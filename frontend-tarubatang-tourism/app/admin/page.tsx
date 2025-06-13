@@ -247,38 +247,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Mountain className="h-8 w-8 text-green-600" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">Admin Dashboard</h1>
-                <p className="text-sm text-gray-600">Kelola Konten Website Desa Tarubatang</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="text-green-600 hover:text-green-700">
-                <Eye className="h-5 w-5" />
-              </Link>
-              <Button onClick={saveContent} disabled={isSaving}>
-                <Save className="h-4 w-4 mr-2" />
-                {isSaving ? "Menyimpan..." : "Simpan Semua"}
-              </Button>
-            </div>
-          </div>
-          {saveMessage && (
-            <div
-              className={`mt-2 p-2 rounded text-sm ${
-                saveMessage.includes("berhasil") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
-              }`}
-            >
-              {saveMessage}
-            </div>
-          )}
-        </div>
-      </header>
 
       <div className="p-6">
         {/* Stats Cards */}

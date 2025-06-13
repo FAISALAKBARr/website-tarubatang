@@ -4,21 +4,21 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mountain, MapPin, Calendar, Star, Camera, User, LogOut, Bell, Bookmark, MessageSquare } from "lucide-react"
+import { Sprout, BarChart3, Calendar, Store, User, LogOut, Bell, PlusCircle, Tractor, CloudRain } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import UserBookmarks from "@/components/user/user-bookmarks"
-import UserReviews from "@/components/user/user-reviews"
+import UserHarvests from "@/components/user/user-harvests"
+import UserMarket from "@/components/user/user-market"
 import UserProfile from "@/components/user/user-profile"
-import UserTrips from "@/components/user/user-trips"
+import UserPlanning from "@/components/user/user-planning"
 
-export default function UserDashboard() {
+export default function VillagerDashboard() {
   const [user, setUser] = useState<any>(null)
   const [userStats, setUserStats] = useState({
-    bookmarkedDestinations: 5,
-    reviewsWritten: 3,
-    tripsPlanned: 2,
-    photosUploaded: 12,
+    currentHarvests: 3,
+    totalYield: 1250, // in kg
+    plannedPlantings: 2,
+    marketListings: 5,
   })
   const router = useRouter()
 
@@ -55,38 +55,6 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2">
-                <Mountain className="h-8 w-8 text-green-600" />
-                <div>
-                  <h1 className="text-xl font-bold text-gray-800">Dashboard Saya</h1>
-                  <p className="text-sm text-gray-600">Desa Tarubatang</p>
-                </div>
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <Bell className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center space-x-2">
-                <div className="text-right">
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-gray-500">Wisatawan</p>
-                </div>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="p-6">
         {/* Welcome Section */}
         <div className="mb-8">
@@ -96,11 +64,11 @@ export default function UserDashboard() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Selamat datang, {user.name}!</h2>
                   <p className="text-green-100">
-                    Jelajahi keindahan Desa Tarubatang dan rencanakan petualangan Anda berikutnya.
+                    Kelola hasil panen dan pantau perkembangan pertanian Anda di Desa Tarubatang.
                   </p>
                 </div>
                 <div className="hidden md:block">
-                  <Mountain className="h-16 w-16 text-green-200" />
+                  <Sprout className="h-16 w-16 text-green-200" />
                 </div>
               </div>
             </CardContent>
@@ -113,10 +81,10 @@ export default function UserDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Destinasi Favorit</p>
-                  <p className="text-3xl font-bold text-gray-900">{userStats.bookmarkedDestinations}</p>
+                  <p className="text-sm font-medium text-gray-600">Panen Aktif</p>
+                  <p className="text-3xl font-bold text-gray-900">{userStats.currentHarvests}</p>
                 </div>
-                <Bookmark className="h-8 w-8 text-green-600" />
+                <Sprout className="h-8 w-8 text-green-600" />
               </div>
               <div className="mt-2">
                 <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
@@ -130,14 +98,14 @@ export default function UserDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Review Ditulis</p>
-                  <p className="text-3xl font-bold text-gray-900">{userStats.reviewsWritten}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Hasil (kg)</p>
+                  <p className="text-3xl font-bold text-gray-900">{userStats.totalYield}</p>
                 </div>
-                <Star className="h-8 w-8 text-yellow-600" />
+                <BarChart3 className="h-8 w-8 text-yellow-600" />
               </div>
               <div className="mt-2">
                 <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
-                  Tulis review →
+                  Lihat statistik →
                 </Button>
               </div>
             </CardContent>
@@ -147,14 +115,14 @@ export default function UserDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Trip Direncanakan</p>
-                  <p className="text-3xl font-bold text-gray-900">{userStats.tripsPlanned}</p>
+                  <p className="text-sm font-medium text-gray-600">Rencana Tanam</p>
+                  <p className="text-3xl font-bold text-gray-900">{userStats.plannedPlantings}</p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-600" />
               </div>
               <div className="mt-2">
                 <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
-                  Rencanakan trip →
+                  Tambah rencana →
                 </Button>
               </div>
             </CardContent>
@@ -164,14 +132,14 @@ export default function UserDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Foto Dibagikan</p>
-                  <p className="text-3xl font-bold text-gray-900">{userStats.photosUploaded}</p>
+                  <p className="text-sm font-medium text-gray-600">Produk di Pasar</p>
+                  <p className="text-3xl font-bold text-gray-900">{userStats.marketListings}</p>
                 </div>
-                <Camera className="h-8 w-8 text-purple-600" />
+                <Store className="h-8 w-8 text-purple-600" />
               </div>
               <div className="mt-2">
                 <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
-                  Upload foto →
+                  Kelola produk →
                 </Button>
               </div>
             </CardContent>
@@ -183,38 +151,38 @@ export default function UserDashboard() {
           <h3 className="text-lg font-semibold mb-4">Aksi Cepat</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button className="h-20 flex-col space-y-2" variant="outline">
-              <MapPin className="h-6 w-6" />
-              <span className="text-sm">Jelajahi Destinasi</span>
+              <PlusCircle className="h-6 w-6" />
+              <span className="text-sm">Catat Panen Baru</span>
             </Button>
             <Button className="h-20 flex-col space-y-2" variant="outline">
-              <Calendar className="h-6 w-6" />
-              <span className="text-sm">Rencanakan Trip</span>
+              <Store className="h-6 w-6" />
+              <span className="text-sm">Jual ke Pasar</span>
             </Button>
             <Button className="h-20 flex-col space-y-2" variant="outline">
-              <Camera className="h-6 w-6" />
-              <span className="text-sm">Upload Foto</span>
+              <Tractor className="h-6 w-6" />
+              <span className="text-sm">Peralatan</span>
             </Button>
             <Button className="h-20 flex-col space-y-2" variant="outline">
-              <MessageSquare className="h-6 w-6" />
-              <span className="text-sm">Tulis Review</span>
+              <CloudRain className="h-6 w-6" />
+              <span className="text-sm">Prakiraan Cuaca</span>
             </Button>
           </div>
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="bookmarks" className="space-y-6">
+        <Tabs defaultValue="harvests" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="bookmarks" className="flex items-center space-x-2">
-              <Bookmark className="h-4 w-4" />
-              <span>Favorit</span>
+            <TabsTrigger value="harvests" className="flex items-center space-x-2">
+              <Sprout className="h-4 w-4" />
+              <span>Hasil Panen</span>
             </TabsTrigger>
-            <TabsTrigger value="trips" className="flex items-center space-x-2">
+            <TabsTrigger value="planning" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
-              <span>Trip Saya</span>
+              <span>Perencanaan</span>
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="flex items-center space-x-2">
-              <Star className="h-4 w-4" />
-              <span>Review</span>
+            <TabsTrigger value="market" className="flex items-center space-x-2">
+              <Store className="h-4 w-4" />
+              <span>Pasar</span>
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center space-x-2">
               <User className="h-4 w-4" />
@@ -222,16 +190,16 @@ export default function UserDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="bookmarks">
-            <UserBookmarks />
+          <TabsContent value="harvests">
+            <UserHarvests />
           </TabsContent>
 
-          <TabsContent value="trips">
-            <UserTrips />
+          <TabsContent value="planning">
+            <UserPlanning />
           </TabsContent>
 
-          <TabsContent value="reviews">
-            <UserReviews />
+          <TabsContent value="market">
+            <UserMarket />
           </TabsContent>
 
           <TabsContent value="profile">

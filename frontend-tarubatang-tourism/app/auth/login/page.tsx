@@ -44,6 +44,9 @@ export default function LoginPage() {
         localStorage.setItem("token", data.token)
         localStorage.setItem("user", JSON.stringify(data.user))
 
+        // Dispatch custom event for login success
+        window.dispatchEvent(new Event('loginSuccess'));
+
         // Redirect based on role
         if (data.user.role === "admin") {
           router.push("/admin/dashboard")

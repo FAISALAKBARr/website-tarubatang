@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { MapPin, Phone, Calendar, Users, Mountain, Star, Send } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { ModeToggle } from "@/components/mode-toggle"
+import { User } from "lucide-react"
 
 interface WebsiteContent {
   hero: {
@@ -143,50 +145,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <nav className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Mountain className="h-8 w-8 text-green-600" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">Desa Tarubatang</h1>
-                <p className="text-sm text-gray-600">Boyolali, Jawa Tengah</p>
-              </div>
-            </div>
-            <div className="hidden md:flex space-x-6">
-              <a href="#beranda" className="text-gray-700 hover:text-green-600 font-medium">
-                Beranda
-              </a>
-              <a href="#tentang" className="text-gray-700 hover:text-green-600 font-medium">
-                Tentang
-              </a>
-              <a href="#wisata" className="text-gray-700 hover:text-green-600 font-medium">
-                Wisata
-              </a>
-              <a href="#umkm" className="text-gray-700 hover:text-green-600 font-medium">
-                UMKM
-              </a>
-              <a href="#acara" className="text-gray-700 hover:text-green-600 font-medium">
-                Acara
-              </a>
-              <a href="#kontak" className="text-gray-700 hover:text-green-600 font-medium">
-                Kontak
-              </a>
-            </div>
-            <Link href="/admin" className="text-sm text-gray-500 hover:text-gray-700">
-              Admin
-            </Link>
-          </nav>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <section id="beranda" className="relative h-[600px] bg-gradient-to-r from-green-800 to-green-600">
+      <section id="beranda" className="relative h-[600px] bg-background overflow-hidden">
         <div className="absolute inset-0 bg-black/40"></div>
         <Image
-          src="/placeholder.svg?height=600&width=1200"
+          src="/merbabuu.png"
           alt="Pemandangan Gunung Merbabu dari Desa Tarubatang"
           fill
           className="object-cover"
@@ -202,8 +166,8 @@ export default function HomePage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="text-white border-white hover:bg-white hover:text-green-600"
+                variant="secondary"
+                // className="text-primary border-border "
               >
                 Lihat Acara
               </Button>
@@ -213,39 +177,39 @@ export default function HomePage() {
       </section>
 
       {/* Quick Stats */}
-      <section id="tentang" className="py-12 bg-green-50">
+      <section id="tentang" className="py-12 bg-background scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">{content.about.title}</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">{content.about.description}</p>
+            <h2 className="text-3xl font-bold text-foreground mb-4">{content.about.title}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">{content.about.description}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className=" rounded-lg p-6 shadow-sm">
                 <MapPin className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-gray-800">{content.about.stats.altitude}</h3>
-                <p className="text-gray-600">Ketinggian</p>
+                <h3 className="text-2xl font-bold text-foreground">{content.about.stats.altitude}</h3>
+                <p className="text-muted-foreground">Ketinggian</p>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className=" rounded-lg p-6 shadow-sm">
                 <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-gray-800">{content.about.stats.population}</h3>
-                <p className="text-gray-600">Penduduk</p>
+                <h3 className="text-2xl font-bold text-foreground">{content.about.stats.population}</h3>
+                <p className="text-muted-foreground">Penduduk</p>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className=" rounded-lg p-6 shadow-sm">
                 <Mountain className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-gray-800">{content.about.stats.destinations}</h3>
-                <p className="text-gray-600">Destinasi Wisata</p>
+                <h3 className="text-2xl font-bold text-foreground">{content.about.stats.destinations}</h3>
+                <p className="text-muted-foreground">Destinasi Wisata</p>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className=" rounded-lg p-6 shadow-sm">
                 <Calendar className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-gray-800">{content.about.stats.events}</h3>
-                <p className="text-gray-600">Acara Tahunan</p>
+                <h3 className="text-2xl font-bold text-foreground">{content.about.stats.events}</h3>
+                <p className="text-muted-foreground">Acara Tahunan</p>
               </div>
             </div>
           </div>
@@ -253,11 +217,13 @@ export default function HomePage() {
       </section>
 
       {/* Featured Destinations */}
-      <section id="wisata" className="py-16 bg-white">
+      <section id="wisata" className="py-16 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Destinasi Wisata Unggulan</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Destinasi Wisata Unggulan
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Jelajahi keindahan alam Desa Tarubatang dengan berbagai destinasi wisata yang menakjubkan
             </p>
           </div>
@@ -273,7 +239,7 @@ export default function HomePage() {
                     className="object-cover"
                   />
                   <Badge className="absolute top-4 left-4 bg-green-500">{destination.category}</Badge>
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                  <div className="absolute top-4 right-4 /90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
                     <Star className="h-4 w-4 text-yellow-500 fill-current" />
                     <span className="text-sm font-medium">{destination.rating}</span>
                   </div>
@@ -283,7 +249,7 @@ export default function HomePage() {
                     <h3 className="text-xl font-semibold">{destination.name}</h3>
                     <p className="text-sm font-medium text-green-600">{destination.price}</p>
                   </div>
-                  <p className="text-gray-600 mb-4">{destination.description}</p>
+                  <p className="text-muted-foreground mb-4">{destination.description}</p>
                   <Button size="sm" className="w-full">
                     Lihat Detail
                   </Button>
@@ -295,11 +261,11 @@ export default function HomePage() {
       </section>
 
       {/* UMKM Section */}
-      <section id="umkm" className="py-16 bg-gray-50">
+      <section id="umkm" className="py-16 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">UMKM & Homestay</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-foreground mb-4">UMKM & Homestay</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Dukung ekonomi lokal dengan berbelanja produk UMKM dan menginap di homestay warga
             </p>
           </div>
@@ -320,7 +286,7 @@ export default function HomePage() {
                     <Badge variant="secondary" className="text-xs mb-1">
                       {item.category}
                     </Badge>
-                    <p className="text-sm text-gray-600">{item.description}</p>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
                     <p className="text-sm text-green-600 font-medium">{item.price}</p>
                     {item.contact && <p className="text-xs text-gray-500">Kontak: {item.contact}</p>}
                   </div>
@@ -332,11 +298,11 @@ export default function HomePage() {
       </section>
 
       {/* Events */}
-      <section id="acara" className="py-16 bg-white">
+      <section id="acara" className="py-16 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Acara & Event</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Acara & Event</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Ikuti berbagai acara menarik yang diselenggarakan di Desa Tarubatang
             </p>
           </div>
@@ -347,7 +313,7 @@ export default function HomePage() {
                 <CardContent className="p-6">
                   <Badge className="mb-3 bg-blue-100 text-blue-800">{event.category}</Badge>
                   <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
-                  <p className="text-gray-600 mb-4">{event.description}</p>
+                  <p className="text-muted-foreground mb-4">{event.description}</p>
                   <div className="space-y-2 text-sm text-gray-500">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-2" />
@@ -366,11 +332,11 @@ export default function HomePage() {
       </section>
 
       {/* Gallery */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Galeri Foto</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Lihat keindahan Desa Tarubatang melalui foto-foto terbaru</p>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Galeri Foto</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Lihat keindahan Desa Tarubatang melalui foto-foto terbaru</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -398,11 +364,11 @@ export default function HomePage() {
       </section>
 
       {/* Contact & Forms */}
-      <section id="kontak" className="py-16 bg-white">
+      <section id="kontak" className="py-16 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Kontak & Buku Tamu</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Hubungi kami atau tinggalkan pesan di buku tamu</p>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Kontak & Buku Tamu</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Hubungi kami atau tinggalkan pesan di buku tamu</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
@@ -415,7 +381,7 @@ export default function HomePage() {
                     <Phone className="h-5 w-5 text-green-600" />
                     <div>
                       <p className="font-medium">Kantor Desa</p>
-                      <p className="text-sm text-gray-600">{content.contact.village}</p>
+                      <p className="text-sm text-muted-foreground">{content.contact.village}</p>
                     </div>
                   </div>
                 </Card>
@@ -425,7 +391,7 @@ export default function HomePage() {
                     <Phone className="h-5 w-5 text-green-600" />
                     <div>
                       <p className="font-medium">Pengelola Wisata</p>
-                      <p className="text-sm text-gray-600">{content.contact.tourism}</p>
+                      <p className="text-sm text-muted-foreground">{content.contact.tourism}</p>
                     </div>
                   </div>
                 </Card>
@@ -435,7 +401,7 @@ export default function HomePage() {
                     <Phone className="h-5 w-5 text-red-600" />
                     <div>
                       <p className="font-medium">Darurat (SAR)</p>
-                      <p className="text-sm text-gray-600">{content.contact.emergency}</p>
+                      <p className="text-sm text-muted-foreground">{content.contact.emergency}</p>
                     </div>
                   </div>
                 </Card>
@@ -443,8 +409,8 @@ export default function HomePage() {
                 <Card className="p-4">
                   <div className="space-y-2">
                     <p className="font-medium">Alamat</p>
-                    <p className="text-sm text-gray-600">{content.contact.address}</p>
-                    <p className="text-sm text-gray-600">Email: {content.contact.email}</p>
+                    <p className="text-sm text-muted-foreground">{content.contact.address}</p>
+                    <p className="text-sm text-muted-foreground">Email: {content.contact.email}</p>
                   </div>
                 </Card>
               </div>
@@ -529,61 +495,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Mountain className="h-6 w-6 text-green-400" />
-                <h3 className="text-lg font-semibold">Desa Tarubatang</h3>
-              </div>
-              <p className="text-gray-300 text-sm">
-                Destinasi wisata alam terbaik di kaki Gunung Merbabu, menawarkan pengalaman tak terlupakan dengan
-                keindahan alam dan budaya lokal.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Menu Utama</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <a href="#tentang" className="hover:text-green-400">
-                    Tentang Desa
-                  </a>
-                </li>
-                <li>
-                  <a href="#wisata" className="hover:text-green-400">
-                    Destinasi Wisata
-                  </a>
-                </li>
-                <li>
-                  <a href="#umkm" className="hover:text-green-400">
-                    UMKM & Homestay
-                  </a>
-                </li>
-                <li>
-                  <a href="#acara" className="hover:text-green-400">
-                    Acara & Event
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Kontak</h4>
-              <div className="space-y-2 text-sm text-gray-300">
-                <p>Kantor Desa: {content.contact.village}</p>
-                <p>Wisata: {content.contact.tourism}</p>
-                <p>Email: {content.contact.email}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2024 Desa Tarubatang. Dikembangkan oleh Tim KKN Universitas</p>
-          </div>
-        </div>
-      </footer>
+      
     </div>
   )
 }

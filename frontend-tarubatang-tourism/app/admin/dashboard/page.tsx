@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,13 +8,17 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Mountain, Users, MapPin, Calendar, BarChart3, LogOut, Bell, Search } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+
 import AdminDestinations from "@/components/admin/admin-destinations"
 import AdminEvents from "@/components/admin/admin-events"
 import AdminUsers from "@/components/admin/admin-users"
 import AdminAnalytics from "@/components/admin/admin-analytics"
 
 export default function AdminDashboard() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get('tab') || 'destinations'
+
   const [user, setUser] = useState<any>(null)
   const [stats, setStats] = useState({
     totalDestinations: 8,
@@ -21,7 +26,7 @@ export default function AdminDashboard() {
     totalEvents: 12,
     monthlyVisitors: 2847,
   })
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState(defaultTab)
 
   useEffect(() => {
     // Check if user is logged in and is admin
@@ -42,10 +47,26 @@ export default function AdminDashboard() {
     setUser(parsedUser)
   }, [router])
 
+  useEffect(() => {
+    const handleTabChange = (event: CustomEvent) => {
+      setActiveTab(event.detail);
+    };
+
+    window.addEventListener('changeAdminTab', handleTabChange as EventListener);
+
+    return () => {
+      window.removeEventListener('changeAdminTab', handleTabChange as EventListener);
+    };
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     router.push("/")
+  }
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
   }
 
   if (!user) {
@@ -61,41 +82,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2">
-                <Mountain className="h-8 w-8 text-green-600" />
-                <div>
-                  <h1 className="text-xl font-bold text-gray-800">Admin Dashboard</h1>
-                  <p className="text-sm text-gray-600">Desa Tarubatang</p>
-                </div>
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <Bell className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Search className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center space-x-2">
-                <div className="text-right">
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-gray-500">Administrator</p>
-                </div>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -167,7 +153,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="destinations" className="space-y-6">
+        <Tabs 
+          value={activeTab} 
+          className="space-y-6"
+          onValueChange={handleTabChange}
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="destinations" className="flex items-center space-x-2">
               <MapPin className="h-4 w-4" />

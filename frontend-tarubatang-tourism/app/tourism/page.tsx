@@ -132,40 +132,6 @@ export default function TourismPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <nav className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <Mountain className="h-8 w-8 text-green-600" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">Desa Tarubatang</h1>
-                <p className="text-sm text-gray-600">Boyolali, Jawa Tengah</p>
-              </div>
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-green-600 font-medium">
-                Beranda
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-green-600 font-medium">
-                Tentang Desa
-              </Link>
-              <Link href="/tourism" className="text-green-600 font-medium">
-                Wisata
-              </Link>
-              <Link href="/business" className="text-gray-700 hover:text-green-600 font-medium">
-                UMKM & Homestay
-              </Link>
-              <Link href="/events" className="text-gray-700 hover:text-green-600 font-medium">
-                Acara
-              </Link>
-              <Link href="/contact" className="text-gray-700 hover:text-green-600 font-medium">
-                Kontak
-              </Link>
-            </div>
-          </nav>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section className="relative h-[400px] bg-gradient-to-r from-green-800 to-green-600">
@@ -374,63 +340,6 @@ export default function TourismPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Mountain className="h-6 w-6 text-green-400" />
-                <h3 className="text-lg font-semibold">Desa Tarubatang</h3>
-              </div>
-              <p className="text-gray-300 text-sm">
-                Destinasi wisata alam terbaik di kaki Gunung Merbabu, menawarkan pengalaman tak terlupakan dengan
-                keindahan alam dan budaya lokal.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Menu Utama</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <Link href="/about" className="hover:text-green-400">
-                    Tentang Desa
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tourism" className="hover:text-green-400">
-                    Destinasi Wisata
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/business" className="hover:text-green-400">
-                    UMKM & Homestay
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/events" className="hover:text-green-400">
-                    Acara & Event
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Kontak</h4>
-              <div className="space-y-2 text-sm text-gray-300">
-                <p>Kantor Desa: (0276) 123-4567</p>
-                <p>Wisata: 0812-3456-7890</p>
-                <p>Email: info@tarubatang.desa.id</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2024 Desa Tarubatang. Dikembangkan oleh Tim KKN Universitas [Nama Universitas]</p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

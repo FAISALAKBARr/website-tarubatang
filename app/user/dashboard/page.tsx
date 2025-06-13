@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sprout, BarChart3, Calendar, Store, User, LogOut, Bell, PlusCircle, Tractor, CloudRain } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 import UserHarvests from "@/components/user/user-harvests"
 import UserMarket from "@/components/user/user-market"
 import UserProfile from "@/components/user/user-profile"
@@ -16,11 +16,21 @@ export default function VillagerDashboard() {
   const [user, setUser] = useState<any>(null)
   const [userStats, setUserStats] = useState({
     currentHarvests: 3,
-    totalYield: 1250, // in kg
+    totalYield: 1250,
     plannedPlantings: 2,
     marketListings: 5,
   })
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState('harvests')
+
+  useEffect(() => {
+    // Set initial tab from URL on mount
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab) {
+      setActiveTab(tab)
+    }
+  }, [])
 
   useEffect(() => {
     // Check if user is logged in
@@ -51,6 +61,10 @@ export default function VillagerDashboard() {
         </div>
       </div>
     )
+  }
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
   }
 
   return (
@@ -170,7 +184,12 @@ export default function VillagerDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="harvests" className="space-y-6">
+
+        <Tabs 
+          value={activeTab} 
+          className="space-y-6"
+          onValueChange={handleTabChange}
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="harvests" className="flex items-center space-x-2">
               <Sprout className="h-4 w-4" />

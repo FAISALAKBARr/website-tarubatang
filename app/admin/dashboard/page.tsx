@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mountain, Users, MapPin, Calendar, BarChart3, LogOut, Bell, Search } from "lucide-react"
+import { Mountain, Users, MapPin, Calendar, BarChart3, LogOut, Bell, Search, MessageSquare, Store, Image } from "lucide-react"
 import Link from "next/link"
 
 import AdminDestinations from "@/components/admin/admin-destinations"
@@ -158,14 +158,22 @@ export default function AdminDashboard() {
           className="space-y-6"
           onValueChange={handleTabChange}
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="destinations" className="flex items-center space-x-2">
               <MapPin className="h-4 w-4" />
               <span>Destinasi</span>
             </TabsTrigger>
+            <TabsTrigger value="umkm" className="flex items-center space-x-2">
+              <Store className="h-4 w-4" />
+              <span>UMKM</span>
+            </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
               <span>Events</span>
+            </TabsTrigger>
+            <TabsTrigger value="destinations" className="flex items-center space-x-2">
+              <Image className="h-4 w-4" />
+              <span>Galeri</span>
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
@@ -175,9 +183,17 @@ export default function AdminDashboard() {
               <BarChart3 className="h-4 w-4" />
               <span>Analytics</span>
             </TabsTrigger>
+            <TabsTrigger value="message" className="flex items-center space-x-2">
+              <MessageSquare className="h-4 w-4" />
+              <span>Pesan</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="destinations">
+            <AdminDestinations />
+          </TabsContent>
+
+          <TabsContent value="umkm">
             <AdminDestinations />
           </TabsContent>
 
@@ -185,11 +201,19 @@ export default function AdminDashboard() {
             <AdminEvents />
           </TabsContent>
 
+          <TabsContent value="galeri">
+            <AdminDestinations />
+          </TabsContent>
+          
           <TabsContent value="users">
             <AdminUsers />
           </TabsContent>
 
           <TabsContent value="analytics">
+            <AdminAnalytics />
+          </TabsContent>
+          
+          <TabsContent value="message">
             <AdminAnalytics />
           </TabsContent>
         </Tabs>

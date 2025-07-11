@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category")
     const search = searchParams.get("search")
-    const upcoming = searchParams.get("upcoming") === "true"
     const limit = Number.parseInt(searchParams.get("limit") || "10")
     const page = Number.parseInt(searchParams.get("page") || "1")
 
@@ -28,28 +27,22 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    if (upcoming) {
-      where.date = {
-        gte: new Date(),
-      }
-    }
-
-    const events = await prisma.event.findMany({
+    const destinations = await prisma.destination.findMany({
       where,
       take: limit,
       skip: (page - 1) * limit,
-      orderBy: { date: "asc" },
+      orderBy: { createdAt: "desc" },
       include: {
         _count: {
-          select: { participants: true },
+          select: { reviews: true, bookmarks: true },
         },
       },
     })
 
-    const total = await prisma.event.count({ where })
+    const total = await prisma.destination.count({ where })
 
     return NextResponse.json({
-      events,
+      destinations,
       pagination: {
         total,
         page,
@@ -58,7 +51,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Error fetching events:", error)
+    console.error("Error fetching destinations:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -66,7 +59,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, description, content, category, date, endDate, location, maxParticipants, price, images } = body
+    const { name, category, description, content, price, facilities, location, latitude, longitude, images } = body
 
     // In a real app, verify admin authentication here
     const token = request.headers.get("authorization")
@@ -74,25 +67,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const event = await prisma.event.create({
+    const destination = await prisma.destination.create({
       data: {
         name,
         slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        category,
         description,
         content,
-        category,
-        date: new Date(date),
-        endDate: endDate ? new Date(endDate) : null,
-        location,
-        maxParticipants,
         price,
+        facilities: facilities || [],
+        location,
+        latitude,
+        longitude,
         images: images || [],
       },
     })
 
-    return NextResponse.json(event)
+    return NextResponse.json(destination)
   } catch (error) {
-    console.error("Error creating event:", error)
+    console.error("Error creating destination:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

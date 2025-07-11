@@ -13,6 +13,7 @@ import AdminDestinations from "@/components/admin/admin-destinations"
 import AdminEvents from "@/components/admin/admin-events"
 import AdminUsers from "@/components/admin/admin-users"
 import AdminAnalytics from "@/components/admin/admin-analytics"
+import AdminUMKM from '@/components/admin/admin-umkm'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -194,7 +195,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="umkm">
-            <AdminDestinations />
+            <AdminUMKM />
           </TabsContent>
 
           <TabsContent value="events">

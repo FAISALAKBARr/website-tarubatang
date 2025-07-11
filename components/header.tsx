@@ -109,22 +109,22 @@ export default function Header() {
           {/* Desktop Navigation */}
           {!isLoggedIn && (
             <div className="hidden md:flex space-x-6">
-              <a href="#beranda" className="text-muted-foreground hover:text-green-600 font-medium">
+              <a href="/" className="text-muted-foreground hover:text-green-600 font-medium">
                 Beranda
               </a>
-              <a href="#tentang" className="text-muted-foreground hover:text-green-600 font-medium">
+              <a href="/about" className="text-muted-foreground hover:text-green-600 font-medium">
                 Tentang
               </a>
-              <a href="#wisata" className="text-muted-foreground hover:text-green-600 font-medium">
+              <a href="/tourism" className="text-muted-foreground hover:text-green-600 font-medium">
                 Wisata
               </a>
-              <a href="#umkm" className="text-muted-foreground hover:text-green-600 font-medium">
+              <a href="/umkm" className="text-muted-foreground hover:text-green-600 font-medium">
                 UMKM
               </a>
-              <a href="#acara" className="text-muted-foreground hover:text-green-600 font-medium">
+              <a href="/events" className="text-muted-foreground hover:text-green-600 font-medium">
                 Acara
               </a>
-              <a href="#kontak" className="text-muted-foreground hover:text-green-600 font-medium">
+              <a href="/kontak" className="text-muted-foreground hover:text-green-600 font-medium">
                 Kontak
               </a>
             </div>
@@ -210,22 +210,22 @@ export default function Header() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col space-y-4 mt-6">
-                  <a href="#beranda" className="text-muted-foreground hover:text-green-600 font-medium">
+                  <a href="/beranda" className="text-muted-foreground hover:text-green-600 font-medium">
                     Beranda
                   </a>
-                  <a href="#tentang" className="text-muted-foreground hover:text-green-600 font-medium">
+                  <a href="/about" className="text-muted-foreground hover:text-green-600 font-medium">
                     Tentang
                   </a>
-                  <a href="#wisata" className="text-muted-foreground hover:text-green-600 font-medium">
+                  <a href="/tourism" className="text-muted-foreground hover:text-green-600 font-medium">
                     Wisata
                   </a>
-                  <a href="#umkm" className="text-muted-foreground hover:text-green-600 font-medium">
+                  <a href="/umkm" className="text-muted-foreground hover:text-green-600 font-medium">
                     UMKM
                   </a>
-                  <a href="#acara" className="text-muted-foreground hover:text-green-600 font-medium">
+                  <a href="/events" className="text-muted-foreground hover:text-green-600 font-medium">
                     Acara
                   </a>
-                  <a href="#kontak" className="text-muted-foreground hover:text-green-600 font-medium">
+                  <a href="/kontak" className="text-muted-foreground hover:text-green-600 font-medium">
                     Kontak
                   </a>
                   {!isLoggedIn && (

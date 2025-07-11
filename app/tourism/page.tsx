@@ -1,115 +1,118 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Clock, Users, Star, Camera, Mountain, TreePine, Tent } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { MapPin, Clock, Users, Star, Camera, Mountain, TreePine, Tent, Search, Filter } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import GoogleMapsComponent from "@/components/google-maps"
 
-const destinations = [
-  {
-    id: 1,
-    name: "Air Terjun Sekumpul",
-    category: "Wisata Alam",
-    image: "/placeholder.svg?height=300&width=400",
-    description:
-      "Air terjun spektakuler setinggi 25 meter dengan kolam alami yang jernih dan segar. Dikelilingi oleh hutan tropis yang asri, tempat ini menjadi favorit wisatawan untuk berenang dan bersantai.",
-    features: ["Kolam Renang Alami", "Area Piknik", "Spot Foto Instagramable"],
-    distance: "2 km dari pusat desa",
-    duration: "30 menit jalan kaki",
-    difficulty: "Mudah",
-    rating: 4.8,
-    price: "Rp 10.000",
-    coordinates: { lat: -7.4167, lng: 110.4833 },
-  },
-  {
-    id: 2,
-    name: "Basecamp Pendakian Merbabu",
-    category: "Pendakian",
-    image: "/placeholder.svg?height=300&width=400",
-    description:
-      "Basecamp resmi pendakian Gunung Merbabu via jalur Tarubatang. Dilengkapi dengan fasilitas lengkap termasuk tempat istirahat, warung makan, dan pemandu berpengalaman.",
-    features: ["Pemandu Profesional", "Penyewaan Alat", "Warung Makan", "Area Parkir"],
-    distance: "1 km dari pusat desa",
-    duration: "15 menit jalan kaki",
-    difficulty: "Menantang",
-    rating: 4.9,
-    price: "Rp 25.000",
-    coordinates: { lat: -7.415, lng: 110.485 },
-  },
-  {
-    id: 3,
-    name: "Camping Ground Sunrise",
-    category: "Camping",
-    image: "/placeholder.svg?height=300&width=400",
-    description:
-      "Area camping terbaik dengan pemandangan sunrise yang menakjubkan. Dilengkapi fasilitas toilet, tempat cuci, dan warung makan untuk kenyamanan berkemah.",
-    features: ["View Sunrise Terbaik", "Toilet & MCK", "Warung Makan", "Area Api Unggun"],
-    distance: "3 km dari pusat desa",
-    duration: "45 menit jalan kaki",
-    difficulty: "Sedang",
-    rating: 4.7,
-    price: "Rp 15.000/malam",
-    coordinates: { lat: -7.418, lng: 110.482 },
-  },
-  {
-    id: 4,
-    name: "Hutan Pinus Tarubatang",
-    category: "Wisata Alam",
-    image: "/placeholder.svg?height=300&width=400",
-    description:
-      "Hutan pinus yang sejuk dengan jalur trekking yang tertata rapi. Udara segar dan pemandangan yang indah menjadikan tempat ini perfect untuk healing dan foto-foto.",
-    features: ["Jalur Trekking", "Spot Foto Aesthetic", "Udara Sejuk", "Hammock Area"],
-    distance: "2.5 km dari pusat desa",
-    duration: "40 menit jalan kaki",
-    difficulty: "Mudah",
-    rating: 4.6,
-    price: "Rp 5.000",
-    coordinates: { lat: -7.42, lng: 110.48 },
-  },
-  {
-    id: 5,
-    name: "Sungai Jernih Merbabu",
-    category: "Wisata Alam",
-    image: "/placeholder.svg?height=300&width=400",
-    description:
-      "Sungai dengan air yang sangat jernih dan segar langsung dari mata air Gunung Merbabu. Tempat yang sempurna untuk refreshing dan bermain air.",
-    features: ["Air Jernih & Segar", "Area Bermain Air", "Spot Foto", "Gazebo Istirahat"],
-    distance: "1.5 km dari pusat desa",
-    duration: "25 menit jalan kaki",
-    difficulty: "Mudah",
-    rating: 4.5,
-    price: "Gratis",
-    coordinates: { lat: -7.419, lng: 110.487 },
-  },
-  {
-    id: 6,
-    name: "Spot Foto Panorama",
-    category: "Spot Foto",
-    image: "/placeholder.svg?height=300&width=400",
-    description:
-      "Spot foto terbaik dengan panorama 360 derajat pemandangan pegunungan. Tempat favorit untuk menikmati sunset dan mengabadikan momen indah.",
-    features: ["View 360 Derajat", "Sunset Point", "Spot Foto Terbaik", "Bangku Santai"],
-    distance: "4 km dari pusat desa",
-    duration: "1 jam jalan kaki",
-    difficulty: "Sedang",
-    rating: 4.9,
-    price: "Gratis",
-    coordinates: { lat: -7.414, lng: 110.488 },
-  },
-]
+interface Destination {
+  id: string
+  name: string
+  category: string
+  description: string
+  content?: string
+  price: string
+  facilities: string[]
+  location: string
+  latitude?: number
+  longitude?: number
+  images: string[]
+  rating: number
+  totalReviews: number
+  isActive: boolean
+  _count: {
+    reviews: number
+    bookmarks: number
+  }
+}
+
+interface PaginationData {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
 
 export default function TourismPage() {
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Mudah":
+  const [user, setUser] = useState<any>(null)
+  const [destinations, setDestinations] = useState<Destination[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [pagination, setPagination] = useState<PaginationData>({
+    total: 0,
+    page: 1,
+    limit: 6,
+    totalPages: 0
+  })
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    const userData = localStorage.getItem("user")
+    if (token && userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchDestinations()
+  }, [searchTerm, selectedCategory, pagination.page])
+
+  const fetchDestinations = async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+      })
+      
+      if (searchTerm) params.append("search", searchTerm)
+      if (selectedCategory !== "all") params.append("category", selectedCategory)
+
+      const response = await fetch(`/api/destinations?${params}`)
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch destinations")
+      }
+
+      const data = await response.json()
+      setDestinations(data.destinations)
+      setPagination(data.pagination)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category)
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  const getDifficultyColor = (category: string) => {
+    switch (category) {
+      case "Wisata Alam":
         return "bg-green-100 text-green-800"
-      case "Sedang":
-        return "bg-yellow-100 text-yellow-800"
-      case "Menantang":
+      case "Pendakian":
         return "bg-red-100 text-red-800"
+      case "Camping":
+        return "bg-blue-100 text-blue-800"
+      case "Spot Foto":
+        return "bg-purple-100 text-purple-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -130,9 +133,16 @@ export default function TourismPage() {
     }
   }
 
+  const categories = [
+    { value: "all", label: "Semua Kategori" },
+    { value: "Wisata Alam", label: "Wisata Alam" },
+    { value: "Pendakian", label: "Pendakian" },
+    { value: "Camping", label: "Camping" },
+    { value: "Spot Foto", label: "Spot Foto" },
+  ]
+
   return (
     <div className="min-h-screen bg-white">
-
       {/* Hero Section */}
       <section className="relative h-[400px] bg-gradient-to-r from-green-800 to-green-600">
         <div className="absolute inset-0 bg-black/40"></div>
@@ -149,6 +159,45 @@ export default function TourismPage() {
               Jelajahi keindahan alam yang menakjubkan di kaki Gunung Merbabu dengan berbagai destinasi wisata yang
               memikat hati
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Search and Filter Section */}
+      <section className="py-8 bg-white border-b">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Cari destinasi wisata..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button type="submit">
+                <Search className="h-4 w-4 mr-2" />
+                Cari
+              </Button>
+            </form>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </section>
@@ -170,91 +219,163 @@ export default function TourismPage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Semua Destinasi Wisata</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              {selectedCategory === "all" ? "Semua Destinasi Wisata" : `Destinasi ${selectedCategory}`}
+            </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Pilih destinasi yang sesuai dengan minat dan kemampuan Anda
+              {searchTerm ? `Hasil pencarian untuk "${searchTerm}"` : "Pilih destinasi yang sesuai dengan minat dan kemampuan Anda"}
             </p>
+            {!loading && (
+              <p className="text-sm text-gray-500 mt-2">
+                Menampilkan {destinations.length} dari {pagination.total} destinasi
+              </p>
+            )}
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {destinations.map((destination) => {
-              const IconComponent = getCategoryIcon(destination.category)
-              return (
-                <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="md:flex">
-                    <div className="md:w-1/2 relative h-64 md:h-auto">
-                      <Image
-                        src={destination.image || "/placeholder.svg"}
-                        alt={destination.name}
-                        fill
-                        className="object-cover"
-                      />
-                      <Badge className="absolute top-4 left-4 bg-green-500">{destination.category}</Badge>
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium">{destination.rating}</span>
-                      </div>
-                    </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Memuat destinasi...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={fetchDestinations}>Coba Lagi</Button>
+            </div>
+          ) : destinations.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Tidak ada destinasi yang ditemukan.</p>
+              <Button onClick={() => {
+                setSearchTerm("")
+                setSelectedCategory("all")
+                setPagination(prev => ({ ...prev, page: 1 }))
+              }} className="mt-4">
+                Reset Filter
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="grid lg:grid-cols-2 gap-8">
+                {destinations.map((destination) => {
+                  const IconComponent = getCategoryIcon(destination.category)
+                  return (
+                    <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="md:flex">
+                        <div className="md:w-1/2 relative h-64 md:h-auto">
+                          <Image
+                            src={destination.images[0] || "/placeholder.svg?height=300&width=400"}
+                            alt={destination.name}
+                            fill
+                            className="object-cover"
+                          />
+                          <Badge className={`${getDifficultyColor(destination.category)} absolute top-4 left-4`}>
+                            {destination.category}
+                          </Badge>
+                          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                            <span className="text-sm font-medium">{destination.rating.toFixed(1)}</span>
+                          </div>
+                        </div>
 
-                    <div className="md:w-1/2 p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <IconComponent className="h-5 w-5 text-green-600" />
-                          <h3 className="text-xl font-semibold">{destination.name}</h3>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-green-600">{destination.price}</p>
+                        <div className="md:w-1/2 p-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center space-x-2">
+                              <IconComponent className="h-5 w-5 text-green-600" />
+                              <h3 className="text-xl font-semibold">{destination.name}</h3>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-green-600">{destination.price}</p>
+                            </div>
+                          </div>
+
+                          <p className="text-gray-600 mb-4 text-sm leading-relaxed">{destination.description}</p>
+
+                          <div className="space-y-3 mb-4">
+                            <div className="flex items-center text-sm text-gray-500">
+                              <MapPin className="h-4 w-4 mr-2" />
+                              {destination.location}
+                            </div>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Star className="h-4 w-4 mr-2" />
+                              {destination._count.reviews} ulasan • {destination._count.bookmarks} bookmark
+                            </div>
+                          </div>
+
+                          {destination.facilities.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="font-medium text-sm mb-2">Fasilitas:</h4>
+                              <div className="flex flex-wrap gap-1">
+                                {destination.facilities.slice(0, 3).map((facility, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {facility}
+                                  </Badge>
+                                ))}
+                                {destination.facilities.length > 3 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{destination.facilities.length - 3} lainnya
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => {
+                                if (destination.latitude && destination.longitude) {
+                                  const url = `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}`
+                                  window.open(url, "_blank")
+                                }
+                              }}
+                              disabled={!destination.latitude || !destination.longitude}
+                            >
+                              Petunjuk Arah
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              Detail
+                            </Button>
+                          </div>
                         </div>
                       </div>
+                    </Card>
+                  )
+                })}
+              </div>
 
-                      <p className="text-gray-600 mb-4 text-sm leading-relaxed">{destination.description}</p>
-
-                      <div className="space-y-3 mb-4">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          {destination.distance}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Clock className="h-4 w-4 mr-2" />
-                          {destination.duration}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge className={getDifficultyColor(destination.difficulty)}>{destination.difficulty}</Badge>
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <h4 className="font-medium text-sm mb-2">Fasilitas:</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {destination.features.map((feature, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {feature}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => {
-                            const url = `https://www.google.com/maps/dir/?api=1&destination=${destination.coordinates.lat},${destination.coordinates.lng}`
-                            window.open(url, "_blank")
-                          }}
-                        >
-                          Petunjuk Arah
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          Detail
-                        </Button>
-                      </div>
-                    </div>
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex justify-center mt-12">
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                      disabled={pagination.page === 1}
+                    >
+                      Sebelumnya
+                    </Button>
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={pagination.page === page ? "default" : "outline"}
+                        onClick={() => setPagination(prev => ({ ...prev, page }))}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                      disabled={pagination.page === pagination.totalPages}
+                    >
+                      Selanjutnya
+                    </Button>
                   </div>
-                </Card>
-              )
-            })}
-          </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 

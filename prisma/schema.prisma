@@ -29,10 +29,7 @@ model User {
 
   // Relations
   umkmProducts UMKM[]
-  reviews      Review[]
   submissions  Submission[]
-  bookmarks    Bookmark[]
-  eventJoins   EventParticipant[]
 
   @@map("users")
 }
@@ -56,10 +53,6 @@ model Destination {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
-  reviews   Review[]
-  bookmarks Bookmark[]
-
   @@map("destinations")
 }
 
@@ -80,9 +73,6 @@ model Event {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
-  participants EventParticipant[]
 
   @@map("events")
 }
@@ -108,24 +98,6 @@ model UMKM {
   @@map("umkm")
 }
 
-model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String
-  images    String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  destinationId String
-  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, destinationId])
-  @@map("reviews")
-}
-
 model Submission {
   id        String         @id @default(cuid())
   name      String
@@ -144,36 +116,6 @@ model Submission {
   @@map("submissions")
 }
 
-model Bookmark {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  // Relations
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  destinationId String
-  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, destinationId])
-  @@map("bookmarks")
-}
-
-model EventParticipant {
-  id        String   @id @default(cuid())
-  status    ParticipantStatus @default(REGISTERED)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  eventId String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, eventId])
-  @@map("event_participants")
-}
-
 model Analytics {
   id        String   @id @default(cuid())
   date      DateTime @default(now())
@@ -188,13 +130,14 @@ model Analytics {
 }
 
 model Gallery {
-  id        String   @id @default(cuid())
-  title     String
-  image     String
-  category  String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  description String?  
+  images      String[]
+  category    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("gallery")
 }
@@ -224,11 +167,4 @@ enum SubmissionStatus {
   REVIEWED
   RESPONDED
   CLOSED
-}
-
-enum ParticipantStatus {
-  REGISTERED
-  CONFIRMED
-  ATTENDED
-  CANCELLED
 }

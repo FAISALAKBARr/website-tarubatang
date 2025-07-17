@@ -118,6 +118,9 @@ export default function Header() {
               <a href="/tourism" className="text-muted-foreground hover:text-green-600 font-medium">
                 Wisata
               </a>
+              <a href="/gallery" className="text-muted-foreground hover:text-green-600 font-medium">
+                Galeri
+              </a>
               <a href="/umkm" className="text-muted-foreground hover:text-green-600 font-medium">
                 UMKM
               </a>
@@ -218,6 +221,9 @@ export default function Header() {
                   </a>
                   <a href="/tourism" className="text-muted-foreground hover:text-green-600 font-medium">
                     Wisata
+                  </a>
+                  <a href="/gallery" className="text-muted-foreground hover:text-green-600 font-medium">
+                    Galeri
                   </a>
                   <a href="/umkm" className="text-muted-foreground hover:text-green-600 font-medium">
                     UMKM

@@ -1,18 +1,176 @@
-import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+// app/api/produk/[id]/route.ts
+import { type NextRequest, NextResponse } from "next/server"
+import { PrismaClient } from "@prisma/client"
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const umkm = await prisma.uMKM.findUnique({ where: { id: Number(params.id) }, include: { owner: true } });
-  return umkm ? NextResponse.json(umkm) : NextResponse.json({ error: "Not found" }, { status: 404 });
+const prisma = new PrismaClient()
+
+// GET single UMKM by ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const umkm = await prisma.uMKM.findUnique({
+      where: { id: params.id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    if (!umkm) {
+      return NextResponse.json({ error: "UMKM not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(umkm)
+  } catch (error) {
+    console.error("Error fetching UMKM:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const data = await req.json();
-  const updated = await prisma.uMKM.update({ where: { id: Number(params.id) }, data });
-  return NextResponse.json(updated);
+// PUT update UMKM
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json()
+    const { name, category, description, price, stock, images, contact, location, userId } = body
+
+    // Verify authorization
+    const token = request.headers.get("authorization")
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Check if UMKM exists
+    const existingUMKM = await prisma.uMKM.findUnique({
+      where: { id: params.id }
+    })
+
+    if (!existingUMKM) {
+      return NextResponse.json({ error: "UMKM not found" }, { status: 404 })
+    }
+
+    // Update UMKM
+    const updatedUMKM = await prisma.uMKM.update({
+      where: { id: params.id },
+      data: {
+        name,
+        category,
+        description,
+        price,
+        stock,
+        images: images || [],
+        contact,
+        location,
+        userId,
+        updatedAt: new Date(),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    return NextResponse.json(updatedUMKM)
+  } catch (error) {
+    console.error("Error updating UMKM:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  await prisma.uMKM.delete({ where: { id: Number(params.id) } });
-  return NextResponse.json({ message: "Deleted" });
+// DELETE UMKM
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Verify authorization
+    const token = request.headers.get("authorization")
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Check if UMKM exists
+    const existingUMKM = await prisma.uMKM.findUnique({
+      where: { id: params.id }
+    })
+
+    if (!existingUMKM) {
+      return NextResponse.json({ error: "UMKM not found" }, { status: 404 })
+    }
+
+    // Delete UMKM
+    await prisma.uMKM.delete({
+      where: { id: params.id }
+    })
+
+    return NextResponse.json({ message: "UMKM deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting UMKM:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+// PATCH toggle active status
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json()
+    const { isActive } = body
+
+    // Verify authorization
+    const token = request.headers.get("authorization")
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Check if UMKM exists
+    const existingUMKM = await prisma.uMKM.findUnique({
+      where: { id: params.id }
+    })
+
+    if (!existingUMKM) {
+      return NextResponse.json({ error: "UMKM not found" }, { status: 404 })
+    }
+
+    // Update active status
+    const updatedUMKM = await prisma.uMKM.update({
+      where: { id: params.id },
+      data: {
+        isActive: isActive !== undefined ? isActive : !existingUMKM.isActive,
+        updatedAt: new Date(),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+      },
+    })
+
+    return NextResponse.json(updatedUMKM)
+  } catch (error) {
+    console.error("Error updating UMKM status:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

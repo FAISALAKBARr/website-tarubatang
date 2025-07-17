@@ -639,7 +639,7 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Kelola UMKM & Homestay</CardTitle>
+                  <CardTitle>Kelola UMKM & Basecamp</CardTitle>
                   <Button onClick={addUMKM}>
                     <Plus className="h-4 w-4 mr-2" />
                     Tambah UMKM

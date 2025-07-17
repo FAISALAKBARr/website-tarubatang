@@ -39,11 +39,7 @@ export async function GET(request: NextRequest) {
       take: limit,
       skip: (page - 1) * limit,
       orderBy: { date: "asc" },
-      include: {
-        _count: {
-          select: { participants: true },
-        },
-      },
+      // Removed _count since participants relation doesn't exist in schema
     })
 
     const total = await prisma.event.count({ where })
@@ -68,29 +64,43 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, description, content, category, date, endDate, location, maxParticipants, price, images } = body
 
+    // Validate required fields
+    if (!name || !description || !category || !date || !location) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
     // In a real app, verify admin authentication here
     const token = request.headers.get("authorization")
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Generate slug from name
+    const slug = name.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim()
+
     const event = await prisma.event.create({
       data: {
         name,
-        slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        slug,
         description,
-        content,
+        content: content || "",
         category,
         date: new Date(date),
         endDate: endDate ? new Date(endDate) : null,
         location,
-        maxParticipants,
-        price,
+        maxParticipants: maxParticipants ? parseInt(maxParticipants.toString()) : null,
+        currentParticipants: 0, // Initialize to 0
+        price: price || "Gratis",
         images: images || [],
+        isActive: true,
       },
     })
 
-    return NextResponse.json(event)
+    return NextResponse.json(event, { status: 201 })
   } catch (error) {
     console.error("Error creating event:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

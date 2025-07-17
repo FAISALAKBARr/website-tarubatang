@@ -32,11 +32,7 @@ export async function GET(request: NextRequest) {
       take: limit,
       skip: (page - 1) * limit,
       orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: { reviews: true, bookmarks: true },
-        },
-      },
+      // Removed _count since reviews and bookmarks relations don't exist in schema
     })
 
     const total = await prisma.destination.count({ where })
@@ -61,29 +57,42 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, category, description, content, price, facilities, location, latitude, longitude, images } = body
 
+    // Validate required fields
+    if (!name || !category || !description || !location) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
     // In a real app, verify admin authentication here
     const token = request.headers.get("authorization")
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Generate slug from name
+    const slug = name.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim()
+
     const destination = await prisma.destination.create({
       data: {
         name,
-        slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        slug,
         category,
         description,
-        content,
-        price,
+        content: content || "",
+        price: price || "Gratis",
         facilities: facilities || [],
         location,
-        latitude,
-        longitude,
+        latitude: latitude ? parseFloat(latitude.toString()) : null,
+        longitude: longitude ? parseFloat(longitude.toString()) : null,
         images: images || [],
+        isActive: true,
       },
     })
 
-    return NextResponse.json(destination)
+    return NextResponse.json(destination, { status: 201 })
   } catch (error) {
     console.error("Error creating destination:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

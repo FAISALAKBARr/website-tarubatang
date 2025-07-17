@@ -26,10 +26,6 @@ interface Destination {
   rating: number
   totalReviews: number
   isActive: boolean
-  _count: {
-    reviews: number
-    bookmarks: number
-  }
 }
 
 interface PaginationData {
@@ -146,11 +142,12 @@ export default function TourismPage() {
       {/* Hero Section */}
       <section className="relative h-[400px] bg-gradient-to-r from-green-800 to-green-600">
         <div className="absolute inset-0 bg-black/40"></div>
-        <Image
-          src="/placeholder.svg?height=400&width=1200"
-          alt="Destinasi Wisata Tarubatang"
-          fill
+        <Image 
+          src="/merbabuu.png" 
+          alt="Destinasi Wisata Tarubatang" 
+          fill 
           className="object-cover"
+          priority
         />
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white">
@@ -294,10 +291,6 @@ export default function TourismPage() {
                             <div className="flex items-center text-sm text-gray-500">
                               <MapPin className="h-4 w-4 mr-2" />
                               {destination.location}
-                            </div>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Star className="h-4 w-4 mr-2" />
-                              {destination._count.reviews} ulasan • {destination._count.bookmarks} bookmark
                             </div>
                           </div>
 

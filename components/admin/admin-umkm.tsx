@@ -95,7 +95,7 @@ export default function AdminUMKM() {
   const categories = [
     "Kuliner",
     "Kerajinan",
-    "Homestay",
+    "Basecamp",
     "Pertanian",
     "Peternakan",
     "Jasa",

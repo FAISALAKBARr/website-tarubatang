@@ -55,22 +55,22 @@ export default function Footer() {
               <h4 className="font-semibold mb-4">Menu Utama</h4>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>
-                  <a href="#tentang" className="hover:text-green-400">
+                  <a href="/about" className="hover:text-green-400">
                     Tentang Desa
                   </a>
                 </li>
                 <li>
-                  <a href="#wisata" className="hover:text-green-400">
+                  <a href="/tourism" className="hover:text-green-400">
                     Destinasi Wisata
                   </a>
                 </li>
                 <li>
-                  <a href="#umkm" className="hover:text-green-400">
-                    UMKM & Homestay
+                  <a href="/umkm" className="hover:text-green-400">
+                    UMKM & Produk Lokal
                   </a>
                 </li>
                 <li>
-                  <a href="#acara" className="hover:text-green-400">
+                  <a href="/acara" className="hover:text-green-400">
                     Acara & Event
                   </a>
                 </li>
@@ -88,7 +88,7 @@ export default function Footer() {
           </div>
 
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2025 Desa Tarubatang. Dikembangkan oleh Tim KKN Universitas Sebelas Maret</p>
+            <p>&copy; 2025 Desa Tarubatang. Dikembangkan oleh Tim KKN 32 Universitas Sebelas Maret 2025</p>
           </div>
         </div>
       </footer>

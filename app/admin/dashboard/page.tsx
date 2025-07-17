@@ -11,6 +11,7 @@ import Link from "next/link"
 
 import AdminDestinations from "@/components/admin/admin-destinations"
 import AdminEvents from "@/components/admin/admin-events"
+import AdminGallery from '@/components/admin/admin-gallery'
 import AdminUsers from "@/components/admin/admin-users"
 import AdminAnalytics from "@/components/admin/admin-analytics"
 import AdminUMKM from '@/components/admin/admin-umkm'
@@ -172,7 +173,7 @@ export default function AdminDashboard() {
               <Calendar className="h-4 w-4" />
               <span>Events</span>
             </TabsTrigger>
-            <TabsTrigger value="destinations" className="flex items-center space-x-2">
+            <TabsTrigger value="gallery" className="flex items-center space-x-2">
               <Image className="h-4 w-4" />
               <span>Galeri</span>
             </TabsTrigger>
@@ -202,8 +203,8 @@ export default function AdminDashboard() {
             <AdminEvents />
           </TabsContent>
 
-          <TabsContent value="galeri">
-            <AdminDestinations />
+          <TabsContent value="gallery">
+            <AdminGallery />
           </TabsContent>
           
           <TabsContent value="users">

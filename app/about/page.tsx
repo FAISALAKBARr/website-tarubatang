@@ -13,10 +13,11 @@ export default function AboutPage() {
       <section className="relative h-[400px] bg-gradient-to-r from-green-800 to-green-600">
         <div className="absolute inset-0 bg-black/40"></div>
         <Image
-          src="/placeholder.svg?height=400&width=1200"
+          src="/merbabuu.png"
           alt="Panorama Desa Tarubatang"
           fill
           className="object-cover"
+          priority
         />
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white">
@@ -224,7 +225,7 @@ export default function AboutPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    Meningkatkan kesejahteraan masyarakat melalui UMKM dan homestay
+                    Meningkatkan kesejahteraan masyarakat melalui UMKM dan basecamp
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>

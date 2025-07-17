@@ -1,18 +1,104 @@
-import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server"
+import { PrismaClient } from "@prisma/client"
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const wisata = await prisma.wisata.findUnique({ where: { id: Number(params.id) } });
-  return wisata ? NextResponse.json(wisata) : NextResponse.json({ error: "Not found" }, { status: 404 });
+const prisma = new PrismaClient()
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const destination = await prisma.destination.findUnique({
+      where: { id: params.id },
+      // Removed _count since reviews and bookmarks relations don't exist in schema
+    })
+
+    if (!destination) {
+      return NextResponse.json({ error: "Destination not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(destination)
+  } catch (error) {
+    console.error("Error fetching destination:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const data = await req.json();
-  const updated = await prisma.wisata.update({ where: { id: Number(params.id) }, data });
-  return NextResponse.json(updated);
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json()
+    const { name, category, description, content, price, facilities, location, latitude, longitude, images } = body
+
+    // Validate required fields
+    if (!name || !category || !description || !location) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // In a real app, verify admin authentication here
+    const token = request.headers.get("authorization")
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Generate slug from name
+    const slug = name.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim()
+
+    const updatedDestination = await prisma.destination.update({
+      where: { id: params.id },
+      data: {
+        name,
+        slug,
+        category,
+        description,
+        content: content || "",
+        price: price || "Gratis",
+        facilities: facilities || [],
+        location,
+        latitude: latitude ? parseFloat(latitude.toString()) : null,
+        longitude: longitude ? parseFloat(longitude.toString()) : null,
+        images: images || [],
+      },
+      // Removed _count since reviews and bookmarks relations don't exist in schema
+    })
+
+    return NextResponse.json(updatedDestination)
+  } catch (error) {
+    console.error("Error updating destination:", error)
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: "Destination not found" }, { status: 404 })
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  await prisma.wisata.delete({ where: { id: Number(params.id) } });
-  return NextResponse.json({ message: "Deleted" });
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // In a real app, verify admin authentication here
+    const token = request.headers.get("authorization")
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    await prisma.destination.delete({
+      where: { id: params.id },
+    })
+
+    return NextResponse.json({ message: "Destination deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting destination:", error)
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: "Destination not found" }, { status: 404 })
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

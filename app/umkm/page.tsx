@@ -15,12 +15,31 @@ export default function UMKMPage() {
   const [selectedCategory, setSelectedCategory] = useState("Semua")
   const [filteredUMKM, setFilteredUMKM] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch UMKM data from API
   useEffect(() => {
-    fetch("/api/produk")
-      .then((res) => res.json())
-      .then((data) => setUmkmData(data.umkm || []))
+    const fetchUMKMData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch("/api/produk")
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch UMKM data")
+        }
+        
+        const data = await response.json()
+        setUmkmData(data.umkm || [])
+        setError(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUMKMData()
   }, [])
 
   // Set user if logged in
@@ -53,6 +72,30 @@ export default function UMKMPage() {
 
   const categories = ["Semua", ...Array.from(new Set(umkmData.map((umkm) => umkm.category)))]
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Search is handled by the useEffect above
+  }
+
+  const retryFetch = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch("/api/produk")
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch UMKM data")
+      }
+      
+      const data = await response.json()
+      setUmkmData(data.umkm || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -62,12 +105,17 @@ export default function UMKMPage() {
       {/* Hero Section */}
       <section className="relative h-[300px] bg-gradient-to-r from-blue-800 to-blue-600">
         <div className="absolute inset-0 bg-black/40"></div>
-        <Image src="/placeholder.svg?height=300&width=1200" alt="UMKM Desa Tarubatang" fill className="object-cover" />
+        <Image 
+          src="/merbabuu.png" 
+          alt="UMKM Desa Tarubatang" 
+          fill className="object-cover" 
+          priority
+        />
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white">
-            <h1 className="text-4xl font-bold mb-4">UMKM & Homestay Tarubatang</h1>
+            <h1 className="text-4xl font-bold mb-4">UMKM & Basecamp Tarubatang</h1>
             <p className="text-xl text-blue-100 max-w-2xl">
-              Dukung ekonomi lokal dengan berbelanja produk UMKM dan menginap di homestay warga desa
+              Dukung ekonomi lokal dengan berbelanja produk UMKM dan menginap di basecamp warga desa
             </p>
           </div>
         </div>
@@ -77,15 +125,21 @@ export default function UMKMPage() {
       <section className="py-8 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Cari UMKM atau produk..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+            <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Cari UMKM atau produk..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button type="submit">
+                <Search className="h-4 w-4 mr-2" />
+                Cari
+              </Button>
+            </form>
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-gray-600" />
               <select
@@ -108,15 +162,36 @@ export default function UMKMPage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Daftar UMKM & Homestay</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              {selectedCategory === "Semua" ? "Daftar UMKM & Basecamp" : `UMKM ${selectedCategory}`}
+            </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Temukan berbagai produk lokal berkualitas dan penginapan nyaman di Desa Tarubatang
+              {searchTerm ? `Hasil pencarian untuk "${searchTerm}"` : "Temukan berbagai produk lokal berkualitas dan penginapan nyaman di Desa Tarubatang"}
             </p>
+            {!loading && !error && (
+              <p className="text-sm text-gray-500 mt-2">
+                Menampilkan {filteredUMKM.length} dari {umkmData.length} UMKM
+              </p>
+            )}
           </div>
 
-          {filteredUMKM.length === 0 ? (
+          {loading ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">Tidak ada UMKM yang ditemukan</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Memuat UMKM...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={retryFetch}>Coba Lagi</Button>
+            </div>
+          ) : filteredUMKM.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">
+                {searchTerm || selectedCategory !== "Semua" 
+                  ? "Tidak ada UMKM yang ditemukan." 
+                  : "Belum ada UMKM yang tersedia."}
+              </p>
               <Button
                 onClick={() => {
                   setSearchTerm("")

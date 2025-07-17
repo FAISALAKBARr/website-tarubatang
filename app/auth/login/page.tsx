@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Mountain, User, Shield } from "lucide-react"
+import { Eye, EyeOff, Mountain, Shield } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "user", // user or admin
+    role: "admin", // Only admin role
   })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -47,12 +47,8 @@ export default function LoginPage() {
         // Dispatch custom event for login success
         window.dispatchEvent(new Event('loginSuccess'));
 
-        // Redirect based on role
-        if (data.user.role === "admin") {
-          router.push("/admin/dashboard")
-        } else {
-          router.push("/user/dashboard")
-        }
+        // Redirect to admin dashboard
+        router.push("/admin/dashboard")
       } else {
         setError(data.message || "Login failed")
       }
@@ -79,40 +75,18 @@ export default function LoginPage() {
             <Mountain className="h-8 w-8" />
             <span className="text-2xl font-bold">Desa Tarubatang</span>
           </Link>
-          <p className="text-gray-600 mt-2">Masuk ke akun Anda</p>
+          <p className="text-gray-600 mt-2">Admin Panel - Masuk ke akun Anda</p>
         </div>
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-center">Login</CardTitle>
+            <CardTitle className="text-center flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5 text-green-600" />
+              Admin Login
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Role Selection */}
-              <div className="space-y-2">
-                <Label>Masuk sebagai</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={formData.role === "user" ? "default" : "outline"}
-                    className="w-full"
-                    onClick={() => setFormData({ ...formData, role: "user" })}
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    User
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.role === "admin" ? "default" : "outline"}
-                    className="w-full"
-                    onClick={() => setFormData({ ...formData, role: "admin" })}
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Admin
-                  </Button>
-                </div>
-              </div>
-
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -122,7 +96,7 @@ export default function LoginPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Masukkan email Anda"
+                  placeholder="Masukkan email admin"
                   required
                 />
               </div>
@@ -137,7 +111,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Masukkan password Anda"
+                    placeholder="Masukkan password admin"
                     required
                   />
                   <Button
@@ -165,28 +139,15 @@ export default function LoginPage() {
 
               {/* Submit Button */}
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Memproses..." : "Masuk"}
+                {loading ? "Memproses..." : "Masuk sebagai Admin"}
               </Button>
 
-              {/* Demo Accounts */}
+              {/* Demo Account */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-sm mb-2">Demo Accounts:</h4>
-                <div className="space-y-2 text-xs text-gray-600">
-                  <div>
-                    <strong>Admin:</strong> admin@tarubatang.com / admin123
-                  </div>
-                  <div>
-                    <strong>User:</strong> user@tarubatang.com / user123
-                  </div>
+                <h4 className="font-medium text-sm mb-2">Demo Account:</h4>
+                <div className="text-xs text-gray-600">
+                  <strong>Admin:</strong> admin@tarubatang.com / admin123
                 </div>
-              </div>
-
-              {/* Register Link */}
-              <div className="text-center text-sm">
-                <span className="text-gray-600">Belum punya akun? </span>
-                <Link href="/auth/register" className="text-green-600 hover:text-green-700 font-medium">
-                  Daftar di sini
-                </Link>
               </div>
             </form>
           </CardContent>

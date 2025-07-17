@@ -379,36 +379,30 @@ export default function EventsPage() {
             <p className="text-gray-600 max-w-2xl mx-auto">
               Temukan berbagai acara menarik yang diselenggarakan di Desa Tarubatang
             </p>
+            {!loading && !error && (
+              <p className="text-sm text-gray-500 mt-2">
+                Menampilkan {events.length} dari {pagination.total} events
+              </p>
+            )}
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-16">
-              <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
-                <p className="text-gray-600">Memuat event...</p>
-              </div>
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Memuat events...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-                <p className="text-red-700 text-lg mb-4">Error: {error}</p>
-                <div className="space-y-2">
-                  <Button onClick={handleRetry} className="w-full">
-                    Coba Lagi
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleResetFilters}
-                    className="w-full"
-                  >
-                    Reset Filter
-                  </Button>
-                </div>
-              </div>
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={handleRetry}>Coba Lagi</Button>
             </div>
           ) : events.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-4">Tidak ada event yang ditemukan</p>
+              <p className="text-gray-600">
+                {searchTerm || selectedCategory !== "all" || selectedStatus !== "all"
+                  ? "Tidak ada event yang ditemukan." 
+                  : "Belum ada event yang tersedia."}
+              </p>
               <Button onClick={handleResetFilters} className="mt-4">
                 Reset Filter
               </Button>
@@ -553,7 +547,11 @@ export default function EventsPage() {
             <Card className="text-center">
               <CardContent className="p-6">
                 <div className="text-3xl font-bold text-purple-600 mb-2">
-                  {loading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : pagination.total}
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                  ) : (
+                    pagination.total
+                  )}
                 </div>
                 <p className="text-gray-600">Total Event</p>
               </CardContent>
@@ -562,7 +560,11 @@ export default function EventsPage() {
             <Card className="text-center">
               <CardContent className="p-6">
                 <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {loading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : events.filter(e => getStatusFromDate(e.date, e.endDate) === "upcoming").length}
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  ) : (
+                    events.filter(e => getStatusFromDate(e.date, e.endDate) === "upcoming").length
+                  )}
                 </div>
                 <p className="text-gray-600">Event Mendatang</p>
               </CardContent>
@@ -571,7 +573,11 @@ export default function EventsPage() {
             <Card className="text-center">
               <CardContent className="p-6">
                 <div className="text-3xl font-bold text-green-600 mb-2">
-                  {loading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : events.reduce((sum, e) => sum + (e._count?.participants || e.currentParticipants || 0), 0)}
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                  ) : (
+                    events.reduce((sum, e) => sum + (e._count?.participants || e.currentParticipants || 0), 0)
+                  )}
                 </div>
                 <p className="text-gray-600">Total Peserta</p>
               </CardContent>
@@ -580,7 +586,11 @@ export default function EventsPage() {
             <Card className="text-center">
               <CardContent className="p-6">
                 <div className="text-3xl font-bold text-orange-600 mb-2">
-                  {loading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : categories.length - 1}
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
+                  ) : (
+                    categories.length - 1
+                  )}
                 </div>
                 <p className="text-gray-600">Kategori Event</p>
               </CardContent>

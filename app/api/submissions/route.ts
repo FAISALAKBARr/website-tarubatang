@@ -1,61 +1,57 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { prisma } from "@/lib/prisma";
 
-// Mock storage - in production, use a database
-const submissions: Array<{
-  id: number
-  type: string
-  name: string
-  email: string
-  message: string
-  timestamp: string
-  status: "new" | "read" | "replied"
-}> = [
-  {
-    id: 1,
-    type: "guestbook",
-    name: "Ahmad Wijaya",
-    email: "ahmad@email.com",
-    message: "Terima kasih atas pengalaman wisata yang luar biasa di Desa Tarubatang. Air terjunnya sangat indah!",
-    timestamp: "2024-06-01T10:30:00Z",
-    status: "new",
-  },
-  {
-    id: 2,
-    type: "volunteer",
-    name: "Siti Nurhaliza",
-    email: "siti@email.com",
-    message: "Saya tertarik untuk menjadi relawan dalam kegiatan pengembangan wisata desa. Bagaimana caranya?",
-    timestamp: "2024-06-02T14:15:00Z",
-    status: "read",
-  },
-  {
-    id: 3,
-    type: "feedback",
-    name: "Budi Santoso",
-    email: "budi@email.com",
-    message: "Saran untuk menambah papan petunjuk arah di jalur pendakian agar lebih mudah bagi pendaki pemula.",
-    timestamp: "2024-06-03T09:45:00Z",
-    status: "replied",
-  },
-]
+// Inisialisasi Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // pakai service_role agar bisa tulis file
+);
 
-export async function GET() {
-  return NextResponse.json(
-    submissions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
-  )
-}
+export async function POST(req: NextRequest) {
+  const formData = await req.formData();
 
-export async function POST(request: NextRequest) {
-  try {
-    const newSubmission = await request.json()
-    const submission = {
-      id: Date.now(),
-      ...newSubmission,
-      status: "new" as const,
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const message = formData.get("message") as string;
+  const type = formData.get("type") as string;
+  const userId = formData.get("userId") as string | null;
+
+  const file = formData.get("file") as File | null;
+  let fileUrl: string | null = null;
+
+  if (file) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `submission-${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("media")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return NextResponse.json({ error: "Gagal upload file ke Supabase" }, { status: 500 });
     }
-    submissions.push(submission)
-    return NextResponse.json({ message: "Submission received successfully" })
-  } catch (error) {
-    return NextResponse.json({ message: "Failed to save submission" }, { status: 500 })
+
+    const { data } = supabase.storage.from("media").getPublicUrl(fileName);
+    fileUrl = data.publicUrl;
+  }
+
+  try {
+    const submission = await prisma.submission.create({
+      data: {
+        name,
+        email,
+        message,
+        type,
+        response: fileUrl,
+        userId: userId || undefined,
+      },
+    });
+
+    return NextResponse.json(submission, { status: 201 });
+  } catch (err) {
+    return NextResponse.json({ error: "Gagal menyimpan submission" }, { status: 500 });
   }
 }

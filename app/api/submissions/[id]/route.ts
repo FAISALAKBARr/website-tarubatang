@@ -1,29 +1,26 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
-// This would be imported from the main submissions route in a real app
-const submissions: Array<{
-  id: number
-  type: string
-  name: string
-  email: string
-  message: string
-  timestamp: string
-  status: "new" | "read" | "replied"
-}> = []
+type Params = {
+  params: {
+    id: string;
+  };
+};
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: Params) {
+  const { id } = params;
+
   try {
-    const { status } = await request.json()
-    const submissionId = Number.parseInt(params.id)
+    const submission = await prisma.submission.findUnique({
+      where: { id },
+    });
 
-    const submissionIndex = submissions.findIndex((sub) => sub.id === submissionId)
-    if (submissionIndex === -1) {
-      return NextResponse.json({ message: "Submission not found" }, { status: 404 })
+    if (!submission) {
+      return NextResponse.json({ error: "Submission tidak ditemukan" }, { status: 404 });
     }
 
-    submissions[submissionIndex].status = status
-    return NextResponse.json({ message: "Status updated successfully" })
+    return NextResponse.json(submission, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ message: "Failed to update status" }, { status: 500 })
+    return NextResponse.json({ error: "Gagal mengambil data" }, { status: 500 });
   }
 }

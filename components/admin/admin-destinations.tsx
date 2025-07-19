@@ -430,9 +430,7 @@ export default function AdminDestinations() {
                           <div className="flex items-center">
                             <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
                             <span>{destination.rating.toFixed(1)}</span>
-                            <span className="text-sm text-gray-500 ml-1">
-                              ({destination._count.reviews})
-                            </span>
+                            
                           </div>
                         </TableCell>
                         <TableCell>

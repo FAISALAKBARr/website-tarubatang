@@ -1,25 +1,150 @@
-// File: app/api/gallery/[id]/route.ts
-// Enhanced individual gallery item route handler
-
-import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { prisma } from "@/lib/prisma";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// File utility functions (duplicated to avoid import issues)
+const generateFileName = (originalName: string, isHeic = false): string => {
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 15);
+  const extension = isHeic
+    ? "jpg"
+    : originalName.split(".").pop()?.toLowerCase() || "jpg";
+  const baseName = originalName.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_");
 
-// Helper function to verify authentication (optional - add if you have auth)
-const verifyAuth = (req: NextRequest) => {
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-  return authHeader.substring(7); // Remove "Bearer " prefix
+  return `gallery/${timestamp}_${randomString}_${baseName}.${extension}`;
 };
 
-// GET single gallery item
+const validateImageFile = (
+  file: File
+): { isValid: boolean; error?: string } => {
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const ALLOWED_TYPES = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+  ];
+
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      isValid: false,
+      error: `File ${file.name} terlalu besar. Maksimal 10MB.`,
+    };
+  }
+
+  if (file.size === 0) {
+    return {
+      isValid: false,
+      error: `File ${file.name} kosong.`,
+    };
+  }
+
+  const fileName = file.name.toLowerCase();
+  const mimeType = file.type.toLowerCase();
+
+  const isValidType =
+    ALLOWED_TYPES.includes(mimeType) ||
+    fileName.endsWith(".heic") ||
+    fileName.endsWith(".heif");
+
+  if (!isValidType) {
+    return {
+      isValid: false,
+      error: `File ${file.name} bukan format gambar yang didukung.`,
+    };
+  }
+
+  return { isValid: true };
+};
+
+const isHeicFile = (file: File): boolean => {
+  const fileName = file.name.toLowerCase();
+  const mimeType = file.type.toLowerCase();
+
+  return (
+    mimeType.includes("heic") ||
+    mimeType.includes("heif") ||
+    fileName.endsWith(".heic") ||
+    fileName.endsWith(".heif")
+  );
+};
+
+// HEIC conversion
+let convert: any = null;
+
+const loadHeicConverter = async () => {
+  if (!convert) {
+    try {
+      convert = (await import("heic-convert")).default;
+    } catch (error) {
+      console.warn("heic-convert not available:", error);
+      throw new Error("HEIC conversion not supported");
+    }
+  }
+  return convert;
+};
+
+const convertHeicToJpg = async (file: File): Promise<Buffer> => {
+  try {
+    const heicConvert = await loadHeicConverter();
+    const arrayBuffer = await file.arrayBuffer();
+    const inputBuffer = Buffer.from(arrayBuffer);
+
+    const outputBuffer = await heicConvert({
+      buffer: inputBuffer,
+      format: "JPEG",
+      quality: 0.92,
+    });
+
+    return outputBuffer as Buffer;
+  } catch (error) {
+    console.error("HEIC conversion failed:", error);
+    throw new Error("Gagal mengkonversi file HEIC");
+  }
+};
+
+// Initialize Supabase client
+const getSupabaseClient = () => {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
+    throw new Error("Missing required Supabase environment variables");
+  }
+
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+};
+
+// Helper function to validate ID format
+const isValidId = (id: string): boolean => {
+  // UUID v4 format
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // CUID format (used by Prisma default)
+  const cuidRegex = /^c[a-z0-9]{24}$/i;
+  // CUID2 format (newer version)
+  const cuid2Regex = /^[a-z][a-z0-9]*$/i;
+
+  return (
+    uuidRegex.test(id) ||
+    cuidRegex.test(id) ||
+    (cuid2Regex.test(id) && id.length >= 8 && id.length <= 32)
+  );
+};
+
+// GET handler - Get single gallery item
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -27,78 +152,52 @@ export async function GET(
   try {
     const { id } = params;
 
-    const galleryItem = await prisma.gallery.findUnique({
-      where: { 
-        id,
-        isActive: true 
-      }
+    if (!isValidId(id)) {
+      return NextResponse.json(
+        { error: "Invalid gallery ID" },
+        { status: 400 }
+      );
+    }
+
+    const item = await prisma.gallery.findUnique({
+      where: { id },
     });
 
-    if (!galleryItem) {
+    if (!item) {
       return NextResponse.json(
         { error: "Gallery item not found" },
         { status: 404 }
       );
     }
 
-    // Transform the response to ensure proper formatting
-    const response = {
-      ...galleryItem,
-      images: Array.isArray(galleryItem.images) ? galleryItem.images : [galleryItem.images].filter(Boolean),
-      createdAt: galleryItem.createdAt.toISOString(),
-      updatedAt: galleryItem.updatedAt.toISOString()
-    };
-
-    return NextResponse.json(response);
-
+    return NextResponse.json({ item });
   } catch (error) {
-    console.error("Gallery fetch failed:", error);
+    console.error("Error fetching gallery item:", error);
     return NextResponse.json(
-      { 
-        error: "Gagal mengambil data galeri",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }, 
+      { error: "Failed to fetch gallery item" },
       { status: 500 }
     );
   }
 }
 
-// PUT - Update gallery item
+// PUT handler - Update gallery item
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Optional: Verify authentication
-    // const token = verifyAuth(req);
-    // if (!token) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-
     const { id } = params;
-    const body = await req.json();
-    const { title, description, category, images } = body;
 
-    // Validate required fields
-    if (!title || !category || !images || images.length === 0) {
+    if (!isValidId(id)) {
       return NextResponse.json(
-        { error: "Missing required fields: title, category, and at least one image" },
+        { error: "Invalid gallery ID" },
         { status: 400 }
       );
     }
 
-    // Filter out empty URLs
-    const validImages = images.filter((img: string) => img.trim() !== "");
-    if (validImages.length === 0) {
-      return NextResponse.json(
-        { error: "At least one valid image URL is required" },
-        { status: 400 }
-      );
-    }
-
-    // Check if gallery item exists
+    // Check if item exists
     const existingItem = await prisma.gallery.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingItem) {
@@ -108,182 +207,261 @@ export async function PUT(
       );
     }
 
-    // Update the gallery item
-    const updatedGallery = await prisma.gallery.update({
+    const supabase = getSupabaseClient();
+    const contentType = req.headers.get("content-type") || "";
+
+    let title: string;
+    let description: string;
+    let category: string;
+    let images: string[] = [];
+
+    const uploadedUrls: string[] = [];
+    const errors: string[] = [];
+    const convertedFiles: string[] = [];
+    const warnings: string[] = [];
+
+    if (contentType.includes("multipart/form-data")) {
+      // Handle file upload for update
+      const formData = await req.formData();
+
+      title = formData.get("title") as string;
+      description = (formData.get("description") as string) || "";
+      category = formData.get("category") as string;
+      const keepExistingImages = formData.get("keepExistingImages") === "true";
+
+      const newFiles = formData.getAll("newImages") as File[];
+      const existingImages = formData.getAll("existingImages") as string[];
+
+      if (!title || !category) {
+        return NextResponse.json(
+          { error: "Title and category are required" },
+          { status: 400 }
+        );
+      }
+
+      // Start with existing images if keeping them
+      if (keepExistingImages) {
+        images = existingImages.filter((img) => img.trim() !== "");
+      }
+
+      // Process new files
+      for (const file of newFiles) {
+        const validation = validateImageFile(file);
+        if (!validation.isValid) {
+          errors.push(validation.error!);
+          continue;
+        }
+
+        try {
+          const isHeic = isHeicFile(file);
+          const fileName = generateFileName(file.name, isHeic);
+
+          let fileToUpload: File | Buffer;
+          let uploadContentType: string;
+
+          if (isHeic) {
+            console.log(`Converting HEIC file: ${file.name}`);
+            try {
+              const convertedBuffer = await convertHeicToJpg(file);
+              fileToUpload = convertedBuffer;
+              uploadContentType = "image/jpeg";
+              convertedFiles.push(file.name);
+            } catch (conversionError) {
+              console.error(
+                `HEIC conversion failed for ${file.name}:`,
+                conversionError
+              );
+              warnings.push(`Gagal mengkonversi ${file.name}`);
+              fileToUpload = file;
+              uploadContentType = file.type || "image/heic";
+            }
+          } else {
+            fileToUpload = file;
+            uploadContentType =
+              file.type || `image/${file.name.split(".").pop()}`;
+          }
+
+          const { error: uploadError } = await supabase.storage
+            .from("media")
+            .upload(fileName, fileToUpload, {
+              contentType: uploadContentType,
+              cacheControl: "3600",
+              upsert: false,
+            });
+
+          if (uploadError) {
+            console.error(
+              `Upload failed for ${file.name}:`,
+              uploadError.message
+            );
+            errors.push(
+              `Gagal mengupload ${file.name}: ${uploadError.message}`
+            );
+            continue;
+          }
+
+          const { data: urlData } = supabase.storage
+            .from("media")
+            .getPublicUrl(fileName);
+
+          if (urlData.publicUrl) {
+            uploadedUrls.push(urlData.publicUrl);
+            images.push(urlData.publicUrl);
+          }
+        } catch (fileError) {
+          console.error(`Error processing ${file.name}:`, fileError);
+          errors.push(`Gagal memproses ${file.name}`);
+        }
+      }
+    } else {
+      // Handle JSON request
+      const body = await req.json();
+      title = body.title;
+      description = body.description || "";
+      category = body.category;
+      images = body.images || [];
+
+      if (!title || !category) {
+        return NextResponse.json(
+          { error: "Title and category are required" },
+          { status: 400 }
+        );
+      }
+
+      if (images.length === 0) {
+        return NextResponse.json(
+          { error: "At least one image is required" },
+          { status: 400 }
+        );
+      }
+
+      // Validate URLs
+      for (const imageUrl of images) {
+        try {
+          new URL(imageUrl);
+        } catch {
+          errors.push(`Invalid URL: ${imageUrl}`);
+        }
+      }
+    }
+
+    // Ensure we have at least one image
+    if (images.length === 0) {
+      return NextResponse.json(
+        { error: "At least one image is required" },
+        { status: 400 }
+      );
+    }
+
+    // Update gallery item in database
+    const updatedItem = await prisma.gallery.update({
       where: { id },
       data: {
         title: title.trim(),
-        description: description?.trim() || "",
+        description: description.trim(),
         category,
-        images: validImages,
-        updatedAt: new Date()
-      }
+        images,
+        updatedAt: new Date(),
+      },
     });
 
-    // Transform the response to ensure proper formatting
-    const response = {
-      ...updatedGallery,
-      images: Array.isArray(updatedGallery.images) ? updatedGallery.images : [updatedGallery.images].filter(Boolean),
-      createdAt: updatedGallery.createdAt.toISOString(),
-      updatedAt: updatedGallery.updatedAt.toISOString()
-    };
+    console.log(`Updated gallery item: ${updatedItem.id}`);
 
-    return NextResponse.json(response);
-
+    return NextResponse.json({
+      success: true,
+      item: updatedItem,
+      uploadedCount: uploadedUrls.length,
+      convertedFiles,
+      warnings: warnings.length > 0 ? warnings : undefined,
+      errors: errors.length > 0 ? errors : undefined,
+      keptExistingImages: contentType.includes("multipart/form-data"),
+    });
   } catch (error) {
-    console.error("Gallery update failed:", error);
+    console.error("Error updating gallery item:", error);
     return NextResponse.json(
-      { 
-        error: "Gagal memperbarui galeri",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }, 
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
 
-// DELETE - Remove gallery item
+// DELETE handler - Delete gallery item
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Optional: Verify authentication
-    // const token = verifyAuth(req);
-    // if (!token) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-
     const { id } = params;
 
-    // Check if gallery item exists
-    const existingItem = await prisma.gallery.findUnique({
-      where: { id }
-    });
-
-    if (!existingItem) {
+    if (!isValidId(id)) {
       return NextResponse.json(
-        { error: "Gallery item not found" },
-        { status: 404 }
+        { error: "Invalid gallery ID" },
+        { status: 400 }
       );
     }
 
-    // Delete associated images from Supabase if they exist
-    if (existingItem.images && Array.isArray(existingItem.images)) {
-      console.log(`Deleting ${existingItem.images.length} images for gallery item: ${id}`);
-      
-      const deletePromises = existingItem.images.map(async (imageUrl: string) => {
-        try {
-          // Extract filename from Supabase URL
-          const urlParts = imageUrl.split('/');
-          const fileName = urlParts[urlParts.length - 1];
-          
-          // Only delete if it's a Supabase-hosted image (contains gallery- prefix)
-          if (imageUrl.includes('supabase') && fileName && fileName.startsWith('gallery-')) {
-            const { error: deleteError } = await supabase.storage
-              .from("media")
-              .remove([fileName]);
-            
-            if (deleteError) {
-              console.warn(`Failed to delete image ${fileName}:`, deleteError.message);
-            } else {
-              console.log(`Successfully deleted image: ${fileName}`);
-            }
-          } else {
-            console.log(`Skipping external image: ${imageUrl}`);
-          }
-        } catch (error) {
-          console.warn(`Error deleting image ${imageUrl}:`, error);
-        }
-      });
-
-      // Wait for all image deletions to complete (but don't fail if some fail)
-      await Promise.allSettled(deletePromises);
-    }
-
-    // Delete the gallery item from database
-    await prisma.gallery.delete({
-      where: { id }
-    });
-
-    console.log(`Successfully deleted gallery item: ${id}`);
-
-    return NextResponse.json(
-      { 
-        message: "Gallery item deleted successfully", 
-        id,
-        deletedImages: existingItem.images?.length || 0
-      },
-      { status: 200 }
-    );
-
-  } catch (error) {
-    console.error("Gallery deletion failed:", error);
-    return NextResponse.json(
-      { 
-        error: "Gagal menghapus galeri",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }, 
-      { status: 500 }
-    );
-  }
-}
-
-// PATCH - Toggle active status or partial updates
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    // Optional: Verify authentication
-    // const token = verifyAuth(req);
-    // if (!token) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-
-    const { id } = params;
-    const body = await req.json();
-    const { isActive, ...otherUpdates } = body;
-
-    // Check if gallery item exists
-    const existingItem = await prisma.gallery.findUnique({
-      where: { id }
-    });
-
-    if (!existingItem) {
-      return NextResponse.json(
-        { error: "Gallery item not found" },
-        { status: 404 }
-      );
-    }
-
-    // Update the gallery item with provided fields
-    const updatedGallery = await prisma.gallery.update({
+    // Get item to delete associated files
+    const item = await prisma.gallery.findUnique({
       where: { id },
-      data: {
-        ...(typeof isActive === 'boolean' && { isActive }),
-        ...otherUpdates,
-        updatedAt: new Date()
-      }
     });
 
-    // Transform the response to ensure proper formatting
-    const response = {
-      ...updatedGallery,
-      images: Array.isArray(updatedGallery.images) ? updatedGallery.images : [updatedGallery.images].filter(Boolean),
-      createdAt: updatedGallery.createdAt.toISOString(),
-      updatedAt: updatedGallery.updatedAt.toISOString()
-    };
+    if (!item) {
+      return NextResponse.json(
+        { error: "Gallery item not found" },
+        { status: 404 }
+      );
+    }
 
-    return NextResponse.json(response);
+    const supabase = getSupabaseClient();
+    const warnings: string[] = [];
+    let deletedImages = 0;
 
+    // Delete associated images from storage
+    if (item.images && item.images.length > 0) {
+      for (const imageUrl of item.images) {
+        try {
+          // Extract file path from Supabase URL
+          const url = new URL(imageUrl);
+          const pathParts = url.pathname.split("/");
+          const fileName = pathParts[pathParts.length - 1];
+          const filePath = `gallery/${fileName}`;
+
+          const { error: deleteError } = await supabase.storage
+            .from("media")
+            .remove([filePath]);
+
+          if (deleteError) {
+            console.warn(
+              `Failed to delete file ${filePath}:`,
+              deleteError.message
+            );
+            warnings.push(`Gagal menghapus file: ${fileName}`);
+          } else {
+            deletedImages++;
+          }
+        } catch (urlError) {
+          console.warn(`Invalid image URL: ${imageUrl}`);
+          warnings.push(`URL gambar tidak valid: ${imageUrl}`);
+        }
+      }
+    }
+
+    // Delete item from database
+    await prisma.gallery.delete({
+      where: { id },
+    });
+
+    console.log(`Deleted gallery item: ${id}`);
+
+    return NextResponse.json({
+      success: true,
+      deletedImages,
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
   } catch (error) {
-    console.error("Gallery patch failed:", error);
+    console.error("Error deleting gallery item:", error);
     return NextResponse.json(
-      { 
-        error: "Gagal memperbarui status galeri",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }, 
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

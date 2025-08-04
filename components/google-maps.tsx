@@ -1,10 +1,21 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MapPin, Mountain, Camera, Tent, TreePine, Waves, Home, Coffee } from "lucide-react"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  MapPin,
+  Mountain,
+  Camera,
+  Tent,
+  TreePine,
+  Waves,
+  Home,
+  Coffee,
+  Navigation,
+  ExternalLink,
+} from "lucide-react";
 
 // Tourist spots data with coordinates
 const touristSpots = [
@@ -88,202 +99,18 @@ const touristSpots = [
     icon: "camera",
     category: "Spot Foto",
   },
-]
+];
 
-// Village center coordinates
+// Village center coordinates (Tarubatang, Selo, Boyolali)
 const VILLAGE_CENTER = {
-  lat: -7.4167,
-  lng: 110.4833,
-}
+  lat: -7.491810021292882,
+  lng: 110.46092439527409,
+};
 
 export default function GoogleMapsComponent() {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
-  const [selectedSpot, setSelectedSpot] = useState<(typeof touristSpots)[0] | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  // Load Google Maps API
-  useEffect(() => {
-    const loadGoogleMaps = () => {
-      if (window.google) {
-        setIsLoaded(true)
-        return
-      }
-
-      const script = document.createElement("script")
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY"}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => setIsLoaded(true)
-      document.head.appendChild(script)
-    }
-
-    loadGoogleMaps()
-  }, [])
-
-  // Initialize map
-  useEffect(() => {
-    if (!isLoaded || !mapRef.current) return
-
-    const mapInstance = new window.google.maps.Map(mapRef.current, {
-      center: VILLAGE_CENTER,
-      zoom: 14,
-      styles: [
-        {
-          featureType: "poi",
-          elementType: "labels",
-          stylers: [{ visibility: "off" }],
-        },
-        {
-          featureType: "landscape.natural",
-          elementType: "geometry.fill",
-          stylers: [{ color: "#f0f8f0" }],
-        },
-      ],
-      mapTypeControl: true,
-      streetViewControl: true,
-      fullscreenControl: true,
-      zoomControl: true,
-    })
-
-    setMap(mapInstance)
-
-    // Add markers for each tourist spot
-    touristSpots.forEach((spot) => {
-      const marker = new window.google.maps.Marker({
-        position: { lat: spot.lat, lng: spot.lng },
-        map: mapInstance,
-        title: spot.name,
-        icon: {
-          url: getMarkerIcon(spot.type),
-          scaledSize: new window.google.maps.Size(40, 40),
-          origin: new window.google.maps.Point(0, 0),
-          anchor: new window.google.maps.Point(20, 40),
-        },
-      })
-
-      // Create info window
-      const infoWindow = new window.google.maps.InfoWindow({
-        content: `
-          <div style="padding: 10px; max-width: 250px;">
-            <h3 style="margin: 0 0 8px 0; color: #16a34a; font-weight: bold;">${spot.name}</h3>
-            <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">${spot.description}</p>
-            <span style="background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${spot.category}</span>
-          </div>
-        `,
-      })
-
-      marker.addListener("click", () => {
-        infoWindow.open(mapInstance, marker)
-        setSelectedSpot(spot)
-      })
-    })
-
-    // Add village center marker
-    new window.google.maps.Marker({
-      position: VILLAGE_CENTER,
-      map: mapInstance,
-      title: "Pusat Desa Tarubatang",
-      icon: {
-        url:
-          "data:image/svg+xml;charset=UTF-8," +
-          encodeURIComponent(`
-          <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="25" cy="25" r="20" fill="#dc2626" stroke="white" strokeWidth="3"/>
-            <text x="25" y="30" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">DESA</text>
-          </svg>
-        `),
-        scaledSize: new window.google.maps.Size(50, 50),
-        anchor: new window.google.maps.Point(25, 25),
-      },
-    })
-  }, [isLoaded])
-
-  const getMarkerIcon = (type: string) => {
-    const iconMap: { [key: string]: string } = {
-      waterfall:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#0ea5e9" stroke="white" strokeWidth="2"/>
-          <path d="M20 8 L16 16 L20 12 L24 16 Z M20 16 L16 24 L20 20 L24 24 Z M20 24 L16 32 L20 28 L24 32 Z" fill="white"/>
-        </svg>
-      `),
-      hiking:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#16a34a" stroke="white" strokeWidth="2"/>
-          <path d="M12 28 L20 12 L28 28 Z" fill="white"/>
-          <circle cx="20" cy="18" r="2" fill="#16a34a"/>
-        </svg>
-      `),
-      camping:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#f59e0b" stroke="white" strokeWidth="2"/>
-          <path d="M12 26 L20 14 L28 26 Z" fill="white"/>
-          <rect x="18" y="22" width="4" height="4" fill="#f59e0b"/>
-        </svg>
-      `),
-      forest:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#059669" stroke="white" strokeWidth="2"/>
-          <path d="M20 10 L16 18 L24 18 Z M20 14 L14 22 L26 22 Z M20 18 L12 26 L28 26 Z" fill="white"/>
-          <rect x="19" y="26" width="2" height="4" fill="white"/>
-        </svg>
-      `),
-      river:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#06b6d4" stroke="white" strokeWidth="2"/>
-          <path d="M10 20 Q15 15 20 20 T30 20 Q25 25 20 20 T10 20" fill="white"/>
-        </svg>
-      `),
-      homestay:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#7c3aed" stroke="white" strokeWidth="2"/>
-          <path d="M12 24 L20 16 L28 24 L28 28 L12 28 Z" fill="white"/>
-          <rect x="18" y="22" width="4" height="6" fill="#7c3aed"/>
-        </svg>
-      `),
-      cafe:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#92400e" stroke="white" strokeWidth="2"/>
-          <rect x="14" y="16" width="8" height="10" rx="1" fill="white"/>
-          <rect x="22" y="18" width="4" height="6" rx="1" fill="white"/>
-          <path d="M16 14 Q18 12 20 14 Q22 12 24 14" stroke="white" strokeWidth="1" fill="none"/>
-        </svg>
-      `),
-      viewpoint:
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(`
-        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18" fill="#ec4899" stroke="white" strokeWidth="2"/>
-          <rect x="14" y="16" width="12" height="8" rx="2" fill="white"/>
-          <circle cx="20" cy="20" r="2" fill="#ec4899"/>
-          <rect x="18" y="24" width="4" height="2" fill="white"/>
-        </svg>
-      `),
-    }
-    return iconMap[type] || iconMap.viewpoint
-  }
-
-  const focusOnSpot = (spot: (typeof touristSpots)[0]) => {
-    if (map) {
-      map.setCenter({ lat: spot.lat, lng: spot.lng })
-      map.setZoom(16)
-      setSelectedSpot(spot)
-    }
-  }
+  const [selectedSpot, setSelectedSpot] = useState<
+    (typeof touristSpots)[0] | null
+  >(null);
 
   const getIconComponent = (type: string) => {
     const iconMap: { [key: string]: any } = {
@@ -295,155 +122,98 @@ export default function GoogleMapsComponent() {
       homestay: Home,
       cafe: Coffee,
       viewpoint: Camera,
-    }
-    return iconMap[type] || Camera
-  }
+    };
+    return iconMap[type] || Camera;
+  };
 
-  if (!isLoaded) {
-    return (
-      <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">Memuat peta...</p>
-        </div>
-      </div>
-    )
-  }
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "Wisata Alam":
+        return "bg-green-100 text-green-800";
+      case "Pendakian":
+        return "bg-red-100 text-red-800";
+      case "Camping":
+        return "bg-blue-100 text-blue-800";
+      case "Spot Foto":
+        return "bg-purple-100 text-purple-800";
+      case "Akomodasi":
+        return "bg-orange-100 text-orange-800";
+      case "Kuliner":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const focusOnSpot = (spot: (typeof touristSpots)[0]) => {
+    setSelectedSpot(spot);
+    // Scroll to the map
+    document.getElementById("main-map")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Map Container */}
-      <div className="relative">
-        <div ref={mapRef} className="w-full h-96 rounded-lg shadow-lg" />
+      <div className="relative" id="main-map">
+        <div className="w-full rounded-lg shadow-lg overflow-hidden">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31646.07417511448!2d110.46092439527409!3d-7.491810021292882!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a651b39211b75%3A0x53aa0d3bee048fc!2sTarubatang%2C%20Kec.%20Selo%2C%20Kabupaten%20Boyolali%2C%20Jawa%20Tengah!5e0!3m2!1sid!2sid!4v1753532416384!5m2!1sid!2sid"
+            width="100%"
+            height="450"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Peta Lokasi Tarubatang, Selo, Boyolali"
+          />
+        </div>
 
-        {/* Map Controls */}
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2">
-          <div className="flex flex-col space-y-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                if (map) {
-                  map.setCenter(VILLAGE_CENTER)
-                  map.setZoom(14)
-                }
-              }}
-            >
-              <MapPin className="h-4 w-4 mr-1" />
-              Pusat Desa
-            </Button>
+        {/* Map Info Overlay */}
+        <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 max-w-xs">
+          <div className="flex items-center space-x-2 mb-2">
+            <MapPin className="h-5 w-5 text-red-600" />
+            <h4 className="font-semibold text-sm">Tarubatang, Selo</h4>
           </div>
+          <p className="text-xs text-gray-600">
+            Desa wisata di kaki Gunung Merbabu, Kabupaten Boyolali, Jawa Tengah
+          </p>
         </div>
 
         {/* Legend */}
-        <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-3 max-w-xs">
-          <h4 className="font-semibold text-sm mb-2">Legenda</h4>
-          <div className="grid grid-cols-2 gap-1 text-xs">
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span>Air Terjun</span>
+        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 max-w-xs">
+          <h4 className="font-semibold text-sm mb-2">Kategori Wisata</h4>
+          <div className="grid grid-cols-1 gap-1 text-xs">
+            <div className="flex items-center space-x-2">
+              <TreePine className="w-3 h-3 text-green-600" />
+              <span>Wisata Alam</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Mountain className="w-3 h-3 text-red-600" />
               <span>Pendakian</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="flex items-center space-x-2">
+              <Tent className="w-3 h-3 text-blue-600" />
               <span>Camping</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-              <span>Homestay</span>
+            <div className="flex items-center space-x-2">
+              <Camera className="w-3 h-3 text-purple-600" />
+              <span>Spot Foto</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tourist Spots List */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {touristSpots.map((spot) => {
-          const IconComponent = getIconComponent(spot.type)
-          return (
-            <Card
-              key={spot.id}
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                selectedSpot?.id === spot.id ? "ring-2 ring-green-500" : ""
-              }`}
-              onClick={() => focusOnSpot(spot)}
-            >
-              <CardContent className="p-3">
-                <div className="flex items-start space-x-2">
-                  <IconComponent className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-medium text-sm truncate">{spot.name}</h4>
-                    <p className="text-xs text-gray-600 line-clamp-2">{spot.description}</p>
-                    <Badge variant="secondary" className="text-xs mt-1">
-                      {spot.category}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Selected Spot Details */}
-      {selectedSpot && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-3">
-                {(() => {
-                  const IconComponent = getIconComponent(selectedSpot.type)
-                  return <IconComponent className="h-6 w-6 text-green-600 mt-1" />
-                })()}
-                <div>
-                  <h3 className="font-semibold text-lg text-green-800">{selectedSpot.name}</h3>
-                  <p className="text-gray-700 mb-2">{selectedSpot.description}</p>
-                  <Badge className="bg-green-100 text-green-800">{selectedSpot.category}</Badge>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedSpot.lat},${selectedSpot.lng}`
-                  window.open(url, "_blank")
-                }}
-              >
-                Petunjuk Arah
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center">
         <Button
           size="sm"
           variant="outline"
           onClick={() => {
-            const bounds = new window.google.maps.LatLngBounds()
-            touristSpots.forEach((spot) => {
-              bounds.extend({ lat: spot.lat, lng: spot.lng })
-            })
-            if (map) {
-              map.fitBounds(bounds)
-            }
+            const url = `https://www.google.com/maps/search/Tarubatang+Selo+Boyolali/@${VILLAGE_CENTER.lat},${VILLAGE_CENTER.lng},14z`;
+            window.open(url, "_blank");
           }}
         >
-          Lihat Semua Lokasi
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            const url = `https://www.google.com/maps/search/Tarubatang+Selo+Boyolali/@${VILLAGE_CENTER.lat},${VILLAGE_CENTER.lng},14z`
-            window.open(url, "_blank")
-          }}
-        >
+          <ExternalLink className="h-4 w-4 mr-2" />
           Buka di Google Maps
         </Button>
         <Button
@@ -451,20 +221,155 @@ export default function GoogleMapsComponent() {
           variant="outline"
           onClick={() => {
             if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition((position) => {
-                const userLocation = {
-                  lat: position.coords.latitude,
-                  lng: position.coords.longitude,
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                  };
+                  const url = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${VILLAGE_CENTER.lat},${VILLAGE_CENTER.lng}`;
+                  window.open(url, "_blank");
+                },
+                (error) => {
+                  // Fallback jika geolocation gagal
+                  const url = `https://www.google.com/maps/dir/?api=1&destination=${VILLAGE_CENTER.lat},${VILLAGE_CENTER.lng}`;
+                  window.open(url, "_blank");
                 }
-                const url = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${VILLAGE_CENTER.lat},${VILLAGE_CENTER.lng}`
-                window.open(url, "_blank")
-              })
+              );
+            } else {
+              // Fallback untuk browser yang tidak support geolocation
+              const url = `https://www.google.com/maps/dir/?api=1&destination=${VILLAGE_CENTER.lat},${VILLAGE_CENTER.lng}`;
+              window.open(url, "_blank");
             }
           }}
         >
+          <Navigation className="h-4 w-4 mr-2" />
           Rute dari Lokasi Saya
         </Button>
       </div>
+
+      {/* Tourist Spots List */}
+      <div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+          Destinasi Wisata di Tarubatang
+        </h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {touristSpots.map((spot) => {
+            const IconComponent = getIconComponent(spot.type);
+            return (
+              <Card
+                key={spot.id}
+                className={`cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
+                  selectedSpot?.id === spot.id
+                    ? "ring-2 ring-green-500 shadow-lg"
+                    : ""
+                }`}
+                onClick={() => focusOnSpot(spot)}
+              >
+                <CardContent className="p-4">
+                  <div className="text-center space-y-3">
+                    <div className="flex justify-center">
+                      <div className="p-3 bg-green-50 rounded-full">
+                        <IconComponent className="h-6 w-6 text-green-600" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm mb-1">{spot.name}</h4>
+                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                        {spot.description}
+                      </p>
+                      <Badge
+                        className={`text-xs ${getCategoryColor(spot.category)}`}
+                      >
+                        {spot.category}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Selected Spot Details */}
+      {selectedSpot && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-4">
+                {(() => {
+                  const IconComponent = getIconComponent(selectedSpot.type);
+                  return (
+                    <div className="p-3 bg-green-100 rounded-full">
+                      <IconComponent className="h-8 w-8 text-green-600" />
+                    </div>
+                  );
+                })()}
+                <div>
+                  <h3 className="font-semibold text-xl text-green-800 mb-2">
+                    {selectedSpot.name}
+                  </h3>
+                  <p className="text-gray-700 mb-3 leading-relaxed">
+                    {selectedSpot.description}
+                  </p>
+                  <Badge
+                    className={`${getCategoryColor(selectedSpot.category)}`}
+                  >
+                    {selectedSpot.category}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedSpot.lat},${selectedSpot.lng}`;
+                    window.open(url, "_blank");
+                  }}
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Petunjuk Arah
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSelectedSpot(null)}
+                >
+                  Tutup Detail
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Additional Info */}
+      <div className="bg-blue-50 rounded-lg p-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">
+            Informasi Lokasi
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <strong className="text-blue-700">Alamat:</strong>
+              <p className="text-gray-700">
+                Tarubatang, Kec. Selo, Kabupaten Boyolali, Jawa Tengah
+              </p>
+            </div>
+            <div>
+              <strong className="text-blue-700">Akses:</strong>
+              <p className="text-gray-700">
+                Dapat diakses dengan kendaraan pribadi atau transportasi umum
+              </p>
+            </div>
+            <div>
+              <strong className="text-blue-700">Koordinat:</strong>
+              <p className="text-gray-700">-7.492°S, 110.461°E</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

@@ -31,7 +31,7 @@ async function deleteFileFromSupabase(imageUrl: string): Promise<void> {
 // Helper function to upload file to Supabase Storage
 async function uploadFileToSupabase(
   file: File,
-  folder = "umkm"
+  folder = "basecamp"
 ): Promise<string> {
   try {
     // Validate file
@@ -49,9 +49,9 @@ async function uploadFileToSupabase(
       `Uploading file: ${file.name} (${file.size} bytes) as ${fileName}`
     );
 
-    // Upload to Supabase Storage - using 'media' bucket
+    // Upload to Supabase Storage
     const { data, error } = await supabase.storage
-      .from("media") // Changed from "images" to "media"
+      .from("media")
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -65,7 +65,7 @@ async function uploadFileToSupabase(
     // Get public URL
     const {
       data: { publicUrl },
-    } = supabase.storage.from("media").getPublicUrl(fileName); // Changed to "media"
+    } = supabase.storage.from("media").getPublicUrl(fileName);
 
     console.log(`File uploaded successfully: ${publicUrl}`);
     return publicUrl;
@@ -75,62 +75,52 @@ async function uploadFileToSupabase(
   }
 }
 
-// GET single UMKM by ID
+// GET single Basecamp by ID
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const umkm = await prisma.uMKM.findUnique({
+    const basecamp = await prisma.basecamp.findUnique({
       where: { id: params.id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-            email: true,
-          },
-        },
-      },
     });
 
-    if (!umkm) {
-      return NextResponse.json({ error: "UMKM not found" }, { status: 404 });
+    if (!basecamp) {
+      return NextResponse.json(
+        { error: "Basecamp tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(umkm);
+    return NextResponse.json(basecamp);
   } catch (error) {
-    console.error("Error fetching UMKM:", error);
+    console.error("Error fetching basecamp:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Gagal mengambil data basecamp" },
       { status: 500 }
     );
   }
 }
 
-// PUT update UMKM
+// PUT update Basecamp
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verify authorization
-    const token = request.headers.get("authorization");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if UMKM exists
-    const existingUMKM = await prisma.uMKM.findUnique({
+    // Check if Basecamp exists
+    const existingBasecamp = await prisma.basecamp.findUnique({
       where: { id: params.id },
     });
 
-    if (!existingUMKM) {
-      return NextResponse.json({ error: "UMKM not found" }, { status: 404 });
+    if (!existingBasecamp) {
+      return NextResponse.json(
+        { error: "Basecamp tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
-    console.log("Updating UMKM:", params.id);
+    console.log("Updating Basecamp:", params.id);
 
     const contentType = request.headers.get("content-type");
     let formData: any = {};
@@ -142,17 +132,35 @@ export async function PUT(
 
       console.log("Processing FormData...");
 
-      // Extract form fields
-      formData = {
-        name: data.get("name") as string,
-        category: data.get("category") as string,
-        description: data.get("description") as string,
-        price: data.get("price") as string,
-        stock: Number.parseInt(data.get("stock") as string) || 0,
-        contact: data.get("contact") as string,
-        location: data.get("location") as string,
-        userId: data.get("userId") as string,
-      };
+      // Extract form fields with better error handling
+      try {
+        formData = {
+          namaBasecamp: data.get("namaBasecamp") as string,
+          fasilitas: JSON.parse((data.get("fasilitas") as string) || "[]"),
+          dayaTampungKendaraan:
+            Number.parseInt(data.get("dayaTampungKendaraan") as string) || 0,
+          dayaTampungOrang:
+            Number.parseInt(data.get("dayaTampungOrang") as string) || 0,
+          nomorWa: data.get("nomorWa") as string,
+          sosialMedia: JSON.parse((data.get("sosialMedia") as string) || "[]"),
+          lokasi: data.get("lokasi") as string,
+          latitude: data.get("latitude")
+            ? Number.parseFloat(data.get("latitude") as string)
+            : null,
+          longitude: data.get("longitude")
+            ? Number.parseFloat(data.get("longitude") as string)
+            : null,
+          pemilik: data.get("pemilik") as string,
+          menuMakanan: JSON.parse((data.get("menuMakanan") as string) || "[]"),
+          menuMinuman: JSON.parse((data.get("menuMinuman") as string) || "[]"),
+        };
+      } catch (parseError) {
+        console.error("Error parsing form data:", parseError);
+        return NextResponse.json(
+          { error: "Invalid form data format" },
+          { status: 400 }
+        );
+      }
 
       console.log("Form data:", formData);
 
@@ -171,7 +179,7 @@ export async function PUT(
       }
 
       // Delete removed images from storage
-      const imagesToDelete = existingUMKM.images.filter(
+      const imagesToDelete = existingBasecamp.images.filter(
         (oldImage) => !finalImageUrls.includes(oldImage)
       );
       if (imagesToDelete.length > 0) {
@@ -182,6 +190,7 @@ export async function PUT(
           );
         } catch (error) {
           console.error("Error deleting old images:", error);
+          // Continue even if deletion fails
         }
       }
 
@@ -199,7 +208,7 @@ export async function PUT(
               console.log(
                 `Uploading file ${index + 1}: ${file.name} (${file.size} bytes)`
               );
-              return uploadFileToSupabase(file, "umkm");
+              return uploadFileToSupabase(file, "basecamp");
             });
 
             const newImageUrls = await Promise.all(uploadPromises);
@@ -223,7 +232,7 @@ export async function PUT(
       finalImageUrls = body.images || [];
 
       // Delete removed images from storage
-      const imagesToDelete = existingUMKM.images.filter(
+      const imagesToDelete = existingBasecamp.images.filter(
         (oldImage) => !finalImageUrls.includes(oldImage)
       );
       if (imagesToDelete.length > 0) {
@@ -239,97 +248,97 @@ export async function PUT(
 
     console.log(`Final image count: ${finalImageUrls.length}`);
 
-    // Validate required fields
+    // Validation
     if (
-      !formData.name ||
-      !formData.category ||
-      !formData.description ||
-      !formData.price ||
-      !formData.contact
+      !formData.namaBasecamp ||
+      !formData.lokasi ||
+      !formData.pemilik ||
+      !formData.nomorWa
     ) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error: "Nama basecamp, lokasi, pemilik, dan nomor WA wajib diisi",
+        },
         { status: 400 }
       );
     }
 
-    // Validate at least one image
-    if (finalImageUrls.length === 0) {
+    if (formData.dayaTampungOrang < 1 || formData.dayaTampungKendaraan < 1) {
       return NextResponse.json(
-        { error: "At least one image is required" },
+        {
+          error: "Daya tampung harus lebih dari 0",
+        },
         { status: 400 }
       );
     }
 
-    // Update UMKM
-    const updatedUMKM = await prisma.uMKM.update({
+    // Update Basecamp
+    const updatedBasecamp = await prisma.basecamp.update({
       where: { id: params.id },
       data: {
-        name: formData.name,
-        category: formData.category,
-        description: formData.description,
-        price: formData.price,
-        stock: formData.stock,
+        namaBasecamp: formData.namaBasecamp,
+        fasilitas: formData.fasilitas || [],
+        dayaTampungKendaraan: Number(formData.dayaTampungKendaraan),
+        dayaTampungOrang: Number(formData.dayaTampungOrang),
+        nomorWa: formData.nomorWa,
         images: finalImageUrls,
-        contact: formData.contact,
-        location: formData.location,
-        userId: formData.userId || existingUMKM.userId,
+        sosialMedia: formData.sosialMedia || [],
+        lokasi: formData.lokasi,
+        latitude: formData.latitude ? Number(formData.latitude) : null,
+        longitude: formData.longitude ? Number(formData.longitude) : null,
+        pemilik: formData.pemilik,
+        menuMakanan: formData.menuMakanan || [],
+        menuMinuman: formData.menuMinuman || [],
         updatedAt: new Date(),
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-            email: true,
-          },
-        },
       },
     });
 
-    console.log("UMKM updated successfully");
+    console.log("Basecamp updated successfully");
 
     return NextResponse.json({
-      ...updatedUMKM,
-      message: "UMKM berhasil diperbarui",
+      message: "Basecamp berhasil diperbarui",
+      basecamp: updatedBasecamp,
       uploadedImages: finalImageUrls.length,
     });
   } catch (error) {
-    console.error("Error updating UMKM:", error);
+    console.error("Error updating basecamp:", error);
+
+    // Better error response
+    const errorMessage =
+      error instanceof Error ? error.message : "Gagal memperbarui basecamp";
     return NextResponse.json(
-      { error: `Internal server error: ${error.message}` },
+      {
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : undefined,
+      },
       { status: 500 }
     );
   }
 }
 
-// DELETE UMKM
+// DELETE Basecamp
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verify authorization
-    const token = request.headers.get("authorization");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if UMKM exists
-    const existingUMKM = await prisma.uMKM.findUnique({
+    // Check if Basecamp exists
+    const existingBasecamp = await prisma.basecamp.findUnique({
       where: { id: params.id },
     });
 
-    if (!existingUMKM) {
-      return NextResponse.json({ error: "UMKM not found" }, { status: 404 });
+    if (!existingBasecamp) {
+      return NextResponse.json(
+        { error: "Basecamp tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
     // Delete associated images from storage
-    if (existingUMKM.images && existingUMKM.images.length > 0) {
+    if (existingBasecamp.images && existingBasecamp.images.length > 0) {
       try {
         await Promise.all(
-          existingUMKM.images.map((imageUrl) =>
+          existingBasecamp.images.map((imageUrl) =>
             deleteFileFromSupabase(imageUrl)
           )
         );
@@ -338,16 +347,16 @@ export async function DELETE(
       }
     }
 
-    // Delete UMKM
-    await prisma.uMKM.delete({
+    // Delete Basecamp
+    await prisma.basecamp.delete({
       where: { id: params.id },
     });
 
-    return NextResponse.json({ message: "UMKM berhasil dihapus" });
+    return NextResponse.json({ message: "Basecamp berhasil dihapus" });
   } catch (error) {
-    console.error("Error deleting UMKM:", error);
+    console.error("Error deleting basecamp:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Gagal menghapus basecamp" },
       { status: 500 }
     );
   }
@@ -362,49 +371,38 @@ export async function PATCH(
     const body = await request.json();
     const { isActive } = body;
 
-    // Verify authorization
-    const token = request.headers.get("authorization");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if UMKM exists
-    const existingUMKM = await prisma.uMKM.findUnique({
+    // Check if Basecamp exists
+    const existingBasecamp = await prisma.basecamp.findUnique({
       where: { id: params.id },
     });
 
-    if (!existingUMKM) {
-      return NextResponse.json({ error: "UMKM not found" }, { status: 404 });
+    if (!existingBasecamp) {
+      return NextResponse.json(
+        { error: "Basecamp tidak ditemukan" },
+        { status: 404 }
+      );
     }
 
     // Update active status
-    const updatedUMKM = await prisma.uMKM.update({
+    const updatedBasecamp = await prisma.basecamp.update({
       where: { id: params.id },
       data: {
-        isActive: isActive !== undefined ? isActive : !existingUMKM.isActive,
+        isActive:
+          isActive !== undefined ? isActive : !existingBasecamp.isActive,
         updatedAt: new Date(),
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-          },
-        },
       },
     });
 
     return NextResponse.json({
-      ...updatedUMKM,
-      message: `UMKM berhasil ${
-        updatedUMKM.isActive ? "diaktifkan" : "dinonaktifkan"
+      message: `Basecamp berhasil ${
+        updatedBasecamp.isActive ? "diaktifkan" : "dinonaktifkan"
       }`,
+      basecamp: updatedBasecamp,
     });
   } catch (error) {
-    console.error("Error updating UMKM status:", error);
+    console.error("Error updating basecamp status:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Gagal mengubah status basecamp" },
       { status: 500 }
     );
   }

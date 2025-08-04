@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import {
   Mountain,
   Save,
@@ -21,60 +21,60 @@ import {
   Utensils,
   Mail,
   Clock,
-} from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Submission {
-  id: number
-  type: string
-  name: string
-  email: string
-  message: string
-  timestamp: string
-  status: "new" | "read" | "replied"
+  id: number;
+  type: string;
+  name: string;
+  email: string;
+  message: string;
+  timestamp: string;
+  status: "new" | "read" | "replied";
 }
 
 export default function AdminDashboard() {
-  const [content, setContent] = useState<any>(null)
-  const [submissions, setSubmissions] = useState<Submission[]>([])
-  const [activeTab, setActiveTab] = useState("hero")
-  const [isSaving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState("")
+  const [content, setContent] = useState<any>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [activeTab, setActiveTab] = useState("hero");
+  const [isSaving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   // Load content and submissions
   useEffect(() => {
-    loadContent()
-    loadSubmissions()
-  }, [])
+    loadContent();
+    loadSubmissions();
+  }, []);
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/content")
+      const response = await fetch("/api/content");
       if (response.ok) {
-        const data = await response.json()
-        setContent(data)
+        const data = await response.json();
+        setContent(data);
       }
     } catch (error) {
-      console.error("Failed to load content:", error)
+      console.error("Failed to load content:", error);
     }
-  }
+  };
 
   const loadSubmissions = async () => {
     try {
-      const response = await fetch("/api/submissions")
+      const response = await fetch("/api/submissions");
       if (response.ok) {
-        const data = await response.json()
-        setSubmissions(data)
+        const data = await response.json();
+        setSubmissions(data);
       }
     } catch (error) {
-      console.error("Failed to load submissions:", error)
+      console.error("Failed to load submissions:", error);
     }
-  }
+  };
 
   const saveContent = async () => {
-    setSaving(true)
-    setSaveMessage("")
+    setSaving(true);
+    setSaveMessage("");
 
     try {
       const response = await fetch("/api/content", {
@@ -83,20 +83,20 @@ export default function AdminDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(content),
-      })
+      });
 
       if (response.ok) {
-        setSaveMessage("Konten berhasil disimpan!")
+        setSaveMessage("Konten berhasil disimpan!");
       } else {
-        setSaveMessage("Gagal menyimpan konten.")
+        setSaveMessage("Gagal menyimpan konten.");
       }
     } catch (error) {
-      setSaveMessage("Terjadi kesalahan saat menyimpan.")
+      setSaveMessage("Terjadi kesalahan saat menyimpan.");
     } finally {
-      setSaving(false)
-      setTimeout(() => setSaveMessage(""), 3000)
+      setSaving(false);
+      setTimeout(() => setSaveMessage(""), 3000);
     }
-  }
+  };
 
   const updateSubmissionStatus = async (id: number, status: string) => {
     try {
@@ -106,15 +106,19 @@ export default function AdminDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ status }),
-      })
+      });
 
       if (response.ok) {
-        setSubmissions(submissions.map((sub) => (sub.id === id ? { ...sub, status: status as any } : sub)))
+        setSubmissions(
+          submissions.map((sub) =>
+            sub.id === id ? { ...sub, status: status as any } : sub
+          )
+        );
       }
     } catch (error) {
-      console.error("Failed to update submission:", error)
+      console.error("Failed to update submission:", error);
     }
-  }
+  };
 
   const addDestination = () => {
     const newDestination = {
@@ -125,19 +129,19 @@ export default function AdminDashboard() {
       image: "/placeholder.svg?height=200&width=300",
       rating: 4.5,
       price: "Rp 0",
-    }
+    };
     setContent({
       ...content,
       destinations: [...content.destinations, newDestination],
-    })
-  }
+    });
+  };
 
   const removeDestination = (id: number) => {
     setContent({
       ...content,
       destinations: content.destinations.filter((dest: any) => dest.id !== id),
-    })
-  }
+    });
+  };
 
   const addUMKM = () => {
     const newUMKM = {
@@ -148,19 +152,19 @@ export default function AdminDashboard() {
       image: "/placeholder.svg?height=60&width=60",
       price: "Rp 0",
       contact: "0812-0000-0000",
-    }
+    };
     setContent({
       ...content,
       umkm: [...content.umkm, newUMKM],
-    })
-  }
+    });
+  };
 
   const removeUMKM = (id: number) => {
     setContent({
       ...content,
       umkm: content.umkm.filter((item: any) => item.id !== id),
-    })
-  }
+    });
+  };
 
   const addEvent = () => {
     const newEvent = {
@@ -170,19 +174,19 @@ export default function AdminDashboard() {
       location: "Lokasi Event",
       description: "Deskripsi event baru",
       category: "Budaya",
-    }
+    };
     setContent({
       ...content,
       events: [...content.events, newEvent],
-    })
-  }
+    });
+  };
 
   const removeEvent = (id: number) => {
     setContent({
       ...content,
       events: content.events.filter((event: any) => event.id !== id),
-    })
-  }
+    });
+  };
 
   const addGalleryPhoto = () => {
     const newPhoto = {
@@ -190,49 +194,49 @@ export default function AdminDashboard() {
       title: "Foto Baru",
       image: "/placeholder.svg?height=200&width=200",
       category: "Pemandangan",
-    }
+    };
     setContent({
       ...content,
       gallery: [...content.gallery, newPhoto],
-    })
-  }
+    });
+  };
 
   const removeGalleryPhoto = (id: number) => {
     setContent({
       ...content,
       gallery: content.gallery.filter((photo: any) => photo.id !== id),
-    })
-  }
+    });
+  };
 
   const getSubmissionTypeColor = (type: string) => {
     switch (type) {
       case "guestbook":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "volunteer":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "feedback":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "complaint":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       case "business":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       case "read":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "replied":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   if (!content) {
     return (
@@ -242,12 +246,11 @@ export default function AdminDashboard() {
           <p className="text-gray-600">Memuat dashboard...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -255,8 +258,12 @@ export default function AdminDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Destinasi</p>
-                  <p className="text-3xl font-bold text-gray-900">{content.destinations?.length || 0}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Destinasi
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {content.destinations?.length || 0}
+                  </p>
                 </div>
                 <MapPin className="h-8 w-8 text-green-600" />
               </div>
@@ -267,8 +274,12 @@ export default function AdminDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total UMKM</p>
-                  <p className="text-3xl font-bold text-gray-900">{content.umkm?.length || 0}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total UMKM
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {content.umkm?.length || 0}
+                  </p>
                 </div>
                 <Utensils className="h-8 w-8 text-blue-600" />
               </div>
@@ -279,8 +290,12 @@ export default function AdminDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Event</p>
-                  <p className="text-3xl font-bold text-gray-900">{content.events?.length || 0}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Event
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {content.events?.length || 0}
+                  </p>
                 </div>
                 <Calendar className="h-8 w-8 text-purple-600" />
               </div>
@@ -291,7 +306,9 @@ export default function AdminDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pesan Baru</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Pesan Baru
+                  </p>
                   <p className="text-3xl font-bold text-gray-900">
                     {submissions.filter((s) => s.status === "new").length}
                   </p>
@@ -303,7 +320,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="hero">Hero</TabsTrigger>
             <TabsTrigger value="destinations">Destinasi</TabsTrigger>
@@ -343,7 +364,10 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            hero: { ...content.hero, description: e.target.value },
+                            hero: {
+                              ...content.hero,
+                              description: e.target.value,
+                            },
                           })
                         }
                         rows={3}
@@ -366,14 +390,19 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="about-description">Deskripsi Tentang</Label>
+                      <Label htmlFor="about-description">
+                        Deskripsi Tentang
+                      </Label>
                       <Textarea
                         id="about-description"
                         value={content.about?.description || ""}
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            about: { ...content.about, description: e.target.value },
+                            about: {
+                              ...content.about,
+                              description: e.target.value,
+                            },
                           })
                         }
                         rows={3}
@@ -395,7 +424,10 @@ export default function AdminDashboard() {
                             ...content,
                             about: {
                               ...content.about,
-                              stats: { ...content.about.stats, altitude: e.target.value },
+                              stats: {
+                                ...content.about.stats,
+                                altitude: e.target.value,
+                              },
                             },
                           })
                         }
@@ -411,7 +443,10 @@ export default function AdminDashboard() {
                             ...content,
                             about: {
                               ...content.about,
-                              stats: { ...content.about.stats, population: e.target.value },
+                              stats: {
+                                ...content.about.stats,
+                                population: e.target.value,
+                              },
                             },
                           })
                         }
@@ -427,7 +462,10 @@ export default function AdminDashboard() {
                             ...content,
                             about: {
                               ...content.about,
-                              stats: { ...content.about.stats, destinations: e.target.value },
+                              stats: {
+                                ...content.about.stats,
+                                destinations: e.target.value,
+                              },
                             },
                           })
                         }
@@ -443,7 +481,10 @@ export default function AdminDashboard() {
                             ...content,
                             about: {
                               ...content.about,
-                              stats: { ...content.about.stats, events: e.target.value },
+                              stats: {
+                                ...content.about.stats,
+                                events: e.target.value,
+                              },
                             },
                           })
                         }
@@ -463,7 +504,10 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            contact: { ...content.contact, village: e.target.value },
+                            contact: {
+                              ...content.contact,
+                              village: e.target.value,
+                            },
                           })
                         }
                       />
@@ -476,7 +520,10 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            contact: { ...content.contact, tourism: e.target.value },
+                            contact: {
+                              ...content.contact,
+                              tourism: e.target.value,
+                            },
                           })
                         }
                       />
@@ -489,7 +536,10 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            contact: { ...content.contact, emergency: e.target.value },
+                            contact: {
+                              ...content.contact,
+                              emergency: e.target.value,
+                            },
                           })
                         }
                       />
@@ -502,7 +552,10 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            contact: { ...content.contact, email: e.target.value },
+                            contact: {
+                              ...content.contact,
+                              email: e.target.value,
+                            },
                           })
                         }
                       />
@@ -515,7 +568,10 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           setContent({
                             ...content,
-                            contact: { ...content.contact, address: e.target.value },
+                            contact: {
+                              ...content.contact,
+                              address: e.target.value,
+                            },
                           })
                         }
                         rows={2}
@@ -541,94 +597,122 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {content.destinations?.map((destination: any, index: number) => (
-                    <Card key={destination.id} className="p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-3">
-                          <div>
-                            <Label>Nama Destinasi</Label>
-                            <Input
-                              value={destination.name}
-                              onChange={(e) => {
-                                const updated = [...content.destinations]
-                                updated[index].name = e.target.value
-                                setContent({ ...content, destinations: updated })
-                              }}
-                            />
+                  {content.destinations?.map(
+                    (destination: any, index: number) => (
+                      <Card key={destination.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-3">
+                            <div>
+                              <Label>Nama Destinasi</Label>
+                              <Input
+                                value={destination.name}
+                                onChange={(e) => {
+                                  const updated = [...content.destinations];
+                                  updated[index].name = e.target.value;
+                                  setContent({
+                                    ...content,
+                                    destinations: updated,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label>Kategori</Label>
+                              <Input
+                                value={destination.category}
+                                onChange={(e) => {
+                                  const updated = [...content.destinations];
+                                  updated[index].category = e.target.value;
+                                  setContent({
+                                    ...content,
+                                    destinations: updated,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label>Harga</Label>
+                              <Input
+                                value={destination.price}
+                                onChange={(e) => {
+                                  const updated = [...content.destinations];
+                                  updated[index].price = e.target.value;
+                                  setContent({
+                                    ...content,
+                                    destinations: updated,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label>Rating</Label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="5"
+                                value={destination.rating}
+                                onChange={(e) => {
+                                  const updated = [...content.destinations];
+                                  updated[index].rating = Number.parseFloat(
+                                    e.target.value
+                                  );
+                                  setContent({
+                                    ...content,
+                                    destinations: updated,
+                                  });
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <Label>Kategori</Label>
-                            <Input
-                              value={destination.category}
-                              onChange={(e) => {
-                                const updated = [...content.destinations]
-                                updated[index].category = e.target.value
-                                setContent({ ...content, destinations: updated })
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label>Harga</Label>
-                            <Input
-                              value={destination.price}
-                              onChange={(e) => {
-                                const updated = [...content.destinations]
-                                updated[index].price = e.target.value
-                                setContent({ ...content, destinations: updated })
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label>Rating</Label>
-                            <Input
-                              type="number"
-                              step="0.1"
-                              min="0"
-                              max="5"
-                              value={destination.rating}
-                              onChange={(e) => {
-                                const updated = [...content.destinations]
-                                updated[index].rating = Number.parseFloat(e.target.value)
-                                setContent({ ...content, destinations: updated })
-                              }}
-                            />
+                          <div className="space-y-3">
+                            <div>
+                              <Label>Deskripsi</Label>
+                              <Textarea
+                                value={destination.description}
+                                onChange={(e) => {
+                                  const updated = [...content.destinations];
+                                  updated[index].description = e.target.value;
+                                  setContent({
+                                    ...content,
+                                    destinations: updated,
+                                  });
+                                }}
+                                rows={3}
+                              />
+                            </div>
+                            <div>
+                              <Label>URL Gambar</Label>
+                              <Input
+                                value={destination.image}
+                                onChange={(e) => {
+                                  const updated = [...content.destinations];
+                                  updated[index].image = e.target.value;
+                                  setContent({
+                                    ...content,
+                                    destinations: updated,
+                                  });
+                                }}
+                                placeholder="/placeholder.svg?height=200&width=300"
+                              />
+                            </div>
+                            <div className="flex justify-end">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() =>
+                                  removeDestination(destination.id)
+                                }
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Hapus
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <div className="space-y-3">
-                          <div>
-                            <Label>Deskripsi</Label>
-                            <Textarea
-                              value={destination.description}
-                              onChange={(e) => {
-                                const updated = [...content.destinations]
-                                updated[index].description = e.target.value
-                                setContent({ ...content, destinations: updated })
-                              }}
-                              rows={3}
-                            />
-                          </div>
-                          <div>
-                            <Label>URL Gambar</Label>
-                            <Input
-                              value={destination.image}
-                              onChange={(e) => {
-                                const updated = [...content.destinations]
-                                updated[index].image = e.target.value
-                                setContent({ ...content, destinations: updated })
-                              }}
-                              placeholder="/placeholder.svg?height=200&width=300"
-                            />
-                          </div>
-                          <div className="flex justify-end">
-                            <Button variant="destructive" size="sm" onClick={() => removeDestination(destination.id)}>
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Hapus
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -657,9 +741,9 @@ export default function AdminDashboard() {
                             <Input
                               value={item.name}
                               onChange={(e) => {
-                                const updated = [...content.umkm]
-                                updated[index].name = e.target.value
-                                setContent({ ...content, umkm: updated })
+                                const updated = [...content.umkm];
+                                updated[index].name = e.target.value;
+                                setContent({ ...content, umkm: updated });
                               }}
                             />
                           </div>
@@ -668,9 +752,9 @@ export default function AdminDashboard() {
                             <Input
                               value={item.category}
                               onChange={(e) => {
-                                const updated = [...content.umkm]
-                                updated[index].category = e.target.value
-                                setContent({ ...content, umkm: updated })
+                                const updated = [...content.umkm];
+                                updated[index].category = e.target.value;
+                                setContent({ ...content, umkm: updated });
                               }}
                             />
                           </div>
@@ -679,9 +763,9 @@ export default function AdminDashboard() {
                             <Input
                               value={item.price}
                               onChange={(e) => {
-                                const updated = [...content.umkm]
-                                updated[index].price = e.target.value
-                                setContent({ ...content, umkm: updated })
+                                const updated = [...content.umkm];
+                                updated[index].price = e.target.value;
+                                setContent({ ...content, umkm: updated });
                               }}
                             />
                           </div>
@@ -692,9 +776,9 @@ export default function AdminDashboard() {
                             <Textarea
                               value={item.description}
                               onChange={(e) => {
-                                const updated = [...content.umkm]
-                                updated[index].description = e.target.value
-                                setContent({ ...content, umkm: updated })
+                                const updated = [...content.umkm];
+                                updated[index].description = e.target.value;
+                                setContent({ ...content, umkm: updated });
                               }}
                               rows={2}
                             />
@@ -704,9 +788,9 @@ export default function AdminDashboard() {
                             <Input
                               value={item.contact}
                               onChange={(e) => {
-                                const updated = [...content.umkm]
-                                updated[index].contact = e.target.value
-                                setContent({ ...content, umkm: updated })
+                                const updated = [...content.umkm];
+                                updated[index].contact = e.target.value;
+                                setContent({ ...content, umkm: updated });
                               }}
                             />
                           </div>
@@ -715,15 +799,19 @@ export default function AdminDashboard() {
                             <Input
                               value={item.image}
                               onChange={(e) => {
-                                const updated = [...content.umkm]
-                                updated[index].image = e.target.value
-                                setContent({ ...content, umkm: updated })
+                                const updated = [...content.umkm];
+                                updated[index].image = e.target.value;
+                                setContent({ ...content, umkm: updated });
                               }}
                               placeholder="/placeholder.svg?height=60&width=60"
                             />
                           </div>
                           <div className="flex justify-end">
-                            <Button variant="destructive" size="sm" onClick={() => removeUMKM(item.id)}>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeUMKM(item.id)}
+                            >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Hapus
                             </Button>
@@ -760,9 +848,9 @@ export default function AdminDashboard() {
                             <Input
                               value={event.name}
                               onChange={(e) => {
-                                const updated = [...content.events]
-                                updated[index].name = e.target.value
-                                setContent({ ...content, events: updated })
+                                const updated = [...content.events];
+                                updated[index].name = e.target.value;
+                                setContent({ ...content, events: updated });
                               }}
                             />
                           </div>
@@ -772,9 +860,9 @@ export default function AdminDashboard() {
                               type="date"
                               value={event.date}
                               onChange={(e) => {
-                                const updated = [...content.events]
-                                updated[index].date = e.target.value
-                                setContent({ ...content, events: updated })
+                                const updated = [...content.events];
+                                updated[index].date = e.target.value;
+                                setContent({ ...content, events: updated });
                               }}
                             />
                           </div>
@@ -783,9 +871,9 @@ export default function AdminDashboard() {
                             <Input
                               value={event.location}
                               onChange={(e) => {
-                                const updated = [...content.events]
-                                updated[index].location = e.target.value
-                                setContent({ ...content, events: updated })
+                                const updated = [...content.events];
+                                updated[index].location = e.target.value;
+                                setContent({ ...content, events: updated });
                               }}
                             />
                           </div>
@@ -796,9 +884,9 @@ export default function AdminDashboard() {
                             <Input
                               value={event.category}
                               onChange={(e) => {
-                                const updated = [...content.events]
-                                updated[index].category = e.target.value
-                                setContent({ ...content, events: updated })
+                                const updated = [...content.events];
+                                updated[index].category = e.target.value;
+                                setContent({ ...content, events: updated });
                               }}
                             />
                           </div>
@@ -807,15 +895,19 @@ export default function AdminDashboard() {
                             <Textarea
                               value={event.description}
                               onChange={(e) => {
-                                const updated = [...content.events]
-                                updated[index].description = e.target.value
-                                setContent({ ...content, events: updated })
+                                const updated = [...content.events];
+                                updated[index].description = e.target.value;
+                                setContent({ ...content, events: updated });
                               }}
                               rows={3}
                             />
                           </div>
                           <div className="flex justify-end">
-                            <Button variant="destructive" size="sm" onClick={() => removeEvent(event.id)}>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeEvent(event.id)}
+                            >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Hapus
                             </Button>
@@ -848,7 +940,10 @@ export default function AdminDashboard() {
                       <div className="space-y-3">
                         <div className="relative h-32 bg-gray-100 rounded">
                           <Image
-                            src={photo.image || "/placeholder.svg?height=128&width=200"}
+                            src={
+                              photo.image ||
+                              "/placeholder.svg?height=128&width=200"
+                            }
                             alt={photo.title}
                             fill
                             className="object-cover rounded"
@@ -859,9 +954,9 @@ export default function AdminDashboard() {
                           <Input
                             value={photo.title}
                             onChange={(e) => {
-                              const updated = [...content.gallery]
-                              updated[index].title = e.target.value
-                              setContent({ ...content, gallery: updated })
+                              const updated = [...content.gallery];
+                              updated[index].title = e.target.value;
+                              setContent({ ...content, gallery: updated });
                             }}
                           />
                         </div>
@@ -870,9 +965,9 @@ export default function AdminDashboard() {
                           <Input
                             value={photo.category}
                             onChange={(e) => {
-                              const updated = [...content.gallery]
-                              updated[index].category = e.target.value
-                              setContent({ ...content, gallery: updated })
+                              const updated = [...content.gallery];
+                              updated[index].category = e.target.value;
+                              setContent({ ...content, gallery: updated });
                             }}
                           />
                         </div>
@@ -881,15 +976,19 @@ export default function AdminDashboard() {
                           <Input
                             value={photo.image}
                             onChange={(e) => {
-                              const updated = [...content.gallery]
-                              updated[index].image = e.target.value
-                              setContent({ ...content, gallery: updated })
+                              const updated = [...content.gallery];
+                              updated[index].image = e.target.value;
+                              setContent({ ...content, gallery: updated });
                             }}
                             placeholder="/placeholder.svg?height=200&width=200"
                           />
                         </div>
                         <div className="flex justify-end">
-                          <Button variant="destructive" size="sm" onClick={() => removeGalleryPhoto(photo.id)}>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeGalleryPhoto(photo.id)}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Hapus
                           </Button>
@@ -920,14 +1019,20 @@ export default function AdminDashboard() {
                       <Card key={submission.id} className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center space-x-3">
-                            <Badge className={getSubmissionTypeColor(submission.type)}>
+                            <Badge
+                              className={getSubmissionTypeColor(
+                                submission.type
+                              )}
+                            >
                               {submission.type === "guestbook" && "Buku Tamu"}
                               {submission.type === "volunteer" && "Relawan"}
                               {submission.type === "feedback" && "Saran"}
                               {submission.type === "complaint" && "Keluhan"}
                               {submission.type === "business" && "Bisnis"}
                             </Badge>
-                            <Badge className={getStatusColor(submission.status)}>
+                            <Badge
+                              className={getStatusColor(submission.status)}
+                            >
                               {submission.status === "new" && "Baru"}
                               {submission.status === "read" && "Dibaca"}
                               {submission.status === "replied" && "Dibalas"}
@@ -935,7 +1040,9 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Clock className="h-4 w-4" />
-                            {new Date(submission.timestamp).toLocaleDateString("id-ID")}
+                            {new Date(submission.timestamp).toLocaleDateString(
+                              "id-ID"
+                            )}
                           </div>
                         </div>
 
@@ -943,14 +1050,20 @@ export default function AdminDashboard() {
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
                               <Users className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium">{submission.name}</span>
+                              <span className="font-medium">
+                                {submission.name}
+                              </span>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Mail className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-600">{submission.email}</span>
+                              <span className="text-sm text-gray-600">
+                                {submission.email}
+                              </span>
                             </div>
                           </div>
-                          <p className="text-gray-700 bg-gray-50 p-3 rounded">{submission.message}</p>
+                          <p className="text-gray-700 bg-gray-50 p-3 rounded">
+                            {submission.message}
+                          </p>
                         </div>
 
                         <div className="flex space-x-2 mt-4">
@@ -958,7 +1071,9 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updateSubmissionStatus(submission.id, "read")}
+                              onClick={() =>
+                                updateSubmissionStatus(submission.id, "read")
+                              }
                             >
                               Tandai Dibaca
                             </Button>
@@ -967,7 +1082,9 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updateSubmissionStatus(submission.id, "replied")}
+                              onClick={() =>
+                                updateSubmissionStatus(submission.id, "replied")
+                              }
                             >
                               Tandai Dibalas
                             </Button>
@@ -975,7 +1092,11 @@ export default function AdminDashboard() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.type}`)}
+                            onClick={() =>
+                              window.open(
+                                `mailto:${submission.email}?subject=Re: ${submission.type}`
+                              )
+                            }
                           >
                             <Mail className="h-4 w-4 mr-1" />
                             Balas Email
@@ -991,5 +1112,5 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

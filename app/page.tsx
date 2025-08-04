@@ -1,233 +1,488 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { MapPin, Phone, Calendar, Users, Mountain, Star, Send, Loader2 } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { ModeToggle } from "@/components/mode-toggle"
-import { User } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  MapPin,
+  Phone,
+  Calendar,
+  Users,
+  Mountain,
+  Star,
+  Send,
+  Loader2,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Car,
+  Home,
+  Utensils,
+  Coffee,
+  ExternalLink,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 // API Response Types
 interface Destination {
-  id: string
-  name: string
-  slug: string
-  category: string
-  description: string
-  images: string[]
-  rating: number
-  price: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  description: string;
+  images: string[];
+  price: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface UMKM {
-  id: string
-  name: string
-  slug: string
-  category: string
-  description: string
-  images: string[]
-  price: string
-  contact: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  description: string;
+  images: string[];
+  price: string;
+  contact: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Basecamp {
+  id: string;
+  namaBasecamp: string;
+  slug?: string;
+  fasilitas: string[];
+  dayaTampungKendaraan: number;
+  dayaTampungOrang: number;
+  nomorWa: string;
+  images: string[];
+  sosialMedia: string[];
+  lokasi: string;
+  latitude?: number;
+  longitude?: number;
+  pemilik: string;
+  menuMakanan: string[];
+  menuMinuman: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Event {
-  id: string
-  name: string
-  slug: string
-  date: string
-  location: string
-  description: string
-  category: string
-  images: string[]
-  price?: string
-  maxParticipants?: number
-  currentParticipants: number
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  slug: string;
+  date: string;
+  location: string;
+  description: string;
+  category: string;
+  images: string[];
+  price?: string;
+  maxParticipants?: number;
+  currentParticipants: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Gallery {
-  id: string
-  title: string
-  images: string[]
-  category: string
-  description?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  title: string;
+  images: string[];
+  category: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface WebsiteStats {
-  totalDestinations: number
-  totalEvents: number
-  totalUMKM: number
-  totalGallery: number
-  totalSubmissions: number
+  totalDestinations: number;
+  totalEvents: number;
+  totalUMKM: number;
+  totalGallery: number;
+  totalSubmissions: number;
 }
 
+// Modal Component for Gallery Images
+interface ImageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  images: string[];
+  currentIndex: number;
+  title: string;
+  onNext: () => void;
+  onPrev: () => void;
+}
+
+const ImageModal: React.FC<ImageModalProps> = ({
+  isOpen,
+  onClose,
+  images,
+  currentIndex,
+  title,
+  onNext,
+  onPrev,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div className="relative max-w-4xl max-h-full">
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-0 text-white hover:text-gray-300 z-10"
+        >
+          <X className="h-8 w-8" />
+        </button>
+
+        <div className="relative">
+          <Image
+            src={
+              images[currentIndex] || "/placeholder.svg?height=600&width=800"
+            }
+            alt={title}
+            width={800}
+            height={600}
+            className="object-contain max-h-[80vh] w-auto"
+          />
+
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={onPrev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={onNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded">
+          <h3 className="font-semibold">{title}</h3>
+          {images.length > 1 && (
+            <p className="text-sm text-gray-300">
+              {currentIndex + 1} dari {images.length}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Detail Modal Components
+interface DetailModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+const DetailModal: React.FC<DetailModalProps> = ({
+  isOpen,
+  onClose,
+  children,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-background rounded-lg max-w-2xl max-h-[90vh] overflow-y-auto w-full">
+        <div className="sticky top-0 bg-background border-b p-4 flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Detail</h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-6">{children}</div>
+      </div>
+    </div>
+  );
+};
+
 export default function HomePage() {
-  const [destinations, setDestinations] = useState<Destination[]>([])
-  const [umkm, setUMKM] = useState<UMKM[]>([])
-  const [events, setEvents] = useState<Event[]>([])
-  const [gallery, setGallery] = useState<Gallery[]>([])
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [umkm, setUMKM] = useState<UMKM[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [gallery, setGallery] = useState<Gallery[]>([]);
+  const [basecamp, setBasecamp] = useState<Basecamp[]>([]);
   const [stats, setStats] = useState<WebsiteStats>({
     totalDestinations: 0,
     totalEvents: 0,
     totalUMKM: 0,
     totalGallery: 0,
-    totalSubmissions: 0
-  })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  
+    totalSubmissions: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Modal states
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    images: [] as string[],
+    currentIndex: 0,
+    title: "",
+  });
+
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    type: "destination" | "umkm" | "basecamp" | "event" | null;
+    data: any;
+  }>({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
+
   const [guestbookForm, setGuestbookForm] = useState({
     name: "",
     email: "",
     message: "",
-    type: "guestbook", // guestbook, volunteer, feedback
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState("")
+    type: "guestbook",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+
+  // Modal handlers
+  const openImageModal = (images: string[], index: number, title: string) => {
+    setModalState({
+      isOpen: true,
+      images,
+      currentIndex: index,
+      title,
+    });
+  };
+
+  const closeImageModal = () => {
+    setModalState({
+      isOpen: false,
+      images: [],
+      currentIndex: 0,
+      title: "",
+    });
+  };
+
+  const nextImage = () => {
+    setModalState((prev) => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % prev.images.length,
+    }));
+  };
+
+  const prevImage = () => {
+    setModalState((prev) => ({
+      ...prev,
+      currentIndex:
+        prev.currentIndex === 0
+          ? prev.images.length - 1
+          : prev.currentIndex - 1,
+    }));
+  };
+
+  // Detail modal handlers
+  const openDetailModal = (
+    type: "destination" | "umkm" | "basecamp" | "event",
+    data: any
+  ) => {
+    setDetailModal({
+      isOpen: true,
+      type,
+      data,
+    });
+  };
+
+  const closeDetailModal = () => {
+    setDetailModal({
+      isOpen: false,
+      type: null,
+      data: null,
+    });
+  };
 
   // Individual API fetch functions with error handling
   const fetchDestinations = async () => {
     try {
-      const response = await fetch("/api/destinations?limit=6")
+      const response = await fetch("/api/destinations?limit=6");
       if (response.ok) {
-        const data = await response.json()
-        return data.destinations || data.data || []
+        const data = await response.json();
+        return data.destinations || data.data || [];
       }
-      return []
+      return [];
     } catch (error) {
-      console.error("Error fetching destinations:", error)
-      return []
+      console.error("Error fetching destinations:", error);
+      return [];
     }
-  }
+  };
 
   const fetchUMKM = async () => {
     try {
-      const response = await fetch("/api/produk?limit=6")
+      const response = await fetch("/api/produk?limit=6");
       if (response.ok) {
-        const data = await response.json()
-        return data.umkm || data.data || []
+        const data = await response.json();
+        return data.umkm || data.data || [];
       }
-      return []
+      return [];
     } catch (error) {
-      console.error("Error fetching UMKM:", error)
-      return []
+      console.error("Error fetching UMKM:", error);
+      return [];
     }
-  }
+  };
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/event?limit=6")
+      const response = await fetch("/api/event?limit=6");
       if (response.ok) {
-        const data = await response.json()
-        return data.events || data.data || []
+        const data = await response.json();
+        return data.events || data.data || [];
       }
-      return []
+      return [];
     } catch (error) {
-      console.error("Error fetching events:", error)
-      return []
+      console.error("Error fetching events:", error);
+      return [];
     }
-  }
+  };
 
-  // Fixed fetchGallery function for homepage
   const fetchGallery = async () => {
     try {
-      const response = await fetch("/api/gallery?limit=8")
+      const response = await fetch("/api/gallery?limit=8");
       if (response.ok) {
-        const data = await response.json()
-        return data.items || [] // ✅ FIXED: Use data.items instead of data.gallery
+        const data = await response.json();
+        return data.items || [];
       }
-      return []
+      return [];
     } catch (error) {
-      console.error("Error fetching gallery:", error)
-      return []
+      console.error("Error fetching gallery:", error);
+      return [];
     }
-  }
+  };
+
+  const fetchBasecamp = async () => {
+    try {
+      const response = await fetch("/api/basecamp?limit=6");
+      if (response.ok) {
+        const data = await response.json();
+        return data.basecamps || data.basecamp || data.data || data.items || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Error fetching basecamp:", error);
+      return [];
+    }
+  };
 
   const fetchStats = async () => {
     try {
-      const response = await fetch("/api/stats")
+      const response = await fetch("/api/stats");
       if (response.ok) {
-        const data = await response.json()
-        return data
+        const data = await response.json();
+        return data;
       }
-      return null
+      return null;
     } catch (error) {
-      console.error("Error fetching stats:", error)
-      return null
+      console.error("Error fetching stats:", error);
+      return null;
     }
-  }
+  };
 
   // Load all data with better error handling
   useEffect(() => {
     const loadAllData = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        setError(null);
 
-        // Fetch all data concurrently but handle errors individually
         const [
           destinationsData,
           umkmData,
           eventsData,
           galleryData,
-          statsData
+          basecampData,
+          statsData,
         ] = await Promise.all([
           fetchDestinations(),
           fetchUMKM(),
           fetchEvents(),
           fetchGallery(),
-          fetchStats()
-        ])
+          fetchBasecamp(),
+          fetchStats(),
+        ]);
 
-        // Set state with fetched data
-        setDestinations(destinationsData)
-        setUMKM(umkmData)
-        setEvents(eventsData)
-        setGallery(galleryData)
-        
-        // Set stats with fallback values
-        setStats(statsData || {
-          totalDestinations: destinationsData.length,
-          totalEvents: eventsData.length,
-          totalUMKM: umkmData.length,
-          totalGallery: galleryData.length,
-          totalSubmissions: 0
-        })
+        setDestinations(destinationsData);
+        setUMKM(umkmData);
+        setEvents(eventsData);
+        setGallery(galleryData);
+        setBasecamp(basecampData);
 
+        setStats(
+          statsData || {
+            totalDestinations: destinationsData.length,
+            totalEvents: eventsData.length,
+            totalUMKM: umkmData.length,
+            totalGallery: galleryData.length,
+            totalSubmissions: 0,
+          }
+        );
       } catch (error) {
-        console.error("Failed to load data:", error)
-        setError(error instanceof Error ? error.message : "Terjadi kesalahan saat memuat data")
+        console.error("Failed to load data:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Terjadi kesalahan saat memuat data"
+        );
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadAllData()
-  }, [])
+    loadAllData();
+  }, []);
+
+  // Keyboard navigation for modals
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (modalState.isOpen) {
+        if (e.key === "Escape") {
+          closeImageModal();
+        } else if (e.key === "ArrowLeft") {
+          prevImage();
+        } else if (e.key === "ArrowRight") {
+          nextImage();
+        }
+      }
+      if (detailModal.isOpen && e.key === "Escape") {
+        closeDetailModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [modalState.isOpen, detailModal.isOpen]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitMessage("")
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitMessage("");
 
     try {
       const response = await fetch("/api/submissions", {
@@ -239,24 +494,338 @@ export default function HomePage() {
           ...guestbookForm,
           timestamp: new Date().toISOString(),
         }),
-      })
+      });
 
       if (response.ok) {
-        setSubmitMessage("Terima kasih! Pesan Anda telah terkirim.")
-        setGuestbookForm({ name: "", email: "", message: "", type: "guestbook" })
+        setSubmitMessage("Terima kasih! Pesan Anda telah terkirim.");
+        setGuestbookForm({
+          name: "",
+          email: "",
+          message: "",
+          type: "guestbook",
+        });
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        setSubmitMessage(errorData.message || "Terjadi kesalahan. Silakan coba lagi.")
+        const errorData = await response.json().catch(() => ({}));
+        setSubmitMessage(
+          errorData.message || "Terjadi kesalahan. Silakan coba lagi."
+        );
       }
     } catch (error) {
-      console.error("Error submitting form:", error)
-      setSubmitMessage("Terjadi kesalahan. Silakan coba lagi.")
+      console.error("Error submitting form:", error);
+      setSubmitMessage("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  // Updated consistent loading state
+  // Render detail modal content based on type
+  const renderDetailContent = () => {
+    if (!detailModal.data) return null;
+
+    switch (detailModal.type) {
+      case "destination":
+        const destination = detailModal.data as Destination;
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              {destination.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image || "/placeholder.svg?height=200&width=300"}
+                  alt={destination.name}
+                  width={300}
+                  height={200}
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  onClick={() =>
+                    openImageModal(destination.images, index, destination.name)
+                  }
+                />
+              ))}
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold">{destination.name}</h3>
+              </div>
+              <div className="flex items-center space-x-4 mb-4">
+                <Badge>{destination.category}</Badge>
+                <span className="text-lg font-semibold text-green-600">
+                  {destination.price}
+                </span>
+              </div>
+              <p className="text-muted-foreground leading-relaxed">
+                {destination.description}
+              </p>
+              <div className="mt-6 flex space-x-4">
+                <Button asChild>
+                  <Link href={`/tourism/${destination.slug}`}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Lihat Halaman Detail
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "umkm":
+        const umkmItem = detailModal.data as UMKM;
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              {umkmItem.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image || "/placeholder.svg?height=200&width=300"}
+                  alt={umkmItem.name}
+                  width={300}
+                  height={200}
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  onClick={() =>
+                    openImageModal(umkmItem.images, index, umkmItem.name)
+                  }
+                />
+              ))}
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-4">{umkmItem.name}</h3>
+              <div className="flex items-center space-x-4 mb-4">
+                <Badge>{umkmItem.category}</Badge>
+                <span className="text-lg font-semibold text-green-600">
+                  {umkmItem.price}
+                </span>
+              </div>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                {umkmItem.description}
+              </p>
+              {umkmItem.contact && (
+                <div className="flex items-center space-x-2 mb-4">
+                  <Phone className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">{umkmItem.contact}</span>
+                </div>
+              )}
+              <div className="flex space-x-4">
+                <Button asChild>
+                  <Link href={`/umkm/${umkmItem.slug}`}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Lihat Halaman Detail
+                  </Link>
+                </Button>
+                {umkmItem.contact && (
+                  <Button variant="outline" asChild>
+                    <a
+                      href={`https://wa.me/${umkmItem.contact.replace(
+                        /\D/g,
+                        ""
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Phone className="h-4 w-4 mr-2" />
+                      Hubungi via WhatsApp
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "basecamp":
+        const basecampItem = detailModal.data as Basecamp;
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              {basecampItem.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image || "/placeholder.svg?height=200&width=300"}
+                  alt={basecampItem.namaBasecamp}
+                  width={300}
+                  height={200}
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  onClick={() =>
+                    openImageModal(
+                      basecampItem.images,
+                      index,
+                      basecampItem.namaBasecamp
+                    )
+                  }
+                />
+              ))}
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-4">
+                {basecampItem.namaBasecamp}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">{basecampItem.lokasi}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">
+                    Kapasitas: {basecampItem.dayaTampungOrang} orang
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Car className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">
+                    Parkir: {basecampItem.dayaTampungKendaraan} kendaraan
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Phone className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">{basecampItem.nomorWa}</span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Pemilik:</h4>
+                <p className="text-muted-foreground">{basecampItem.pemilik}</p>
+              </div>
+              {basecampItem.fasilitas && basecampItem.fasilitas.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold mb-2">Fasilitas:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {basecampItem.fasilitas.map((fasilitas, index) => (
+                      <Badge key={index} variant="outline">
+                        {fasilitas}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {basecampItem.menuMakanan &&
+                basecampItem.menuMakanan.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2 flex items-center">
+                      <Utensils className="h-4 w-4 mr-2" />
+                      Menu Makanan:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {basecampItem.menuMakanan.map((menu, index) => (
+                        <Badge key={index} variant="outline">
+                          {menu}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              {basecampItem.menuMinuman &&
+                basecampItem.menuMinuman.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2 flex items-center">
+                      <Coffee className="h-4 w-4 mr-2" />
+                      Menu Minuman:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {basecampItem.menuMinuman.map((menu, index) => (
+                        <Badge key={index} variant="outline">
+                          {menu}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              <div className="flex space-x-4">
+                {basecampItem.slug && (
+                  <Button asChild>
+                    <Link href={`/basecamp/${basecampItem.slug}`}>
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Lihat Halaman Detail
+                    </Link>
+                  </Button>
+                )}
+                <Button variant="outline" asChild>
+                  <a
+                    href={`https://wa.me/${basecampItem.nomorWa.replace(
+                      /\D/g,
+                      ""
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Phone className="h-4 w-4 mr-2" />
+                    Hubungi via WhatsApp
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "event":
+        const eventItem = detailModal.data as Event;
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              {eventItem.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image || "/placeholder.svg?height=200&width=300"}
+                  alt={eventItem.name}
+                  width={300}
+                  height={200}
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  onClick={() =>
+                    openImageModal(eventItem.images, index, eventItem.name)
+                  }
+                />
+              ))}
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-4">{eventItem.name}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">
+                    {new Date(eventItem.date).toLocaleDateString("id-ID")}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">{eventItem.location}</span>
+                </div>
+                {eventItem.price && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-semibold text-green-600">
+                      {eventItem.price}
+                    </span>
+                  </div>
+                )}
+                {eventItem.maxParticipants && (
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">
+                      {eventItem.currentParticipants}/
+                      {eventItem.maxParticipants} peserta
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="mb-4">
+                <Badge>{eventItem.category}</Badge>
+              </div>
+              <p className="text-muted-foreground leading-relaxed">
+                {eventItem.description}
+              </p>
+              <div className="mt-6">
+                <Button asChild>
+                  <Link href={`/events/${eventItem.slug}`}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Lihat Halaman Detail
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -265,29 +834,62 @@ export default function HomePage() {
           <p className="text-muted-foreground mt-4">Memuat halaman...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={modalState.isOpen}
+        onClose={closeImageModal}
+        images={modalState.images}
+        currentIndex={modalState.currentIndex}
+        title={modalState.title}
+        onNext={nextImage}
+        onPrev={prevImage}
+      />
+
+      {/* Detail Modal */}
+      <DetailModal isOpen={detailModal.isOpen} onClose={closeDetailModal}>
+        {renderDetailContent()}
+      </DetailModal>
+
       {/* Hero Section */}
-      <section id="beranda" className="relative h-[600px] bg-background overflow-hidden">
+      <section
+        id="beranda"
+        className="relative h-[600px] bg-background overflow-hidden"
+      >
         <div className="absolute inset-0 bg-black/40"></div>
         <Image
           src="/merbabuu.png"
           alt="Pemandangan Gunung Merbabu dari Desa Tarubatang"
           fill
-          className="object-cover"
+          className="object-cover cursor-pointer"
+          onClick={() =>
+            openImageModal(
+              ["/merbabuu.png"],
+              0,
+              "Pemandangan Gunung Merbabu dari Desa Tarubatang"
+            )
+          }
         />
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white max-w-2xl">
-            <Badge className="mb-4 bg-green-500 hover:bg-green-600">Kawasan Taman Nasional Gunung Merbabu</Badge>
+            <Badge className="mb-4 bg-green-500 hover:bg-green-600">
+              Kawasan Taman Nasional Gunung Merbabu
+            </Badge>
             <h1 className="text-5xl font-bold mb-4">Desa Tarubatang</h1>
             <p className="text-xl mb-6 text-green-100">
-              Destinasi wisata alam terbaik di kaki Gunung Merbabu dengan keindahan yang memukau dan budaya yang kaya
+              Destinasi wisata alam terbaik di kaki Gunung Merbabu dengan
+              keindahan yang memukau dan budaya yang kaya
             </p>
             <div className="flex space-x-4">
-              <Button size="lg" className="bg-green-500 hover:bg-green-600" asChild>
+              <Button
+                size="lg"
+                className="bg-green-500 hover:bg-green-600"
+                asChild
+              >
                 <Link href="/tourism">Jelajahi Wisata</Link>
               </Button>
               <Button size="lg" variant="secondary" asChild>
@@ -312,398 +914,507 @@ export default function HomePage() {
       {/* Quick Stats */}
       <section id="tentang" className="py-12 bg-background scroll-mt-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Tentang Desa Tarubatang</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Desa wisata yang terletak di lereng Gunung Merbabu, menawarkan pengalaman wisata alam yang tak terlupakan
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              Desa Tarubatang dalam Angka
+            </h2>
+            <p className="text-muted-foreground">
+              Statistik lengkap destinasi wisata dan aktivitas di desa kami
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             <div className="text-center">
-              <div className="rounded-lg p-6 shadow-sm">
-                <MapPin className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-foreground">1.200m</h3>
-                <p className="text-muted-foreground">Ketinggian</p>
+              <div className="bg-green-100 dark:bg-green-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                <Mountain className="h-8 w-8 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.totalDestinations}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Destinasi Wisata
               </div>
             </div>
             <div className="text-center">
-              <div className="rounded-lg p-6 shadow-sm">
-                <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-foreground">2.500</h3>
-                <p className="text-muted-foreground">Penduduk</p>
+              <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                <Calendar className="h-8 w-8 text-blue-600" />
               </div>
+              <div className="text-2xl font-bold text-blue-600">
+                {stats.totalEvents}
+              </div>
+              <div className="text-sm text-muted-foreground">Event Aktif</div>
             </div>
             <div className="text-center">
-              <div className="rounded-lg p-6 shadow-sm">
-                <Mountain className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-foreground">{stats.totalDestinations}</h3>
-                <p className="text-muted-foreground">Destinasi Wisata</p>
+              <div className="bg-purple-100 dark:bg-purple-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                <Home className="h-8 w-8 text-purple-600" />
               </div>
+              <div className="text-2xl font-bold text-purple-600">
+                {stats.totalUMKM}
+              </div>
+              <div className="text-sm text-muted-foreground">UMKM Lokal</div>
             </div>
             <div className="text-center">
-              <div className="rounded-lg p-6 shadow-sm">
-                <Calendar className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-foreground">{stats.totalEvents}</h3>
-                <p className="text-muted-foreground">Acara Tahunan</p>
+              <div className="bg-orange-100 dark:bg-orange-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                <Mountain className="h-8 w-8 text-orange-600" />
               </div>
+              <div className="text-2xl font-bold text-orange-600">
+                {basecamp.length}
+              </div>
+              <div className="text-sm text-muted-foreground">Basecamp</div>
+            </div>
+            <div className="text-center">
+              <div className="bg-pink-100 dark:bg-pink-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                <Star className="h-8 w-8 text-pink-600" />
+              </div>
+              <div className="text-2xl font-bold text-pink-600">
+                {stats.totalGallery}
+              </div>
+              <div className="text-sm text-muted-foreground">Foto Galeri</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Destinations */}
-      <section id="wisata" className="py-16 scroll-mt-20">
+      {/* Popular Destinations */}
+      <section id="wisata" className="py-16 bg-muted/50 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Destinasi Wisata Unggulan
+            <h2 className="text-3xl font-bold mb-4">
+              Destinasi Wisata Populer
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Jelajahi keindahan alam Desa Tarubatang dengan berbagai destinasi wisata yang menakjubkan
+            <p className="text-muted-foreground">
+              Jelajahi keindahan alam dan budaya yang menawan di Desa Tarubatang
             </p>
           </div>
-
-          {destinations.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {destinations.map((destination) => (
-                <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-48">
-                    <Image
-                      src={destination.images?.[0] || "/placeholder.svg?height=200&width=300"}
-                      alt={destination.name}
-                      fill
-                      className="object-cover"
-                    />
-                    <Badge className="absolute top-4 left-4 bg-green-500">{destination.category}</Badge>
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span className="text-sm font-medium">{destination.rating}</span>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {destinations.map((destination) => (
+              <Card
+                key={destination.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="relative h-48">
+                  <Image
+                    src={
+                      destination.images?.[0] ||
+                      "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg"
+                    }
+                    alt={destination.name}
+                    fill
+                    className="object-cover cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() =>
+                      openImageModal(destination.images, 0, destination.name)
+                    }
+                  />
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-white/90 text-black hover:bg-white">
+                      {destination.category}
+                    </Badge>
                   </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-xl font-semibold">{destination.name}</h3>
-                      <p className="text-sm font-medium text-green-600">{destination.price}</p>
-                    </div>
-                    <p className="text-muted-foreground mb-4 line-clamp-2">{destination.description}</p>
-                    <Button size="sm" className="w-full" asChild>
-                      <Link href={`/tourism/${destination.slug}`}>
-                        Lihat Detail
-                      </Link>
+                </div>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg">
+                      {destination.name}
+                    </h3>
+                  </div>
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                    {destination.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-600 font-semibold">
+                      {destination.price}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        openDetailModal("destination", destination)
+                      }
+                    >
+                      Detail
                     </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Belum ada destinasi wisata yang tersedia</p>
-            </div>
-          )}
-
-          <div className="text-center mt-8">
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/tourism">
-                Lihat Semua Destinasi
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/tourism">Lihat Semua Destinasi</Link>
             </Button>
           </div>
         </div>
       </section>
 
       {/* UMKM Section */}
-      <section id="umkm" className="py-16 bg-gray-50 scroll-mt-20">
+      <section id="umkm" className="py-16 bg-background scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">UMKM & Basecamp</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Dukung ekonomi lokal dengan berbelanja produk UMKM dan menginap di basecamp warga
+            <h2 className="text-3xl font-bold mb-4">UMKM Lokal</h2>
+            <p className="text-muted-foreground">
+              Dukung produk dan layanan dari masyarakat lokal Desa Tarubatang
             </p>
           </div>
-
-          {umkm.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {umkm.map((item) => (
-                <Card key={item.id} className="p-4 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center space-x-4">
-                    <Image
-                      src={item.images?.[0] || "/placeholder.svg?height=60&width=60"}
-                      alt={item.name}
-                      width={60}
-                      height={60}
-                      className="rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{item.name}</h4>
-                      <Badge variant="secondary" className="text-xs mb-1">
-                        {item.category}
-                      </Badge>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
-                      <p className="text-sm text-green-600 font-medium">{item.price}</p>
-                      {item.contact && <p className="text-xs text-gray-500">Kontak: {item.contact}</p>}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Belum ada UMKM yang terdaftar</p>
-            </div>
-          )}
-
-          <div className="text-center mt-8">
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/umkm">
-                Lihat Semua UMKM
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Events */}
-      <section id="acara" className="py-16 scroll-mt-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Acara & Event</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ikuti berbagai acara menarik yang diselenggarakan di Desa Tarubatang
-            </p>
-          </div>
-
-          {events.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.map((event) => (
-                <Card key={event.id} className="overflow-hidden border-l-4 border-l-green-500 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <Badge className="mb-3 bg-blue-100 text-blue-800">{event.category}</Badge>
-                    <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
-                    <p className="text-muted-foreground mb-4 line-clamp-3">{event.description}</p>
-                    <div className="space-y-2 text-sm text-gray-500 mb-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {new Date(event.date).toLocaleDateString("id-ID")}
-                      </div>
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        {event.location}
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full" asChild>
-                      <Link href={`/events/${event.slug}`}>
-                        Lihat Detail
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Belum ada acara yang terjadwal</p>
-            </div>
-          )}
-
-          <div className="text-center mt-8">
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/events">
-                Lihat Semua Event
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Galeri Foto</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Lihat keindahan Desa Tarubatang melalui foto-foto terbaru
-            </p>
-          </div>
-
-          {gallery.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {gallery.map((photo) => (
-                <div key={photo.id} className="relative group overflow-hidden rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {umkm.map((item) => (
+              <Card
+                key={item.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="relative h-48">
                   <Image
-                    src={photo.images?.[0] || "/placeholder.svg?height=200&width=200"}
-                    alt={photo.title}
-                    width={200}
-                    height={200}
-                    className="object-cover w-full h-48 group-hover:scale-105 transition-transform"
+                    src={
+                      item.images?.[0] ||
+                      "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg"
+                    }
+                    alt={item.name}
+                    fill
+                    className="object-cover cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => openImageModal(item.images, 0, item.name)}
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                    <div className="p-4 text-white">
-                      <p className="font-medium">{photo.title}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {photo.category}
-                      </Badge>
-                    </div>
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-white/90 text-black hover:bg-white">
+                      {item.category}
+                    </Badge>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Belum ada foto di galeri</p>
-            </div>
-          )}
-
-          <div className="text-center mt-8">
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/gallery">
-                Lihat Semua Foto
-              </Link>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                    {item.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-600 font-semibold">
+                      {item.price}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openDetailModal("umkm", item)}
+                    >
+                      Detail
+                    </Button>
+                  </div>
+                  {item.contact && (
+                    <div className="mt-2 flex items-center text-xs text-muted-foreground">
+                      <Phone className="h-3 w-3 mr-1" />
+                      {item.contact}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/umkm">Lihat Semua UMKM</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Contact & Forms */}
-      <section id="kontak" className="py-16 scroll-mt-20">
+      {/* Basecamp Section */}
+      <section id="basecamp" className="py-16 bg-muted/50 scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Kontak & Buku Tamu</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Hubungi kami atau tinggalkan pesan di buku tamu</p>
+            <h2 className="text-3xl font-bold mb-4">Basecamp & Penginapan</h2>
+            <p className="text-muted-foreground">
+              Tempat istirahat terbaik untuk pendaki dan wisatawan
+            </p>
           </div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Contact Info */}
-            <div>
-              <h3 className="text-xl font-semibold mb-6">Kontak Penting</h3>
-              <div className="space-y-4">
-                <Card className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="font-medium">Kantor Desa</p>
-                      <p className="text-sm text-muted-foreground">+62 274 123456</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {basecamp.map((item) => (
+              <Card
+                key={item.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="relative h-48">
+                  <Image
+                    src={
+                      item.images?.[0] ||
+                      "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg"
+                    }
+                    alt={item.namaBasecamp}
+                    fill
+                    className="object-cover cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() =>
+                      openImageModal(item.images, 0, item.namaBasecamp)
+                    }
+                  />
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-2">
+                    {item.namaBasecamp}
+                  </h3>
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 mr-2 text-green-600" />
+                      {item.lokasi}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Users className="h-4 w-4 mr-2 text-green-600" />
+                      Kapasitas: {item.dayaTampungOrang} orang
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Phone className="h-4 w-4 mr-2 text-green-600" />
+                      {item.nomorWa}
                     </div>
                   </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="font-medium">Pengelola Wisata</p>
-                      <p className="text-sm text-muted-foreground">+62 812 3456 7890</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-red-600" />
-                    <div>
-                      <p className="font-medium">Darurat (SAR)</p>
-                      <p className="text-sm text-muted-foreground">115</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="space-y-2">
-                    <p className="font-medium">Alamat</p>
-                    <p className="text-sm text-muted-foreground">
-                      Desa Tarubatang, Kec. Kemalang, Kab. Klaten, Jawa Tengah 57465
-                    </p>
-                    <p className="text-sm text-muted-foreground">Email: info@tarubatang.id</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
-
-            {/* Forms */}
-            <div>
-              <Card className="p-6">
-                <h3 className="text-xl font-semibold mb-6">Buku Tamu & Formulir</h3>
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Jenis Pesan</Label>
-                    <select
-                      id="type"
-                      value={guestbookForm.type}
-                      onChange={(e) => setGuestbookForm({ ...guestbookForm, type: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      required
+                  <div className="flex justify-between items-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openDetailModal("basecamp", item)}
                     >
-                      <option value="guestbook">Buku Tamu</option>
-                      <option value="volunteer">Daftar Relawan</option>
-                      <option value="feedback">Saran & Masukan</option>
-                      <option value="complaint">Keluhan</option>
-                      <option value="business">Kerjasama Bisnis</option>
-                    </select>
+                      Detail
+                    </Button>
+                    <Button size="sm" asChild>
+                      <a
+                        href={`https://wa.me/${item.nomorWa.replace(
+                          /\D/g,
+                          ""
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Phone className="h-3 w-3 mr-1" />
+                        Hubungi
+                      </a>
+                    </Button>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/basecamp">Lihat Semua Basecamp</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nama Lengkap</Label>
-                    <Input
-                      id="name"
-                      value={guestbookForm.name}
-                      onChange={(e) => setGuestbookForm({ ...guestbookForm, name: e.target.value })}
-                      placeholder="Masukkan nama lengkap"
-                      required
-                    />
+      {/* Events Section */}
+      <section id="acara" className="py-16 bg-background scroll-mt-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Acara & Event</h2>
+            <p className="text-muted-foreground">
+              Ikuti berbagai acara menarik di Desa Tarubatang
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {events.map((event) => (
+              <Card
+                key={event.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="relative h-48">
+                  <Image
+                    src={
+                      event.images?.[0] ||
+                      "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg"
+                    }
+                    alt={event.name}
+                    fill
+                    className="object-cover cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => openImageModal(event.images, 0, event.name)}
+                  />
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-white/90 text-black hover:bg-white">
+                      {event.category}
+                    </Badge>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={guestbookForm.email}
-                      onChange={(e) => setGuestbookForm({ ...guestbookForm, email: e.target.value })}
-                      placeholder="Masukkan email"
-                      required
-                    />
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-2">{event.name}</h3>
+                  <div className="space-y-1 mb-3">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2 text-green-600" />
+                      {new Date(event.date).toLocaleDateString("id-ID")}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 mr-2 text-green-600" />
+                      {event.location}
+                    </div>
+                    {event.maxParticipants && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="h-4 w-4 mr-2 text-green-600" />
+                        {event.currentParticipants}/{event.maxParticipants}{" "}
+                        peserta
+                      </div>
+                    )}
                   </div>
+                  <div className="flex items-center justify-between">
+                    {event.price && (
+                      <span className="text-green-600 font-semibold">
+                        {event.price}
+                      </span>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openDetailModal("event", event)}
+                    >
+                      Detail
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/events">Lihat Semua Event</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
-                  <div className="space-y-2">
+      {/* Gallery Section */}
+      <section id="galeri" className="py-16 bg-muted/50 scroll-mt-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Galeri Foto</h2>
+            <p className="text-muted-foreground">
+              Saksikan keindahan Desa Tarubatang melalui lensa fotografer
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            {gallery.map((item, index) => (
+              <div key={item.id} className="relative group cursor-pointer">
+                <div className="relative h-48 overflow-hidden rounded-lg">
+                  <Image
+                    src={
+                      item.images?.[0] ||
+                      "/placeholder.svg?height=200&width=300" ||
+                      "/placeholder.svg"
+                    }
+                    alt={item.title}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    onClick={() => openImageModal(item.images, 0, item.title)}
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+                  <div className="absolute bottom-2 left-2 right-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <p className="text-sm font-medium truncate">{item.title}</p>
+                    <Badge variant="secondary" className="text-xs">
+                      {item.category}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/gallery">Lihat Semua Foto</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact/Guestbook Section */}
+      <section id="kontak" className="py-16 bg-background scroll-mt-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Tinggalkan Pesan</h2>
+              <p className="text-muted-foreground">
+                Bagikan pengalaman atau tanyakan informasi tentang Desa
+                Tarubatang
+              </p>
+            </div>
+            <Card>
+              <CardContent className="p-6">
+                <form onSubmit={handleFormSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Nama Lengkap</Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        value={guestbookForm.name}
+                        onChange={(e) =>
+                          setGuestbookForm({
+                            ...guestbookForm,
+                            name: e.target.value,
+                          })
+                        }
+                        required
+                        placeholder="Masukkan nama lengkap"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={guestbookForm.email}
+                        onChange={(e) =>
+                          setGuestbookForm({
+                            ...guestbookForm,
+                            email: e.target.value,
+                          })
+                        }
+                        required
+                        placeholder="Masukkan email"
+                      />
+                    </div>
+                  </div>
+                  <div>
                     <Label htmlFor="message">Pesan</Label>
                     <Textarea
                       id="message"
                       value={guestbookForm.message}
-                      onChange={(e) => setGuestbookForm({ ...guestbookForm, message: e.target.value })}
-                      placeholder="Tulis pesan Anda..."
-                      rows={4}
+                      onChange={(e) =>
+                        setGuestbookForm({
+                          ...guestbookForm,
+                          message: e.target.value,
+                        })
+                      }
                       required
+                      placeholder="Tulis pesan atau pertanyaan Anda"
+                      rows={4}
                     />
                   </div>
-
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Mengirim...
                       </>
                     ) : (
                       <>
-                        <Send className="h-4 w-4 mr-2" />
+                        <Send className="mr-2 h-4 w-4" />
                         Kirim Pesan
                       </>
                     )}
                   </Button>
-
                   {submitMessage && (
                     <div
-                      className={`p-3 rounded-md text-sm ${
-                        submitMessage.includes("Terima kasih") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
+                      className={`text-center text-sm p-3 rounded ${
+                        submitMessage.includes("Terima kasih")
+                          ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                          : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
                       }`}
                     >
                       {submitMessage}
                     </div>
                   )}
                 </form>
-              </Card>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

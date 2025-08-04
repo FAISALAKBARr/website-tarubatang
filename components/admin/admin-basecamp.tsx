@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Edit,
@@ -10,90 +9,85 @@ import {
   EyeOff,
   Search,
   MapPin,
-  Calendar,
-  Camera,
-  Mountain,
-  TreePine,
-  Tent,
-  Upload,
-  X,
+  Users,
+  Car,
+  Phone,
   ImageIcon,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
+  Utensils,
+  Wifi,
+  Save,
+  X,
   AlertCircle,
   CheckCircle,
   RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Bed,
+  Bath,
+  Tv,
+  Globe,
+  Home,
+  Upload,
+  Loader2,
 } from "lucide-react";
-import Image from "next/image";
 
-interface Destination {
+interface Basecamp {
   id: string;
-  name: string;
-  slug: string;
-  category: string;
-  description: string;
-  content?: string;
-  price: string;
-  facilities: string[];
-  location: string;
+  namaBasecamp: string;
+  fasilitas: string[];
+  dayaTampungKendaraan: number;
+  dayaTampungOrang: number;
+  nomorWa: string;
+  images: string[];
+  sosialMedia: string[];
+  lokasi: string;
   latitude?: number;
   longitude?: number;
-  images: string[];
-  rating: number;
-  totalReviews: number;
+  pemilik: string;
+  menuMakanan: string[];
+  menuMinuman: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-interface DestinationForm {
-  name: string;
-  category: string;
-  description: string;
-  content: string;
-  price: string;
-  facilities: string[];
-  location: string;
+interface BasecampFormData {
+  namaBasecamp: string;
+  fasilitas: string[];
+  dayaTampungKendaraan: number;
+  dayaTampungOrang: number;
+  nomorWa: string;
+  sosialMedia: string[];
+  lokasi: string;
   latitude?: number;
   longitude?: number;
+  pemilik: string;
+  menuMakanan: string[];
+  menuMinuman: string[];
 }
 
-const initialFormData: DestinationForm = {
-  name: "",
-  category: "",
-  description: "",
-  content: "",
-  price: "",
-  facilities: [],
-  location: "",
-  latitude: undefined,
-  longitude: undefined,
-};
-
-const categories = [
-  { value: "Wisata Alam", label: "Wisata Alam", icon: TreePine },
-  { value: "Pendakian", label: "Pendakian", icon: Mountain },
-  { value: "Camping", label: "Camping", icon: Tent },
-  { value: "Spot Foto", label: "Spot Foto", icon: Camera },
-];
-
-export default function AdminDestinations() {
-  const [destinations, setDestinations] = useState<Destination[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function AdminBasecampPage() {
+  const [basecamps, setBasecamps] = useState<Basecamp[]>([]);
+  const [filteredBasecamps, setFilteredBasecamps] = useState<Basecamp[]>([]);
+  const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-  const [selectedDestination, setSelectedDestination] =
-    useState<Destination | null>(null);
+  const [selectedBasecamp, setSelectedBasecamp] = useState<Basecamp | null>(
+    null
+  );
   const [notification, setNotification] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  // Image states
+  // Image states - separated for better control
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [dragActive, setDragActive] = useState(false);
@@ -104,7 +98,50 @@ export default function AdminDestinations() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [viewerImages, setViewerImages] = useState<string[]>([]);
 
-  const [formData, setFormData] = useState<DestinationForm>(initialFormData);
+  const [formData, setFormData] = useState<BasecampFormData>({
+    namaBasecamp: "",
+    fasilitas: [],
+    dayaTampungKendaraan: 0,
+    dayaTampungOrang: 0,
+    nomorWa: "",
+    sosialMedia: [],
+    lokasi: "",
+    latitude: undefined,
+    longitude: undefined,
+    pemilik: "",
+    menuMakanan: [],
+    menuMinuman: [],
+  });
+
+  // Form input states for dynamic arrays
+  const [newFacility, setNewFacility] = useState("");
+  const [newSocialMedia, setNewSocialMedia] = useState("");
+  const [newFood, setNewFood] = useState("");
+  const [newDrink, setNewDrink] = useState("");
+
+  // Common facilities options
+  const facilityOptions = [
+    "WiFi Gratis",
+    "TV",
+    "Kamar Mandi Dalam",
+    "AC",
+    "Kasur",
+    "Lemari",
+    "Dapur",
+    "Kulkas",
+    "Kompor",
+    "Alat Masak",
+    "Parkir Motor",
+    "Parkir Mobil",
+    "Mushola",
+    "Ruang Tamu",
+    "Teras",
+    "Pemandangan Bagus",
+    "Air Panas",
+    "Laundry",
+    "Breakfast",
+    "Antar Jemput",
+  ];
 
   // File validation
   const validateFile = (file: File): string | null => {
@@ -206,7 +243,7 @@ export default function AdminDestinations() {
       const totalFiles =
         selectedFiles.length + newFiles.length + existingImages.length;
       if (totalFiles > 5) {
-        showNotification("error", "Maksimal 5 gambar per destinasi");
+        showNotification("error", "Maksimal 5 gambar per basecamp");
         return;
       }
 
@@ -253,39 +290,51 @@ export default function AdminDestinations() {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Fetch destinations
-  const fetchDestinations = async () => {
+  // Fetch basecamps
+  const fetchBasecamps = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const params = new URLSearchParams();
-
-      if (searchTerm) params.append("search", searchTerm);
-      if (selectedCategory !== "all")
-        params.append("category", selectedCategory);
-
-      const response = await fetch(`/api/destinations?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      const response = await fetch("/api/basecamp?status=all");
       if (response.ok) {
         const data = await response.json();
-        setDestinations(data.destinations || []);
+        setBasecamps(data.basecamp || []);
       } else {
         throw new Error("Gagal memuat data");
       }
     } catch (error) {
-      showNotification("error", "Gagal memuat data destinasi");
+      showNotification("error", "Gagal memuat data basecamp");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDestinations();
-  }, [searchTerm, selectedCategory]);
+    fetchBasecamps();
+  }, []);
+
+  // Filter basecamps
+  useEffect(() => {
+    let filtered = basecamps;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (basecamp) =>
+          basecamp.namaBasecamp
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          basecamp.lokasi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          basecamp.pemilik.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((basecamp) =>
+        filterStatus === "active" ? basecamp.isActive : !basecamp.isActive
+      );
+    }
+
+    setFilteredBasecamps(filtered);
+  }, [basecamps, searchTerm, filterStatus]);
 
   const showNotification = (type: "success" | "error", message: string) => {
     setNotification({ type, message });
@@ -293,57 +342,91 @@ export default function AdminDestinations() {
   };
 
   const resetForm = () => {
-    setFormData(initialFormData);
+    setFormData({
+      namaBasecamp: "",
+      fasilitas: [],
+      dayaTampungKendaraan: 0,
+      dayaTampungOrang: 0,
+      nomorWa: "",
+      sosialMedia: [],
+      lokasi: "",
+      latitude: undefined,
+      longitude: undefined,
+      pemilik: "",
+      menuMakanan: [],
+      menuMinuman: [],
+    });
     setExistingImages([]);
     setSelectedFiles([]);
+    setNewFacility("");
+    setNewSocialMedia("");
+    setNewFood("");
+    setNewDrink("");
   };
 
   const handleAdd = () => {
     resetForm();
     setModalMode("add");
-    setSelectedDestination(null);
+    setSelectedBasecamp(null);
     setShowModal(true);
   };
 
-  const handleEdit = (destination: Destination) => {
-    setSelectedDestination(destination);
+  const handleEdit = (basecamp: Basecamp) => {
+    console.log("Editing Basecamp:", basecamp);
+
+    setSelectedBasecamp(basecamp);
     setFormData({
-      name: destination.name,
-      category: destination.category,
-      description: destination.description,
-      content: destination.content || "",
-      price: destination.price,
-      facilities: destination.facilities,
-      location: destination.location,
-      latitude: destination.latitude,
-      longitude: destination.longitude,
+      namaBasecamp: basecamp.namaBasecamp,
+      fasilitas: basecamp.fasilitas,
+      dayaTampungKendaraan: basecamp.dayaTampungKendaraan,
+      dayaTampungOrang: basecamp.dayaTampungOrang,
+      nomorWa: basecamp.nomorWa,
+      sosialMedia: basecamp.sosialMedia,
+      lokasi: basecamp.lokasi,
+      latitude: basecamp.latitude,
+      longitude: basecamp.longitude,
+      pemilik: basecamp.pemilik,
+      menuMakanan: basecamp.menuMakanan,
+      menuMinuman: basecamp.menuMinuman,
     });
 
-    setExistingImages([...destination.images]);
+    // Set existing images
+    setExistingImages([...basecamp.images]);
+
+    // Clear selected files
     setSelectedFiles([]);
+
     setModalMode("edit");
     setShowModal(true);
   };
 
+  // Handle form submission with improved error handling
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
 
     try {
-      // Validation
-      if (!formData.name.trim()) {
-        throw new Error("Nama destinasi harus diisi");
+      // Validate form data
+      if (!formData.namaBasecamp.trim()) {
+        throw new Error("Nama basecamp harus diisi");
       }
-      if (!formData.category) {
-        throw new Error("Kategori harus dipilih");
-      }
-      if (!formData.description.trim()) {
-        throw new Error("Deskripsi harus diisi");
-      }
-      if (!formData.location.trim()) {
+      if (!formData.lokasi.trim()) {
         throw new Error("Lokasi harus diisi");
       }
+      if (!formData.pemilik.trim()) {
+        throw new Error("Pemilik harus diisi");
+      }
+      if (!formData.nomorWa.trim()) {
+        throw new Error("Nomor WA harus diisi");
+      }
+      if (formData.dayaTampungOrang < 1) {
+        throw new Error("Daya tampung orang harus lebih dari 0");
+      }
+      if (formData.dayaTampungKendaraan < 1) {
+        throw new Error("Daya tampung kendaraan harus lebih dari 0");
+      }
 
+      // Check if we have at least one image (existing or new)
       const totalImages = existingImages.length + selectedFiles.length;
       if (totalImages === 0) {
         throw new Error("Minimal harus ada 1 gambar");
@@ -351,27 +434,45 @@ export default function AdminDestinations() {
 
       const url =
         modalMode === "add"
-          ? "/api/destinations"
-          : `/api/destinations/${selectedDestination?.id}`;
+          ? "/api/basecamp"
+          : `/api/basecamp/${selectedBasecamp?.id}`;
       const method = modalMode === "add" ? "POST" : "PUT";
 
       // Always use FormData for consistency
       const formDataToSend = new FormData();
 
       // Add form fields
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("category", formData.category);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("content", formData.content);
-      formDataToSend.append("price", formData.price);
-      formDataToSend.append("facilities", JSON.stringify(formData.facilities));
-      formDataToSend.append("location", formData.location);
+      formDataToSend.append("namaBasecamp", formData.namaBasecamp);
+      formDataToSend.append("fasilitas", JSON.stringify(formData.fasilitas));
+      formDataToSend.append(
+        "dayaTampungKendaraan",
+        formData.dayaTampungKendaraan.toString()
+      );
+      formDataToSend.append(
+        "dayaTampungOrang",
+        formData.dayaTampungOrang.toString()
+      );
+      formDataToSend.append("nomorWa", formData.nomorWa);
+      formDataToSend.append(
+        "sosialMedia",
+        JSON.stringify(formData.sosialMedia)
+      );
+      formDataToSend.append("lokasi", formData.lokasi);
       if (formData.latitude !== undefined && formData.latitude !== null) {
         formDataToSend.append("latitude", formData.latitude.toString());
       }
       if (formData.longitude !== undefined && formData.longitude !== null) {
         formDataToSend.append("longitude", formData.longitude.toString());
       }
+      formDataToSend.append("pemilik", formData.pemilik);
+      formDataToSend.append(
+        "menuMakanan",
+        JSON.stringify(formData.menuMakanan)
+      );
+      formDataToSend.append(
+        "menuMinuman",
+        JSON.stringify(formData.menuMinuman)
+      );
 
       // Add existing images (for edit mode)
       if (modalMode === "edit" && existingImages.length > 0) {
@@ -383,44 +484,51 @@ export default function AdminDestinations() {
         formDataToSend.append("images", file);
       });
 
-      const token = localStorage.getItem("token");
+      console.log(`Submitting ${method} to ${url}`);
+      console.log(
+        `Files: ${selectedFiles.length}, Existing: ${existingImages.length}`
+      );
+
       const response = await fetch(url, {
         method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formDataToSend,
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorMessage = "Gagal menyimpan destinasi";
+        console.error("Server response:", response.status, errorText);
+
+        let errorMessage = "Gagal menyimpan basecamp";
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error || errorMessage;
         } catch {
           errorMessage = errorText || errorMessage;
         }
+
         throw new Error(errorMessage);
       }
 
       const result = await response.json();
+      console.log("Submit successful:", result);
 
-      await fetchDestinations();
+      // Refresh data and close dialog
+      await fetchBasecamps();
       setShowModal(false);
-      setSelectedDestination(null);
+      setSelectedBasecamp(null);
       resetForm();
 
       showNotification(
         "success",
         result.message ||
           (modalMode === "edit"
-            ? "Destinasi berhasil diperbarui"
-            : "Destinasi berhasil ditambahkan")
+            ? "Basecamp berhasil diperbarui"
+            : "Basecamp berhasil ditambahkan")
       );
     } catch (err) {
+      console.error("Submit error:", err);
       const errorMessage =
-        err instanceof Error ? err.message : "Gagal menyimpan destinasi";
+        err instanceof Error ? err.message : "Gagal menyimpan basecamp";
       showNotification("error", errorMessage);
     } finally {
       setFormLoading(false);
@@ -430,28 +538,22 @@ export default function AdminDestinations() {
   const handleDelete = async (id: string, name: string) => {
     if (
       !confirm(
-        `Yakin ingin menghapus destinasi "${name}"? Tindakan ini tidak dapat dibatalkan.`
+        `Yakin ingin menghapus basecamp "${name}"? Tindakan ini tidak dapat dibatalkan.`
       )
     )
       return;
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/destinations/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`/api/basecamp/${id}`, { method: "DELETE" });
       if (response.ok) {
-        showNotification("success", "Destinasi berhasil dihapus");
-        fetchDestinations();
+        showNotification("success", "Basecamp berhasil dihapus");
+        fetchBasecamps();
       } else {
-        throw new Error("Gagal menghapus destinasi");
+        throw new Error("Gagal menghapus basecamp");
       }
     } catch (error) {
-      showNotification("error", "Gagal menghapus destinasi");
+      showNotification("error", "Gagal menghapus basecamp");
     } finally {
       setLoading(false);
     }
@@ -460,32 +562,84 @@ export default function AdminDestinations() {
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/destinations/${id}`, {
+      const response = await fetch(`/api/basecamp/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !currentStatus }),
       });
 
       if (response.ok) {
         showNotification(
           "success",
-          `Destinasi berhasil ${
-            !currentStatus ? "diaktifkan" : "dinonaktifkan"
-          }`
+          `Basecamp berhasil ${!currentStatus ? "diaktifkan" : "dinonaktifkan"}`
         );
-        fetchDestinations();
+        fetchBasecamps();
       } else {
         throw new Error("Gagal mengubah status");
       }
     } catch (error) {
-      showNotification("error", "Gagal mengubah status destinasi");
+      showNotification("error", "Gagal mengubah status basecamp");
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleExpandRow = (id: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedRows(newExpanded);
+  };
+
+  const addArrayItem = (field: keyof BasecampFormData, value: string) => {
+    if (value.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: [...(prev[field] as string[]), value.trim()],
+      }));
+    }
+  };
+
+  const removeArrayItem = (field: keyof BasecampFormData, index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: (prev[field] as string[]).filter((_, i) => i !== index),
+    }));
+  };
+
+  const addFacilityFromOptions = (facility: string) => {
+    if (!formData.fasilitas.includes(facility)) {
+      setFormData((prev) => ({
+        ...prev,
+        fasilitas: [...prev.fasilitas, facility],
+      }));
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getFacilityIcon = (facility: string) => {
+    const facilityLower = facility.toLowerCase();
+    if (facilityLower.includes("wifi")) return <Wifi className="h-3 w-3" />;
+    if (facilityLower.includes("tv")) return <Tv className="h-3 w-3" />;
+    if (facilityLower.includes("kasur") || facilityLower.includes("bed"))
+      return <Bed className="h-3 w-3" />;
+    if (facilityLower.includes("mandi")) return <Bath className="h-3 w-3" />;
+    if (facilityLower.includes("dapur") || facilityLower.includes("masak"))
+      return <Utensils className="h-3 w-3" />;
+    if (facilityLower.includes("parkir")) return <Car className="h-3 w-3" />;
+    return <CheckCircle className="h-3 w-3" />;
   };
 
   // Image viewer functions
@@ -527,40 +681,11 @@ export default function AdminDestinations() {
     }
   };
 
+  // Add keyboard event listener
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
     return () => document.removeEventListener("keydown", handleKeyPress);
   }, [showImageViewer, viewerImages.length]);
-
-  const getCategoryIcon = (category: string) => {
-    const categoryData = categories.find((c) => c.value === category);
-    return categoryData ? categoryData.icon : MapPin;
-  };
-
-  const getDifficultyColor = (category: string) => {
-    switch (category) {
-      case "Wisata Alam":
-        return "bg-green-100 text-green-800";
-      case "Pendakian":
-        return "bg-red-100 text-red-800";
-      case "Camping":
-        return "bg-blue-100 text-blue-800";
-      case "Spot Foto":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const totalImages = existingImages.length + selectedFiles.length;
 
@@ -569,9 +694,9 @@ export default function AdminDestinations() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Manajemen Destinasi
+          Manajemen Basecamp
         </h1>
-        <p className="text-gray-600">Kelola destinasi wisata Desa Tarubatang</p>
+        <p className="text-gray-600">Kelola data basecamp Desa Tarubatang</p>
       </div>
 
       {/* Notification */}
@@ -600,28 +725,25 @@ export default function AdminDestinations() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Cari destinasi..."
+                placeholder="Cari basecamp..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64"
               />
             </div>
             <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="all">Semua Kategori</option>
-              {categories.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
+              <option value="all">Semua Status</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Tidak Aktif</option>
             </select>
           </div>
           <div className="flex gap-2">
             <button
-              onClick={fetchDestinations}
+              onClick={fetchBasecamps}
               disabled={loading}
               className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
             >
@@ -635,7 +757,7 @@ export default function AdminDestinations() {
               className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
               <Plus className="h-4 w-4" />
-              Tambah Destinasi
+              Tambah Basecamp
             </button>
           </div>
         </div>
@@ -646,22 +768,22 @@ export default function AdminDestinations() {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Destinasi</p>
+              <p className="text-sm text-gray-600">Total Basecamp</p>
               <p className="text-2xl font-bold text-gray-900">
-                {destinations.length}
+                {basecamps.length}
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
-              <MapPin className="h-6 w-6 text-blue-600" />
+              <Home className="h-6 w-6 text-blue-600" />
             </div>
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Destinasi Aktif</p>
+              <p className="text-sm text-gray-600">Basecamp Aktif</p>
               <p className="text-2xl font-bold text-green-600">
-                {destinations.filter((d) => d.isActive).length}
+                {basecamps.filter((b) => b.isActive).length}
               </p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
@@ -672,9 +794,9 @@ export default function AdminDestinations() {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Destinasi Tidak Aktif</p>
+              <p className="text-sm text-gray-600">Basecamp Tidak Aktif</p>
               <p className="text-2xl font-bold text-red-600">
-                {destinations.filter((d) => !d.isActive).length}
+                {basecamps.filter((b) => !b.isActive).length}
               </p>
             </div>
             <div className="p-3 bg-red-100 rounded-full">
@@ -691,13 +813,10 @@ export default function AdminDestinations() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Destinasi
+                  Basecamp
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Kategori
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Lokasi
+                  Kapasitas
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -713,93 +832,76 @@ export default function AdminDestinations() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex items-center justify-center">
                       <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
                       <span className="text-gray-500">Memuat data...</span>
                     </div>
                   </td>
                 </tr>
-              ) : destinations.length === 0 ? (
+              ) : filteredBasecamps.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={5}
                     className="px-6 py-12 text-center text-gray-500"
                   >
-                    {searchTerm || selectedCategory !== "all"
+                    {searchTerm || filterStatus !== "all"
                       ? "Tidak ada data yang sesuai dengan filter"
-                      : "Belum ada data destinasi"}
+                      : "Belum ada data basecamp"}
                   </td>
                 </tr>
               ) : (
-                destinations.map((destination) => {
-                  const IconComponent = getCategoryIcon(destination.category);
-                  return (
-                    <tr key={destination.id} className="hover:bg-gray-50">
+                filteredBasecamps.map((basecamp) => (
+                  <React.Fragment key={basecamp.id}>
+                    <tr className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <div className="relative h-12 w-16 rounded-lg overflow-hidden mr-4">
-                            <button
-                              onClick={() =>
-                                openImageViewer(destination.images, 0)
-                              }
-                              className="w-full h-full"
-                            >
-                              <Image
-                                src={
-                                  destination.images[0] ||
-                                  "/placeholder.svg?height=48&width=64" ||
-                                  "/placeholder.svg"
-                                }
-                                alt={destination.name}
-                                fill
-                                className="object-cover hover:opacity-80 transition-opacity"
-                              />
-                            </button>
-                            {destination.images.length > 1 && (
-                              <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs px-1 rounded-tl">
-                                +{destination.images.length - 1}
-                              </div>
+                          <button
+                            onClick={() => toggleExpandRow(basecamp.id)}
+                            className="mr-3 p-1 hover:bg-gray-100 rounded"
+                          >
+                            {expandedRows.has(basecamp.id) ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
                             )}
-                          </div>
+                          </button>
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {destination.name}
+                              {basecamp.namaBasecamp}
                             </div>
-                            <div className="text-sm text-gray-500 max-w-xs truncate">
-                              {destination.description}
+                            <div className="text-sm text-gray-500 flex items-center mt-1">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              {basecamp.lokasi}
                             </div>
-                            <div className="text-sm text-green-600 font-medium">
-                              {destination.price}
+                            <div className="text-sm text-gray-500 flex items-center mt-1">
+                              <Users className="h-3 w-3 mr-1" />
+                              {basecamp.pemilik}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(
-                            destination.category
-                          )}`}
-                        >
-                          <IconComponent className="h-3 w-3 mr-1" />
-                          {destination.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 flex items-center">
-                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                          {destination.location}
+                        <div className="text-sm text-gray-900">
+                          <div className="flex items-center mb-1">
+                            <Users className="h-3 w-3 mr-1 text-blue-500" />
+                            {basecamp.dayaTampungOrang} orang
+                          </div>
+                          <div className="flex items-center">
+                            <Car className="h-3 w-3 mr-1 text-green-500" />
+                            {basecamp.dayaTampungKendaraan} kendaraan
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            destination.isActive
+                            basecamp.isActive
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {destination.isActive ? (
+                          {basecamp.isActive ? (
                             <>
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Aktif
@@ -815,35 +917,32 @@ export default function AdminDestinations() {
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 flex items-center">
                           <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-                          {formatDate(destination.createdAt)}
+                          {formatDate(basecamp.createdAt)}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() =>
-                              handleToggleStatus(
-                                destination.id,
-                                destination.isActive
-                              )
+                              handleToggleStatus(basecamp.id, basecamp.isActive)
                             }
                             className={`p-2 rounded-lg ${
-                              destination.isActive
+                              basecamp.isActive
                                 ? "text-red-600 hover:bg-red-50"
                                 : "text-green-600 hover:bg-green-50"
                             }`}
                             title={
-                              destination.isActive ? "Nonaktifkan" : "Aktifkan"
+                              basecamp.isActive ? "Nonaktifkan" : "Aktifkan"
                             }
                           >
-                            {destination.isActive ? (
+                            {basecamp.isActive ? (
                               <EyeOff className="h-4 w-4" />
                             ) : (
                               <Eye className="h-4 w-4" />
                             )}
                           </button>
                           <button
-                            onClick={() => handleEdit(destination)}
+                            onClick={() => handleEdit(basecamp)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
                             title="Edit"
                           >
@@ -851,7 +950,7 @@ export default function AdminDestinations() {
                           </button>
                           <button
                             onClick={() =>
-                              handleDelete(destination.id, destination.name)
+                              handleDelete(basecamp.id, basecamp.namaBasecamp)
                             }
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                             title="Hapus"
@@ -861,8 +960,172 @@ export default function AdminDestinations() {
                         </div>
                       </td>
                     </tr>
-                  );
-                })
+                    {expandedRows.has(basecamp.id) && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-4 bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {/* Contact Info */}
+                            <div className="bg-white p-4 rounded-lg">
+                              <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                                <Phone className="h-4 w-4 mr-2" />
+                                Kontak
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                {basecamp.nomorWa}
+                              </p>
+                            </div>
+
+                            {/* Facilities */}
+                            <div className="bg-white p-4 rounded-lg">
+                              <h4 className="font-medium text-gray-900 mb-2">
+                                Fasilitas
+                              </h4>
+                              <div className="flex flex-wrap gap-1">
+                                {basecamp.fasilitas
+                                  .slice(0, 3)
+                                  .map((facility, index) => (
+                                    <span
+                                      key={index}
+                                      className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                                    >
+                                      {getFacilityIcon(facility)}
+                                      <span className="ml-1">{facility}</span>
+                                    </span>
+                                  ))}
+                                {basecamp.fasilitas.length > 3 && (
+                                  <span className="text-xs text-gray-400">
+                                    +{basecamp.fasilitas.length - 3} lainnya
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Images */}
+                            {basecamp.images.length > 0 && (
+                              <div className="bg-white p-4 rounded-lg">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                                  <ImageIcon className="h-4 w-4 mr-2" />
+                                  Gambar ({basecamp.images.length})
+                                </h4>
+                                <div className="flex gap-2 overflow-x-auto">
+                                  {basecamp.images
+                                    .slice(0, 3)
+                                    .map((image, index) => (
+                                      <button
+                                        key={index}
+                                        onClick={() =>
+                                          openImageViewer(
+                                            basecamp.images,
+                                            index
+                                          )
+                                        }
+                                        className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden hover:opacity-80 transition-opacity group"
+                                      >
+                                        <img
+                                          src={image || "/placeholder.svg"}
+                                          alt={`Gambar ${index + 1}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                          <Eye className="h-4 w-4 text-white" />
+                                        </div>
+                                      </button>
+                                    ))}
+                                  {basecamp.images.length > 3 && (
+                                    <button
+                                      onClick={() =>
+                                        openImageViewer(basecamp.images, 3)
+                                      }
+                                      className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-500 hover:bg-gray-200 transition-colors"
+                                    >
+                                      +{basecamp.images.length - 3}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Menu */}
+                            {(basecamp.menuMakanan.length > 0 ||
+                              basecamp.menuMinuman.length > 0) && (
+                              <div className="bg-white p-4 rounded-lg">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                                  <Utensils className="h-4 w-4 mr-2" />
+                                  Menu
+                                </h4>
+                                <div className="space-y-2">
+                                  {basecamp.menuMakanan.length > 0 && (
+                                    <div>
+                                      <span className="text-xs text-gray-500">
+                                        Makanan:
+                                      </span>
+                                      <p className="text-sm text-gray-600">
+                                        {basecamp.menuMakanan
+                                          .slice(0, 2)
+                                          .join(", ")}
+                                        {basecamp.menuMakanan.length > 2 &&
+                                          "..."}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {basecamp.menuMinuman.length > 0 && (
+                                    <div>
+                                      <span className="text-xs text-gray-500">
+                                        Minuman:
+                                      </span>
+                                      <p className="text-sm text-gray-600">
+                                        {basecamp.menuMinuman
+                                          .slice(0, 2)
+                                          .join(", ")}
+                                        {basecamp.menuMinuman.length > 2 &&
+                                          "..."}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Social Media */}
+                            {basecamp.sosialMedia.length > 0 && (
+                              <div className="bg-white p-4 rounded-lg">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                                  <Globe className="h-4 w-4 mr-2" />
+                                  Sosial Media
+                                </h4>
+                                <div className="space-y-1">
+                                  {basecamp.sosialMedia
+                                    .slice(0, 2)
+                                    .map((social, index) => (
+                                      <p
+                                        key={index}
+                                        className="text-sm text-blue-600 hover:underline"
+                                      >
+                                        <a
+                                          href={social}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          {social.length > 30
+                                            ? `${social.substring(0, 30)}...`
+                                            : social}
+                                        </a>
+                                      </p>
+                                    ))}
+                                  {basecamp.sosialMedia.length > 2 && (
+                                    <p className="text-xs text-gray-400">
+                                      +{basecamp.sosialMedia.length - 2} lainnya
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))
               )}
             </tbody>
           </table>
@@ -875,7 +1138,7 @@ export default function AdminDestinations() {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">
-                {modalMode === "add" ? "Tambah Destinasi" : "Edit Destinasi"}
+                {modalMode === "add" ? "Tambah Basecamp" : "Edit Basecamp"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -890,13 +1153,13 @@ export default function AdminDestinations() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nama Destinasi *
+                    Nama Basecamp *
                   </label>
                   <input
                     type="text"
-                    value={formData.name}
+                    value={formData.namaBasecamp}
                     onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
+                      setFormData({ ...formData, namaBasecamp: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
@@ -905,92 +1168,99 @@ export default function AdminDestinations() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kategori *
+                    Pemilik *
                   </label>
-                  <select
-                    value={formData.category}
+                  <input
+                    type="text"
+                    value={formData.pemilik}
                     onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
+                      setFormData({ ...formData, pemilik: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     disabled={formLoading}
-                  >
-                    <option value="">Pilih kategori</option>
-                    {categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi *
+                  Lokasi *
                 </label>
-                <textarea
-                  value={formData.description}
+                <input
+                  type="text"
+                  value={formData.lokasi}
                   onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
+                    setFormData({ ...formData, lokasi: e.target.value })
                   }
-                  rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                   disabled={formLoading}
                 />
               </div>
 
+              {/* Capacity */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Daya Tampung Orang *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.dayaTampungOrang}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        dayaTampungOrang: Number.parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                    disabled={formLoading}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Daya Tampung Kendaraan *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.dayaTampungKendaraan}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        dayaTampungKendaraan:
+                          Number.parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                    disabled={formLoading}
+                  />
+                </div>
+              </div>
+
+              {/* Contact */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Konten Detail
+                  Nomor WhatsApp *
                 </label>
-                <textarea
-                  value={formData.content}
+                <input
+                  type="text"
+                  value={formData.nomorWa}
                   onChange={(e) =>
-                    setFormData({ ...formData, content: e.target.value })
+                    setFormData({ ...formData, nomorWa: e.target.value })
                   }
-                  rows={4}
+                  placeholder="628123456789"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
                   disabled={formLoading}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Harga *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: e.target.value })
-                    }
-                    placeholder="Gratis / Rp 10.000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                    disabled={formLoading}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lokasi *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                    disabled={formLoading}
-                  />
-                </div>
-              </div>
-
+              {/* Coordinates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1034,32 +1304,96 @@ export default function AdminDestinations() {
                 </div>
               </div>
 
+              {/* Facilities */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Fasilitas
                 </label>
-                <input
-                  type="text"
-                  value={formData.facilities.join(", ")}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      facilities: e.target.value
-                        .split(",")
-                        .map((f) => f.trim())
-                        .filter((f) => f),
-                    })
-                  }
-                  placeholder="Toilet, Parkir, Mushola (pisahkan dengan koma)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  disabled={formLoading}
-                />
+
+                {/* Quick facility buttons */}
+                <div className="mb-3">
+                  <p className="text-xs text-gray-500 mb-2">
+                    Pilih fasilitas umum:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {facilityOptions.map((facility) => (
+                      <button
+                        key={facility}
+                        type="button"
+                        onClick={() => addFacilityFromOptions(facility)}
+                        disabled={
+                          formData.fasilitas.includes(facility) || formLoading
+                        }
+                        className={`px-3 py-1 text-sm rounded-full border ${
+                          formData.fasilitas.includes(facility)
+                            ? "bg-blue-100 text-blue-800 border-blue-200 cursor-not-allowed"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {facility}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom facility input */}
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    value={newFacility}
+                    onChange={(e) => setNewFacility(e.target.value)}
+                    placeholder="Tambah fasilitas custom"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={formLoading}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addArrayItem("fasilitas", newFacility);
+                        setNewFacility("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addArrayItem("fasilitas", newFacility);
+                      setNewFacility("");
+                    }}
+                    disabled={formLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Selected facilities */}
+                {formData.fasilitas.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.fasilitas.map((facility, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                      >
+                        {getFacilityIcon(facility)}
+                        <span className="ml-1">{facility}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem("fasilitas", index)}
+                          disabled={formLoading}
+                          className="ml-2 hover:text-blue-600 disabled:opacity-50"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Image Upload Section */}
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700">
-                  Gambar Destinasi *
+                  Gambar Basecamp *
                 </label>
 
                 {/* Converting Status */}
@@ -1138,11 +1472,10 @@ export default function AdminDestinations() {
                               }
                               className="w-full h-full"
                             >
-                              <Image
+                              <img
                                 src={imageUrl || "/placeholder.svg"}
                                 alt={`Existing ${index + 1}`}
-                                fill
-                                className="object-cover hover:opacity-80 transition-opacity"
+                                className="w-full h-full object-cover hover:opacity-80 transition-opacity"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.src =
@@ -1247,6 +1580,180 @@ export default function AdminDestinations() {
                 </div>
               </div>
 
+              {/* Social Media */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sosial Media
+                </label>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="url"
+                    value={newSocialMedia}
+                    onChange={(e) => setNewSocialMedia(e.target.value)}
+                    placeholder="https://instagram.com/basecamp"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={formLoading}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addArrayItem("sosialMedia", newSocialMedia);
+                        setNewSocialMedia("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addArrayItem("sosialMedia", newSocialMedia);
+                      setNewSocialMedia("");
+                    }}
+                    disabled={formLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                {formData.sosialMedia.length > 0 && (
+                  <div className="space-y-2">
+                    {formData.sosialMedia.map((social, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                      >
+                        <span className="text-sm text-blue-600 truncate">
+                          {social}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem("sosialMedia", index)}
+                          disabled={formLoading}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Menu */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Food Menu */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Menu Makanan
+                  </label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={newFood}
+                      onChange={(e) => setNewFood(e.target.value)}
+                      placeholder="Nasi Gudeg"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={formLoading}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addArrayItem("menuMakanan", newFood);
+                          setNewFood("");
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addArrayItem("menuMakanan", newFood);
+                        setNewFood("");
+                      }}
+                      disabled={formLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {formData.menuMakanan.length > 0 && (
+                    <div className="space-y-1">
+                      {formData.menuMakanan.map((food, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-orange-50 rounded"
+                        >
+                          <span className="text-sm">{food}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeArrayItem("menuMakanan", index)
+                            }
+                            disabled={formLoading}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Drink Menu */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Menu Minuman
+                  </label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={newDrink}
+                      onChange={(e) => setNewDrink(e.target.value)}
+                      placeholder="Teh Hangat"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={formLoading}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addArrayItem("menuMinuman", newDrink);
+                          setNewDrink("");
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addArrayItem("menuMinuman", newDrink);
+                        setNewDrink("");
+                      }}
+                      disabled={formLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {formData.menuMinuman.length > 0 && (
+                    <div className="space-y-1">
+                      {formData.menuMinuman.map((drink, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-blue-50 rounded"
+                        >
+                          <span className="text-sm">{drink}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeArrayItem("menuMinuman", index)
+                            }
+                            disabled={formLoading}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Submit Buttons */}
               <div className="flex justify-end gap-3 pt-6 border-t">
                 <button
@@ -1265,11 +1772,11 @@ export default function AdminDestinations() {
                   {formLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <CheckCircle className="h-4 w-4" />
+                    <Save className="h-4 w-4" />
                   )}
                   {modalMode === "add"
-                    ? "Tambah Destinasi"
-                    : "Perbarui Destinasi"}
+                    ? "Tambah Basecamp"
+                    : "Perbarui Basecamp"}
                 </button>
               </div>
             </form>

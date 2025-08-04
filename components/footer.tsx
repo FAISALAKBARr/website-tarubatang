@@ -70,6 +70,11 @@ export default function Footer() {
                   </a>
                 </li>
                 <li>
+                  <a href="/basecamp" className="hover:text-green-400">
+                    Basecamp
+                  </a>
+                </li>
+                <li>
                   <a href="/acara" className="hover:text-green-400">
                     Acara & Event
                   </a>

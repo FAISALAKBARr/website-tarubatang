@@ -137,6 +137,7 @@ export async function PUT(
           category: data.get("category") as string,
           description: data.get("description") as string,
           content: data.get("content") as string,
+          contact: data.get("contact") as string,
           price: data.get("price") as string,
           facilities: JSON.parse((data.get("facilities") as string) || "[]"),
           location: data.get("location") as string,
@@ -267,6 +268,14 @@ export async function PUT(
       );
     }
 
+    // Validate contact number format (if provided)
+    if (formData.contact && !/^(62)[0-9]{8,}$/.test(formData.contact)) {
+      return NextResponse.json(
+        { error: "Format nomor kontak tidak valid. Gunakan format: 628xxx" },
+        { status: 400 }
+      );
+    }
+
     // Validate image requirement
     if (finalImageUrls.length === 0) {
       return NextResponse.json(
@@ -291,6 +300,7 @@ export async function PUT(
         slug,
         category: formData.category,
         description: formData.description,
+        contact: formData.contact?.trim() || null, // Perbaiki ini
         content: formData.content || "",
         price: formData.price || "Gratis",
         facilities: formData.facilities || [],

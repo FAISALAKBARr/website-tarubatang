@@ -18,7 +18,7 @@ async function getUserIdFromToken(token: string): Promise<string | null> {
     const decoded = jwt.verify(
       cleanToken,
       process.env.JWT_SECRET ||
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptYmxvcHNjYm5nb2FweWxmcnBsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTUzMTU5NiwiZXhwIjoyMDY3MTA3NTk2fQ.k0Y9h1rOTEYXeXZKmPetvf5zpjishXLG5IO8DswJ5aAeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptYmxvcHNjYm5nb2FweWxmcnBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1MzE1OTYsImV4cCI6MjA2NzEwNzU5Nn0.7i6EsvwjcTikfS_MSx5EUqYDufqSf9Du8hJcJ91ZrAI"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptYmxvcHNjYm5nb2FweWxmcnBsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTUzMTU5NiwiZXhwIjoyMDY3MTA3NTk2fQ.k0Y9h1rOTEYXeXZKmPetvf5zpjishXLG5IO8DswJ5aAeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptYmxvcHNjYm5nb2FweWxmcnBsIiwicm9zZSI6ImFub24iLCJpYXQiOjE3NTE1MzE1OTYsImV4cCI6MjA2NzEwNzU5Nn0.7i6EsvwjcTikfS_MSx5EUqYDufqSf9Du8hJcJ91ZrAI"
     ) as any;
 
     return decoded.userId || decoded.id || null;
@@ -40,9 +40,9 @@ async function uploadFileToSupabase(
       .toString(36)
       .substring(2)}.${fileExt}`;
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage - using 'media' bucket
     const { data, error } = await supabase.storage
-      .from("images")
+      .from("media") // Changed from "images" to "media"
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -53,10 +53,10 @@ async function uploadFileToSupabase(
       throw new Error(`Upload failed: ${error.message}`);
     }
 
-    // Get public URL
+    // Get public URL - use the same bucket name
     const {
       data: { publicUrl },
-    } = supabase.storage.from("images").getPublicUrl(fileName);
+    } = supabase.storage.from("media").getPublicUrl(fileName);
 
     return publicUrl;
   } catch (error) {
@@ -88,9 +88,11 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
+        { pemilik: { contains: search, mode: "insensitive" } },
       ];
     }
 
+    // Fetch records - removed updateMany since pemilik is required now
     const umkmProducts = await prisma.uMKM.findMany({
       where,
       take: limit,
@@ -110,7 +112,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ umkm: umkmProducts });
   } catch (error) {
     console.error("Error fetching UMKM:", error);
-    return NextResponse.json({ umkm: [] }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch UMKM data", details: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -129,7 +134,7 @@ export async function POST(request: NextRequest) {
       // Handle FormData (file upload)
       const data = await request.formData();
 
-      // Extract form fields
+      // Extract form fields - FIXED: Added pemilik mapping
       formData = {
         name: data.get("name") as string,
         category: data.get("category") as string,
@@ -139,6 +144,7 @@ export async function POST(request: NextRequest) {
         contact: data.get("contact") as string,
         location: data.get("location") as string,
         userId: data.get("userId") as string,
+        pemilik: data.get("pemilik") as string, // ADDED THIS LINE
       };
 
       // Handle existing images (URLs)
@@ -222,6 +228,8 @@ export async function POST(request: NextRequest) {
         images: uploadedImageUrls,
         contact: formData.contact,
         location: formData.location,
+        // FIXED: Use the pemilik from formData, with proper fallback
+        pemilik: formData.pemilik || "Pemilik tidak diketahui",
         ...(finalUserId && { userId: finalUserId }),
       },
       include: {

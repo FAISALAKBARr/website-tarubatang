@@ -231,6 +231,7 @@ export async function POST(request: NextRequest) {
         slug,
         category: formData.category,
         description: formData.description,
+        contact: formData.contact || "",
         content: formData.content || "",
         price: formData.price || "Gratis",
         facilities: formData.facilities || [],

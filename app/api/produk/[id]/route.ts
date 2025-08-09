@@ -142,7 +142,7 @@ export async function PUT(
 
       console.log("Processing FormData...");
 
-      // Extract form fields
+      // Extract form fields - FIXED: Added pemilik mapping
       formData = {
         name: data.get("name") as string,
         category: data.get("category") as string,
@@ -152,6 +152,7 @@ export async function PUT(
         contact: data.get("contact") as string,
         location: data.get("location") as string,
         userId: data.get("userId") as string,
+        pemilik: data.get("pemilik") as string, // ADDED THIS LINE
       };
 
       console.log("Form data:", formData);
@@ -273,6 +274,9 @@ export async function PUT(
         images: finalImageUrls,
         contact: formData.contact,
         location: formData.location,
+        // FIXED: Use the pemilik from formData with proper fallback
+        pemilik:
+          formData.pemilik || existingUMKM.pemilik || "Pemilik tidak diketahui",
         userId: formData.userId || existingUMKM.userId,
         updatedAt: new Date(),
       },

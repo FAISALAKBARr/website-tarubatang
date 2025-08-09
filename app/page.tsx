@@ -111,6 +111,7 @@ interface WebsiteStats {
   totalDestinations: number;
   totalEvents: number;
   totalUMKM: number;
+  totalBasecamp: number;
   totalGallery: number;
   totalSubmissions: number;
 }
@@ -231,6 +232,7 @@ export default function HomePage() {
     totalDestinations: 0,
     totalEvents: 0,
     totalUMKM: 0,
+    totalBasecamp: 0,
     totalGallery: 0,
     totalSubmissions: 0,
   });
@@ -247,7 +249,7 @@ export default function HomePage() {
 
   const [detailModal, setDetailModal] = useState<{
     isOpen: boolean;
-    type: "destination" | "umkm" | "basecamp" | "event" | null;
+    type: "destination" | "umkm" | "basecamp" | "event" | "gallery" | null;
     data: any;
   }>({
     isOpen: false,
@@ -302,7 +304,7 @@ export default function HomePage() {
 
   // Detail modal handlers
   const openDetailModal = (
-    type: "destination" | "umkm" | "basecamp" | "event",
+    type: "destination" | "umkm" | "basecamp" | "event" | "gallery",
     data: any
   ) => {
     setDetailModal({
@@ -323,71 +325,86 @@ export default function HomePage() {
   // Individual API fetch functions with error handling
   const fetchDestinations = async () => {
     try {
-      const response = await fetch("/api/destinations?limit=6");
+      const response = await fetch("/api/destinations");
       if (response.ok) {
         const data = await response.json();
-        return data.destinations || data.data || [];
+        return {
+          items: data.destinations?.slice(0, 6) || [], // Untuk display di grid
+          total: data.destinations?.length || 0, // Untuk stats
+        };
       }
-      return [];
+      return { items: [], total: 0 };
     } catch (error) {
       console.error("Error fetching destinations:", error);
-      return [];
+      return { items: [], total: 0 };
     }
   };
 
   const fetchUMKM = async () => {
     try {
-      const response = await fetch("/api/produk?limit=6");
+      const response = await fetch("/api/produk");
       if (response.ok) {
         const data = await response.json();
-        return data.umkm || data.data || [];
+        return {
+          items: data.umkm?.slice(0, 6) || [], // Untuk display di grid
+          total: data.umkm?.length || 0, // Untuk stats
+        };
       }
-      return [];
+      return { items: [], total: 0 };
     } catch (error) {
       console.error("Error fetching UMKM:", error);
-      return [];
+      return { items: [], total: 0 };
     }
   };
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/event?limit=6");
+      const response = await fetch("/api/event");
       if (response.ok) {
         const data = await response.json();
-        return data.events || data.data || [];
+        return {
+          items: data.events?.slice(0, 6) || [], // Untuk display di grid
+          total: data.events?.length || 0, // Untuk stats
+        };
       }
-      return [];
+      return { items: [], total: 0 };
     } catch (error) {
       console.error("Error fetching events:", error);
-      return [];
+      return { items: [], total: 0 };
     }
   };
 
   const fetchGallery = async () => {
     try {
-      const response = await fetch("/api/gallery?limit=8");
+      const response = await fetch("/api/gallery");
       if (response.ok) {
         const data = await response.json();
-        return data.items || [];
+        return {
+          items: data.items?.slice(0, 8) || [], // Untuk display di grid
+          total: data.items?.length || 0, // Untuk stats
+        };
       }
-      return [];
+      return { items: [], total: 0 };
     } catch (error) {
       console.error("Error fetching gallery:", error);
-      return [];
+      return { items: [], total: 0 };
     }
   };
 
   const fetchBasecamp = async () => {
     try {
-      const response = await fetch("/api/basecamp?limit=6");
+      const response = await fetch("/api/basecamp");
       if (response.ok) {
         const data = await response.json();
-        return data.basecamps || data.basecamp || data.data || data.items || [];
+        return {
+          items: data.basecamp?.slice(0, 6) || [], // Ubah dari basecamps ke basecamp
+          total: data.basecamp?.length || 0,
+        };
       }
-      return [];
+      return { items: [], total: 0 };
     } catch (error) {
       console.error("Error fetching basecamp:", error);
-      return [];
+      return { items: [], total: 0 };
     }
   };
 
@@ -428,21 +445,22 @@ export default function HomePage() {
           fetchStats(),
         ]);
 
-        setDestinations(destinationsData);
-        setUMKM(umkmData);
-        setEvents(eventsData);
-        setGallery(galleryData);
-        setBasecamp(basecampData);
+        // Set items untuk display di grid
+        setDestinations(destinationsData.items);
+        setUMKM(umkmData.items);
+        setEvents(eventsData.items);
+        setGallery(galleryData.items);
+        setBasecamp(basecampData.items);
 
-        setStats(
-          statsData || {
-            totalDestinations: destinationsData.length,
-            totalEvents: eventsData.length,
-            totalUMKM: umkmData.length,
-            totalGallery: galleryData.length,
-            totalSubmissions: 0,
-          }
-        );
+        // Set stats dengan total yang sebenarnya
+        setStats({
+          totalDestinations: destinationsData.total,
+          totalEvents: eventsData.total,
+          totalUMKM: umkmData.total,
+          totalBasecamp: basecampData.total,
+          totalGallery: galleryData.total,
+          totalSubmissions: statsData?.totalSubmissions || 0,
+        });
       } catch (error) {
         console.error("Failed to load data:", error);
         setError(
@@ -557,9 +575,9 @@ export default function HomePage() {
               </p>
               <div className="mt-6 flex space-x-4">
                 <Button asChild>
-                  <Link href={`/tourism/${destination.slug}`}>
+                  <Link href="/tourism">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Lihat Halaman Detail
+                    Lihat Detail Destinasi
                   </Link>
                 </Button>
               </div>
@@ -605,9 +623,9 @@ export default function HomePage() {
               )}
               <div className="flex space-x-4">
                 <Button asChild>
-                  <Link href={`/umkm/${umkmItem.slug}`}>
+                  <Link href="/umkm">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Lihat Halaman Detail
+                    Lihat Detail UMKM
                   </Link>
                 </Button>
                 {umkmItem.contact && (
@@ -728,14 +746,12 @@ export default function HomePage() {
                   </div>
                 )}
               <div className="flex space-x-4">
-                {basecampItem.slug && (
-                  <Button asChild>
-                    <Link href={`/basecamp/${basecampItem.slug}`}>
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Lihat Halaman Detail
-                    </Link>
-                  </Button>
-                )}
+                <Button asChild>
+                  <Link href="/basecamp">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Lihat Detail Basecamp
+                  </Link>
+                </Button>
                 <Button variant="outline" asChild>
                   <a
                     href={`https://wa.me/${basecampItem.nomorWa.replace(
@@ -811,16 +827,63 @@ export default function HomePage() {
               </p>
               <div className="mt-6">
                 <Button asChild>
-                  <Link href={`/events/${eventItem.slug}`}>
+                  <Link href="/events">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Lihat Halaman Detail
+                    Lihat Detail Event
                   </Link>
                 </Button>
               </div>
             </div>
           </div>
         );
-
+      case "gallery":
+        const galleryItem = detailModal.data as Gallery;
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              {galleryItem.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image || "/placeholder.svg?height=200&width=300"}
+                  alt={galleryItem.title}
+                  width={300}
+                  height={200}
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  onClick={() =>
+                    openImageModal(galleryItem.images, index, galleryItem.title)
+                  }
+                />
+              ))}
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold">{galleryItem.title}</h3>
+              </div>
+              <div className="flex items-center space-x-4 mb-4">
+                <Badge>{galleryItem.category}</Badge>
+                <span className="text-sm text-muted-foreground">
+                  {new Date(galleryItem.createdAt).toLocaleDateString("id-ID")}
+                </span>
+              </div>
+              {galleryItem.description && (
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  {galleryItem.description}
+                </p>
+              )}
+              <div className="text-sm text-muted-foreground">
+                <p>Total gambar: {galleryItem.images?.length || 0}</p>
+              </div>
+              <div className="mt-6">
+                <Button asChild>
+                  <Link href="/gallery">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Lihat Detail Galeri
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -957,7 +1020,7 @@ export default function HomePage() {
                 <Mountain className="h-8 w-8 text-orange-600" />
               </div>
               <div className="text-2xl font-bold text-orange-600">
-                {basecamp.length}
+                {stats.totalBasecamp} {/* Ubah dari basecamp.length */}
               </div>
               <div className="text-sm text-muted-foreground">Basecamp</div>
             </div>
@@ -996,6 +1059,7 @@ export default function HomePage() {
                     src={
                       destination.images?.[0] ||
                       "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={destination.name}
@@ -1066,6 +1130,7 @@ export default function HomePage() {
                     src={
                       item.images?.[0] ||
                       "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={item.name}
@@ -1134,6 +1199,7 @@ export default function HomePage() {
                     src={
                       item.images?.[0] ||
                       "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={item.namaBasecamp}
@@ -1216,6 +1282,7 @@ export default function HomePage() {
                     src={
                       event.images?.[0] ||
                       "/placeholder.svg?height=200&width=400" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={event.name}
@@ -1285,28 +1352,61 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
             {gallery.map((item, index) => (
-              <div key={item.id} className="relative group cursor-pointer">
-                <div className="relative h-48 overflow-hidden rounded-lg">
+              <Card
+                key={item.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow group"
+              >
+                <div className="relative h-48 overflow-hidden cursor-pointer">
                   <Image
                     src={
                       item.images?.[0] ||
-                      "/placeholder.svg?height=200&width=300" ||
-                      "/placeholder.svg"
+                      "/placeholder.svg?height=200&width=300"
                     }
                     alt={item.title}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                     onClick={() => openImageModal(item.images, 0, item.title)}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
-                  <div className="absolute bottom-2 left-2 right-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p className="text-sm font-medium truncate">{item.title}</p>
+                  {/* Badge untuk menampilkan jumlah gambar jika lebih dari 1 */}
+                  {item.images && item.images.length > 1 && (
+                    <div className="absolute top-2 right-2">
+                      <Badge className="bg-black/70 text-white hover:bg-black/80 text-xs">
+                        +{item.images.length - 1}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-3">
+                  <h3 className="font-medium text-sm mb-1 line-clamp-1 cursor-pointer hover:text-green-600 transition-colors">
+                    {item.title}
+                  </h3>
+                  <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary" className="text-xs">
                       {item.category}
                     </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {item.images?.length || 0} foto
+                    </span>
                   </div>
-                </div>
-              </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs px-2 py-1 h-7 flex-1"
+                      onClick={() => openDetailModal("gallery", item)}
+                    >
+                      Detail
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="text-xs px-2 py-1 h-7 flex-1"
+                      onClick={() => openImageModal(item.images, 0, item.title)}
+                    >
+                      Lihat Foto
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
           <div className="text-center">

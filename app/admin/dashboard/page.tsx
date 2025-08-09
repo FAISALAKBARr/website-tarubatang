@@ -322,11 +322,38 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
-  const handleLogout = () => {
+  // Update fungsi handleLogout
+  const handleLogout = async () => {
     if (confirm("Apakah Anda yakin ingin keluar?")) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      router.push("/");
+      try {
+        // Clear local storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        // Reset states
+        setUser(null);
+        setStats({
+          totalDestinations: 0,
+          totalUsers: 0,
+          totalEvents: 0,
+          monthlyVisitors: 0,
+        });
+
+        // Dispatch storage event untuk update header
+        window.dispatchEvent(
+          new CustomEvent("authChange", {
+            detail: { action: "logout" },
+          })
+        );
+
+        // Tunggu sebentar sebelum redirect
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Redirect ke login page
+        router.replace("/auth/login");
+      } catch (error) {
+        console.error("Error during logout:", error);
+      }
     }
   };
 
@@ -417,11 +444,13 @@ export default function AdminDashboard() {
                 Refresh
               </Button>
 
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/">
-                  <Home className="h-4 w-4 mr-2" />
-                  Lihat Website
-                </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => (window.location.href = "/")} // Gunakan window.location.href
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Lihat Website
               </Button>
 
               <Button variant="destructive" size="sm" onClick={handleLogout}>

@@ -42,8 +42,8 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Update useEffect untuk pengecekan auth
   useEffect(() => {
-    // Add this function to check auth status immediately after login
     const checkAuth = () => {
       const token = localStorage.getItem("token");
       const userData = localStorage.getItem("user");
@@ -56,29 +56,41 @@ export default function Header() {
           setIsAdmin(user.role === "admin");
         } catch (error) {
           console.error("Error parsing user data:", error);
-          // Reset states if there's an error
           setIsLoggedIn(false);
           setIsAdmin(false);
           setUser(null);
         }
+      } else {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        setUser(null);
       }
     };
 
-    // Check immediately when component mounts
-    checkAuth();
+    // Hanya check auth jika bukan dari admin dashboard
+    if (!pathname?.startsWith("/admin")) {
+      checkAuth();
+    }
 
-    // Add event listener for storage changes
+    const handleAuthChange = (event: CustomEvent) => {
+      if (event.detail?.action === "logout") {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("authChange", handleAuthChange as EventListener);
     window.addEventListener("storage", checkAuth);
 
-    // Add custom event listener for login success
-    const handleLoginSuccess = () => checkAuth();
-    window.addEventListener("loginSuccess", handleLoginSuccess);
-
     return () => {
+      window.removeEventListener(
+        "authChange",
+        handleAuthChange as EventListener
+      );
       window.removeEventListener("storage", checkAuth);
-      window.removeEventListener("loginSuccess", handleLoginSuccess);
     };
-  }, []);
+  }, [pathname]); // Tambahkan pathname sebagai dependency
 
   // Don't render header on admin dashboard pages
   if (pathname?.startsWith("/admin/dashboard")) {
@@ -98,11 +110,8 @@ export default function Header() {
     router.push(path);
   };
 
-  const handleTabNavigation = (tab: string) => {
-    // Find the dashboard component and update its tab
-    const event = new CustomEvent("changeAdminTab", { detail: tab });
-    window.dispatchEvent(event);
-    router.push("/admin/dashboard");
+  const handleAdminNavigation = (path: string) => {
+    router.push(`/admin/dashboard?tab=${path}`);
   };
 
   const handleTabNavigationUser = (tab: string) => {
@@ -206,47 +215,46 @@ export default function Header() {
                   {isAdmin && (
                     <>
                       <DropdownMenuItem
-                        onSelect={() => handleTabNavigation("destinations")}
+                        onSelect={() => router.push("/admin/dashboard")}
+                      >
+                        <ChartColumn className="mr-2 h-4 w-4" />
+                        Dashboard Admin
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => handleAdminNavigation("destinations")}
                       >
                         <MapPin className="mr-2 h-4 w-4" />
                         Kelola Destinasi Wisata
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onSelect={() => handleTabNavigation("events")}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Kelola Event & Acara
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => handleTabNavigation("umkm")}
+                        onSelect={() => handleAdminNavigation("umkm")}
                       >
                         <Store className="mr-2 h-4 w-4" />
                         Kelola UMKM
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onSelect={() => handleTabNavigation("basecamp")}
+                        onSelect={() => handleAdminNavigation("basecamp")}
                       >
                         <Home className="mr-2 h-4 w-4" />
                         Kelola Basecamp
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onSelect={() => handleTabNavigation("gallery")}
+                        onSelect={() => handleAdminNavigation("events")}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Kelola Event & Acara
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => handleAdminNavigation("gallery")}
                       >
                         <Images className="mr-2 h-4 w-4" />
                         Kelola Galeri
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onSelect={() => handleTabNavigation("analytics")}
+                        onSelect={() => handleAdminNavigation("analytics")}
                       >
                         <ChartColumn className="mr-2 h-4 w-4" />
                         Analisis & Statistik
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onSelect={() => handleNavigation("/admin/dashboard")}
-                      >
-                        <LogInIcon className="mr-2 h-4 w-4" />
-                        Dashboard Admin
                       </DropdownMenuItem>
                     </>
                   )}
@@ -362,53 +370,55 @@ export default function Header() {
                         </p>
                         <div className="flex flex-col space-y-2">
                           <button
-                            onClick={() => handleTabNavigation("destinations")}
+                            onClick={() => router.push("/admin/dashboard")}
+                            className="text-left text-muted-foreground hover:text-green-600 font-medium"
+                          >
+                            <ChartColumn className="h-4 w-4 mr-2 inline" />
+                            Dashboard Admin
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleAdminNavigation("destinations")
+                            }
                             className="text-left text-muted-foreground hover:text-green-600 font-medium"
                           >
                             <MapPin className="h-4 w-4 mr-2 inline" />
                             Kelola Destinasi
                           </button>
                           <button
-                            onClick={() => handleTabNavigation("events")}
+                            onClick={() => handleAdminNavigation("events")}
                             className="text-left text-muted-foreground hover:text-green-600 font-medium"
                           >
                             <Calendar className="h-4 w-4 mr-2 inline" />
                             Kelola Event
                           </button>
                           <button
-                            onClick={() => handleTabNavigation("umkm")}
+                            onClick={() => handleAdminNavigation("umkm")}
                             className="text-left text-muted-foreground hover:text-green-600 font-medium"
                           >
                             <Store className="h-4 w-4 mr-2 inline" />
                             Kelola UMKM
                           </button>
                           <button
-                            onClick={() => handleTabNavigation("basecamp")}
+                            onClick={() => handleAdminNavigation("basecamp")}
                             className="text-left text-muted-foreground hover:text-green-600 font-medium"
                           >
                             <Home className="h-4 w-4 mr-2 inline" />
                             Kelola Basecamp
                           </button>
                           <button
-                            onClick={() => handleTabNavigation("gallery")}
+                            onClick={() => handleAdminNavigation("gallery")}
                             className="text-left text-muted-foreground hover:text-green-600 font-medium"
                           >
                             <Images className="h-4 w-4 mr-2 inline" />
                             Kelola Galeri
                           </button>
                           <button
-                            onClick={() => handleTabNavigation("analytics")}
+                            onClick={() => handleAdminNavigation("analytics")}
                             className="text-left text-muted-foreground hover:text-green-600 font-medium"
                           >
                             <ChartColumn className="h-4 w-4 mr-2 inline" />
                             Analisis & Statistik
-                          </button>
-                          <button
-                            onClick={() => handleNavigation("/admin/dashboard")}
-                            className="text-left text-muted-foreground hover:text-green-600 font-medium"
-                          >
-                            <LogInIcon className="h-4 w-4 mr-2 inline" />
-                            Dashboard Admin
                           </button>
                         </div>
                       </div>

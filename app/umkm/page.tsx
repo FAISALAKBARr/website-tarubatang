@@ -572,7 +572,7 @@ export default function UMKMPage() {
                       <div className="flex items-center text-gray-600">
                         <User className="h-4 w-4 mr-3" />
                         <span className="font-medium">
-                          {selectedUMKM.user.name}
+                          {selectedUMKM.pemilik} {/* Change this line */}
                         </span>
                       </div>
                       <div className="flex items-center text-gray-600">

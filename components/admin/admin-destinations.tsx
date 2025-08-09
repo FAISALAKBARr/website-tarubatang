@@ -51,6 +51,7 @@ interface DestinationForm {
   name: string;
   category: string;
   description: string;
+  contact: string;
   content: string;
   price: string;
   facilities: string[];
@@ -63,6 +64,7 @@ const initialFormData: DestinationForm = {
   name: "",
   category: "",
   description: "",
+  contact: "",
   content: "",
   price: "",
   facilities: [],
@@ -77,6 +79,11 @@ const categories = [
   { value: "Camping", label: "Camping", icon: Tent },
   { value: "Spot Foto", label: "Spot Foto", icon: Camera },
 ];
+
+const validateContact = (contact: string): boolean => {
+  if (!contact) return true;
+  return /^(62)[0-9]{8,}$/.test(contact);
+};
 
 export default function AdminDestinations() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -311,6 +318,7 @@ export default function AdminDestinations() {
       name: destination.name,
       category: destination.category,
       description: destination.description,
+      contact: destination.contact || "",
       content: destination.content || "",
       price: destination.price,
       facilities: destination.facilities,
@@ -362,6 +370,7 @@ export default function AdminDestinations() {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("description", formData.description);
+      formDataToSend.append("contact", formData.contact);
       formDataToSend.append("content", formData.content);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("facilities", JSON.stringify(formData.facilities));
@@ -1054,6 +1063,31 @@ export default function AdminDestinations() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={formLoading}
                 />
+              </div>
+
+              {/* Contact Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nomor Kontak Pemandu
+                </label>
+                <input
+                  type="text"
+                  value={formData.contact}
+                  onChange={(e) =>
+                    setFormData({ ...formData, contact: e.target.value })
+                  }
+                  placeholder="Format: 628123456789"
+                  className={`w-full px-3 py-2 border ${
+                    !validateContact(formData.contact)
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                />
+                {!validateContact(formData.contact) && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Format nomor tidak valid. Gunakan format: 628xxx
+                  </p>
+                )}
               </div>
 
               {/* Image Upload Section */}

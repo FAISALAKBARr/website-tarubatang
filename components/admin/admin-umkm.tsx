@@ -74,6 +74,7 @@ interface UMKMFormData {
   stock: number;
   contact: string;
   location: string;
+  pemilik: string;
 }
 
 export default function AdminUMKM() {
@@ -95,6 +96,7 @@ export default function AdminUMKM() {
     stock: 0,
     contact: "",
     location: "",
+    pemilik: "",
   });
 
   // Image states
@@ -186,6 +188,7 @@ export default function AdminUMKM() {
       "image/png",
       "image/heic",
       "image/heif",
+      "image/webp",
     ];
 
     if (file.size > maxSize) {
@@ -196,11 +199,19 @@ export default function AdminUMKM() {
       return "File kosong.";
     }
 
-    if (
-      !allowedTypes.includes(file.type) &&
-      !file.name.toLowerCase().endsWith(".heic")
-    ) {
-      return "Format file tidak didukung. Gunakan JPG, PNG, atau HEIC.";
+    // FIXED: Check both MIME type and file extension
+    const fileName = file.name.toLowerCase();
+    const isValidMimeType = allowedTypes.includes(file.type);
+    const isValidExtension =
+      fileName.endsWith(".jpg") ||
+      fileName.endsWith(".jpeg") ||
+      fileName.endsWith(".png") ||
+      fileName.endsWith(".heic") ||
+      fileName.endsWith(".heif") ||
+      fileName.endsWith(".webp");
+
+    if (!isValidMimeType && !isValidExtension) {
+      return "Format file tidak didukung. Gunakan JPG, JPEG, PNG, WEBP, atau HEIC.";
     }
 
     return null;
@@ -248,10 +259,16 @@ export default function AdminUMKM() {
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || formLoading) return;
 
+    console.log("Files selected:", files.length);
+
     const newFiles: File[] = [];
     const errors: string[] = [];
 
     for (const file of Array.from(files)) {
+      console.log(
+        `Processing file: ${file.name}, type: ${file.type}, size: ${file.size}`
+      );
+
       const error = validateFile(file);
       if (error) {
         errors.push(`${file.name}: ${error}`);
@@ -259,26 +276,41 @@ export default function AdminUMKM() {
       }
 
       try {
-        const processedFile = await convertHeicToJpg(file);
+        // Only convert HEIC files, process others normally
+        let processedFile = file;
+        if (
+          file.type === "image/heic" ||
+          file.type === "image/heif" ||
+          file.name.toLowerCase().endsWith(".heic") ||
+          file.name.toLowerCase().endsWith(".heif")
+        ) {
+          console.log(`Converting HEIC file: ${file.name}`);
+          processedFile = await convertHeicToJpg(file);
+        } else {
+          console.log(`Processing regular image: ${file.name}`);
+        }
+
         newFiles.push(processedFile);
       } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
         errors.push(`${file.name}: ${error.message}`);
       }
     }
 
     if (errors.length > 0) {
-      toast.error(`Beberapa file tidak dapat diproses:\n${errors.join("\n")}`);
+      toast.error(errors.join("\n"));
+      return;
     }
 
-    if (newFiles.length > 0) {
-      const totalFiles =
-        selectedFiles.length + newFiles.length + existingImages.length;
-      if (totalFiles > 5) {
-        toast.error("Maksimal 5 gambar per produk");
-        return;
-      }
+    const totalFiles =
+      selectedFiles.length + newFiles.length + existingImages.length;
+    if (totalFiles > 5) {
+      toast.error("Maksimal 5 gambar per produk");
+      return;
+    }
 
-      setSelectedFiles((prev) => [...prev, ...newFiles]);
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
+    if (newFiles.length > 0) {
       toast.success(`${newFiles.length} file berhasil ditambahkan`);
     }
   };
@@ -344,6 +376,9 @@ export default function AdminUMKM() {
       }
       if (!formData.contact.trim()) {
         throw new Error("Kontak harus diisi");
+      }
+      if (!formData.pemilik.trim()) {
+        throw new Error("Nama pemilik harus diisi");
       }
 
       // Check if we have at least one image (existing or new)
@@ -490,6 +525,7 @@ export default function AdminUMKM() {
       stock: umkm.stock || 0,
       contact: umkm.contact,
       location: umkm.location || "",
+      pemilik: umkm.pemilik,
     });
 
     // Set existing images
@@ -511,6 +547,7 @@ export default function AdminUMKM() {
       stock: 0,
       contact: "",
       location: "",
+      pemilik: "",
     });
     setExistingImages([]);
     setSelectedFiles([]);
@@ -766,9 +803,9 @@ export default function AdminUMKM() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="font-medium">{umkm.user.name}</p>
+                          <p className="font-medium">{umkm.pemilik}</p>
                           <p className="text-sm text-gray-500">
-                            {umkm.user.phone}
+                            {umkm.contact}
                           </p>
                         </div>
                       </TableCell>
@@ -911,6 +948,19 @@ export default function AdminUMKM() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
+                <Label htmlFor="pemilik">Nama Pemilik *</Label>
+                <Input
+                  id="pemilik"
+                  value={formData.pemilik}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pemilik: e.target.value })
+                  }
+                  placeholder="Nama pemilik UMKM"
+                  required
+                  disabled={formLoading}
+                />
+              </div>
+              <div>
                 <Label htmlFor="contact">Kontak *</Label>
                 <Input
                   id="contact"
@@ -923,6 +973,9 @@ export default function AdminUMKM() {
                   disabled={formLoading}
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="location">Lokasi</Label>
                 <Input

@@ -48,6 +48,7 @@ interface Destination {
   name: string;
   category: string;
   description: string;
+  contact?: string;
   content?: string;
   price: string;
   facilities: string[];
@@ -424,6 +425,15 @@ function DestinationDetailModal({
                       <span className="text-sm">{destination.location}</span>
                     </div>
 
+                    {destination.contact && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
+                          Kontak: {destination.contact}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold text-green-600">
                         {destination.price}
@@ -453,14 +463,23 @@ function DestinationDetailModal({
                     Petunjuk Arah
                   </Button>
 
-                  <Button variant="outline" className="w-full bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full flex items-center justify-center"
+                    onClick={() => {
+                      if (destination.contact) {
+                        window.open(
+                          `https://wa.me/${destination.contact}`,
+                          "_blank"
+                        );
+                      }
+                    }}
+                    disabled={!destination.contact}
+                  >
                     <Phone className="h-4 w-4 mr-2" />
-                    Hubungi Pemandu
-                  </Button>
-
-                  <Button variant="outline" className="w-full bg-transparent">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Bagikan
+                    {destination.contact
+                      ? "Hubungi Pemandu"
+                      : "Tidak Ada Kontak"}
                   </Button>
                 </div>
 
@@ -836,6 +855,24 @@ export default function TourismPage() {
                               <MapPin className="h-4 w-4 mr-2" />
                               {destination.location}
                             </div>
+                            {destination.contact && (
+                              <div className="flex items-center text-sm text-gray-500">
+                                <Phone className="h-4 w-4 mr-2" />
+                                <Button
+                                  variant="link"
+                                  className="p-0 h-auto hover:no-underline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(
+                                      `https://wa.me/${destination.contact}`,
+                                      "_blank"
+                                    );
+                                  }}
+                                >
+                                  Hubungi Pemandu
+                                </Button>
+                              </div>
+                            )}
                           </div>
 
                           {destination.facilities.length > 0 && (

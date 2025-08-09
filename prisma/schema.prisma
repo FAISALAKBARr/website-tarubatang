@@ -27,22 +27,22 @@ model User {
 }
 
 model Destination {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String   @unique
-  category     String
-  description  String
-  content      String?
-  price        String
-  facilities   String[]
-  location     String
-  latitude     Float?
-  longitude    Float?
-  images       String[]
-  totalReviews Int      @default(0)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  category    String
+  description String
+  content     String?
+  price       String
+  facilities  String[]
+  location    String
+  latitude    Float?
+  longitude   Float?
+  images      String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  contact     String?
 
   @@map("destinations")
 }
@@ -82,7 +82,8 @@ model UMKM {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userId      String?
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pemilik     String   @default("Pemilik tidak diketahui")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("umkm")
 }
@@ -94,7 +95,6 @@ model Basecamp {
   dayaTampungKendaraan Int
   dayaTampungOrang     Int
   nomorWa              String
-  images               String[]
   sosialMedia          String[]
   lokasi               String
   latitude             Float?
@@ -105,6 +105,7 @@ model Basecamp {
   isActive             Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  images               String[]
 
   @@map("basecamps")
 }
@@ -152,7 +153,6 @@ model Gallery {
   @@index([active])
   @@index([createdAt])
 }
-
 
 enum Role {
   ADMIN

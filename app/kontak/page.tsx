@@ -20,6 +20,9 @@ import {
   Globe,
   Navigation,
   ExternalLink,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -30,9 +33,14 @@ export default function ContactPage() {
     phone: "",
     subject: "",
     message: "",
+    type: "INQUIRY", // Set default type
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -44,24 +52,99 @@ export default function ContactPage() {
     }));
   };
 
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      errors.push("Nama harus diisi minimal 2 karakter");
+    }
+
+    if (!formData.email.trim()) {
+      errors.push("Email harus diisi");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.push("Format email tidak valid");
+    }
+
+    if (!formData.subject.trim()) {
+      errors.push("Subjek harus diisi");
+    }
+
+    if (!formData.message.trim() || formData.message.trim().length < 10) {
+      errors.push("Pesan harus diisi minimal 10 karakter");
+    }
+
+    if (formData.phone && formData.phone.length > 20) {
+      errors.push("Nomor telepon terlalu panjang");
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Reset status
+    setSubmitStatus({ type: null, message: "" });
+
+    // Validate form
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setSubmitStatus({
+        type: "error",
+        message: errors.join(". "),
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      alert(
-        "Pesan berhasil dikirim! Kami akan merespons dalam 1-2 hari kerja."
-      );
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
+    try {
+      const response = await fetch("/api/submissions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          type: "INQUIRY", // Set type sebagai INQUIRY untuk kontak
+        }),
       });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus({
+          type: "success",
+          message:
+            result.message ||
+            "Pesan berhasil dikirim! Terima kasih, kami akan merespons dalam 1-2 hari kerja.",
+        });
+
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+          type: "INQUIRY",
+        });
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: result.message || "Terjadi kesalahan. Silakan coba lagi.",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setSubmitStatus({
+        type: "error",
+        message:
+          "Terjadi kesalahan jaringan. Silakan periksa koneksi dan coba lagi.",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   // Village center coordinates (Tarubatang, Selo, Boyolali)
@@ -179,10 +262,49 @@ export default function ContactPage() {
                 Hubungi Kami
               </h2>
 
+              {/* Status Message */}
+              {submitStatus.type && (
+                <div
+                  className={`mb-6 p-4 rounded-lg flex items-start space-x-3 ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 border border-green-200"
+                      : "bg-red-50 border border-red-200"
+                  }`}
+                >
+                  {submitStatus.type === "success" ? (
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  )}
+                  <div className="flex-1">
+                    <p
+                      className={`text-sm font-medium ${
+                        submitStatus.type === "success"
+                          ? "text-green-800"
+                          : "text-red-800"
+                      }`}
+                    >
+                      {submitStatus.type === "success" ? "Berhasil!" : "Gagal!"}
+                    </p>
+                    <p
+                      className={`text-sm ${
+                        submitStatus.type === "success"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {submitStatus.message}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="name">Nama Lengkap *</Label>
+                    <Label htmlFor="name">
+                      Nama Lengkap <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="name"
                       name="name"
@@ -191,10 +313,14 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="Masukkan nama lengkap"
+                      className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">
+                      Email <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="email"
                       name="email"
@@ -203,6 +329,8 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="nama@email.com"
+                      className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -217,10 +345,14 @@ export default function ContactPage() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="08xx-xxxx-xxxx"
+                      className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="subject">Subjek *</Label>
+                    <Label htmlFor="subject">
+                      Subjek <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="subject"
                       name="subject"
@@ -229,12 +361,16 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleInputChange}
                       placeholder="Subjek pesan"
+                      className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="message">Pesan *</Label>
+                  <Label htmlFor="message">
+                    Pesan <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="message"
                     name="message"
@@ -242,8 +378,13 @@ export default function ContactPage() {
                     rows={6}
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Tulis pesan Anda di sini..."
+                    placeholder="Tulis pesan Anda di sini... (minimal 10 karakter)"
+                    className="mt-1"
+                    disabled={isSubmitting}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.message.length}/2000 karakter
+                  </p>
                 </div>
 
                 <Button
@@ -252,7 +393,10 @@ export default function ContactPage() {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    "Mengirim..."
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Mengirim...
+                    </>
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
@@ -260,6 +404,10 @@ export default function ContactPage() {
                     </>
                   )}
                 </Button>
+
+                <p className="text-xs text-gray-500 text-center">
+                  <span className="text-red-500">*</span> Field wajib diisi
+                </p>
               </form>
             </div>
 

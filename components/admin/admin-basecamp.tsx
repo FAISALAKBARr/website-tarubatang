@@ -33,6 +33,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
+import { TableBody } from "../ui/table";
 
 interface Basecamp {
   id: string;
@@ -693,7 +694,7 @@ export default function AdminBasecampPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
           Manajemen Basecamp
         </h1>
         <p className="text-gray-600">Kelola data basecamp Desa Tarubatang</p>
@@ -829,25 +830,27 @@ export default function AdminBasecampPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <TableBody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center">
-                      <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-                      <span className="text-gray-500">Memuat data...</span>
+                  <td colSpan={5}>
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+                      <p className="text-gray-600">Memuat data basecamp...</p>
                     </div>
                   </td>
                 </tr>
               ) : filteredBasecamps.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-12 text-center text-gray-500"
-                  >
-                    {searchTerm || filterStatus !== "all"
-                      ? "Tidak ada data yang sesuai dengan filter"
-                      : "Belum ada data basecamp"}
+                  <td colSpan={5}>
+                    <div className="text-center py-8">
+                      <Home className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">
+                        {searchTerm || filterStatus !== "all"
+                          ? "Tidak ada basecamp yang sesuai dengan filter"
+                          : "Belum ada data basecamp"}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -1127,7 +1130,7 @@ export default function AdminBasecampPage() {
                   </React.Fragment>
                 ))
               )}
-            </tbody>
+            </TableBody>
           </table>
         </div>
       </div>

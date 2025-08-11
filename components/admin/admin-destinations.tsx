@@ -26,6 +26,15 @@ import {
   RefreshCw,
 } from "lucide-react";
 import Image from "next/image";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+} from "@/components/ui/table";
+
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface Destination {
   id: string;
@@ -577,7 +586,7 @@ export default function AdminDestinations() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
           Manajemen Destinasi
         </h1>
         <p className="text-gray-600">Kelola destinasi wisata Desa Tarubatang</p>
@@ -695,187 +704,183 @@ export default function AdminDestinations() {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Destinasi
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Kategori
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Lokasi
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dibuat
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center">
-                      <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-                      <span className="text-gray-500">Memuat data...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : destinations.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-gray-500"
-                  >
-                    {searchTerm || selectedCategory !== "all"
-                      ? "Tidak ada data yang sesuai dengan filter"
-                      : "Belum ada data destinasi"}
-                  </td>
-                </tr>
-              ) : (
-                destinations.map((destination) => {
-                  const IconComponent = getCategoryIcon(destination.category);
-                  return (
-                    <tr key={destination.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          <div className="relative h-12 w-16 rounded-lg overflow-hidden mr-4">
-                            <button
-                              onClick={() =>
-                                openImageViewer(destination.images, 0)
-                              }
-                              className="w-full h-full"
-                            >
-                              <Image
-                                src={
-                                  destination.images[0] ||
-                                  "/placeholder.svg?height=48&width=64" ||
-                                  "/placeholder.svg"
+        <CardHeader>
+          <CardTitle className="text-lg">
+            Daftar Destinasi
+            {!loading && (
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({destinations.length} destinasi)
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+              <p className="text-gray-600">Memuat data destinasi...</p>
+            </div>
+          ) : destinations.length === 0 ? (
+            <div className="text-center py-8">
+              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">
+                {searchTerm || selectedCategory !== "all"
+                  ? "Tidak ada destinasi yang sesuai dengan filter"
+                  : "Belum ada data destinasi"}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Destinasi</TableHead>
+                    <TableHead>Kategori</TableHead>
+                    <TableHead>Lokasi</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Dibuat</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {destinations.map((destination) => {
+                    const IconComponent = getCategoryIcon(destination.category);
+                    return (
+                      <tr key={destination.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="relative h-12 w-16 rounded-lg overflow-hidden mr-4">
+                              <button
+                                onClick={() =>
+                                  openImageViewer(destination.images, 0)
                                 }
-                                alt={destination.name}
-                                fill
-                                className="object-cover hover:opacity-80 transition-opacity"
-                              />
-                            </button>
-                            {destination.images.length > 1 && (
-                              <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs px-1 rounded-tl">
-                                +{destination.images.length - 1}
+                                className="w-full h-full"
+                              >
+                                <Image
+                                  src={
+                                    destination.images[0] ||
+                                    "/placeholder.svg?height=48&width=64" ||
+                                    "/placeholder.svg"
+                                  }
+                                  alt={destination.name}
+                                  fill
+                                  className="object-cover hover:opacity-80 transition-opacity"
+                                />
+                              </button>
+                              {destination.images.length > 1 && (
+                                <div className="absolute bottom-0 right-0 bg-black/70 text-white text-xs px-1 rounded-tl">
+                                  +{destination.images.length - 1}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {destination.name}
                               </div>
-                            )}
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {destination.name}
-                            </div>
-                            <div className="text-sm text-gray-500 max-w-xs truncate">
-                              {destination.description}
-                            </div>
-                            <div className="text-sm text-green-600 font-medium">
-                              {destination.price}
+                              <div className="text-sm text-gray-500 max-w-xs truncate">
+                                {destination.description}
+                              </div>
+                              <div className="text-sm text-green-600 font-medium">
+                                {destination.price}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(
-                            destination.category
-                          )}`}
-                        >
-                          <IconComponent className="h-3 w-3 mr-1" />
-                          {destination.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 flex items-center">
-                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                          {destination.location}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            destination.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {destination.isActive ? (
-                            <>
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Aktif
-                            </>
-                          ) : (
-                            <>
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              Tidak Aktif
-                            </>
-                          )}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 flex items-center">
-                          <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-                          {formatDate(destination.createdAt)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() =>
-                              handleToggleStatus(
-                                destination.id,
-                                destination.isActive
-                              )
-                            }
-                            className={`p-2 rounded-lg ${
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(
+                              destination.category
+                            )}`}
+                          >
+                            <IconComponent className="h-3 w-3 mr-1" />
+                            {destination.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 flex items-center">
+                            <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                            {destination.location}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               destination.isActive
-                                ? "text-red-600 hover:bg-red-50"
-                                : "text-green-600 hover:bg-green-50"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
                             }`}
-                            title={
-                              destination.isActive ? "Nonaktifkan" : "Aktifkan"
-                            }
                           >
                             {destination.isActive ? (
-                              <EyeOff className="h-4 w-4" />
+                              <>
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Aktif
+                              </>
                             ) : (
-                              <Eye className="h-4 w-4" />
+                              <>
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                Tidak Aktif
+                              </>
                             )}
-                          </button>
-                          <button
-                            onClick={() => handleEdit(destination)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                            title="Edit"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDelete(destination.id, destination.name)
-                            }
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                            title="Hapus"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 flex items-center">
+                            <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+                            {formatDate(destination.createdAt)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() =>
+                                handleToggleStatus(
+                                  destination.id,
+                                  destination.isActive
+                                )
+                              }
+                              className={`p-2 rounded-lg ${
+                                destination.isActive
+                                  ? "text-red-600 hover:bg-red-50"
+                                  : "text-green-600 hover:bg-green-50"
+                              }`}
+                              title={
+                                destination.isActive
+                                  ? "Nonaktifkan"
+                                  : "Aktifkan"
+                              }
+                            >
+                              {destination.isActive ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleEdit(destination)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                              title="Edit"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleDelete(destination.id, destination.name)
+                              }
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                              title="Hapus"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
       </div>
 
       {/* Modal */}

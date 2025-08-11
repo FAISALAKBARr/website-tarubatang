@@ -20,8 +20,9 @@ model User {
   avatar       String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  submissions  Submission[]
+
   umkmProducts UMKM[]
+  handledSubmissions Submission[] @relation("SubmissionHandler")
 
   @@map("users")
 }
@@ -112,17 +113,35 @@ model Basecamp {
 
 model Submission {
   id        String           @id @default(cuid())
-  name      String
-  email     String
-  message   String
-  type      SubmissionType
+  name      String           
+  email     String           
+  phone     String?          
+  subject   String?          
+  message   String           
+  type      SubmissionType   @default(GUESTBOOK)
   status    SubmissionStatus @default(PENDING)
-  response  String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  userId    String?
-  user      User?            @relation(fields: [userId], references: [id])
+  priority  SubmissionPriority @default(NORMAL)
+  
+  response     String?       
+  responseBy   String?       
+  responseAt   DateTime?     
+  
+  readAt       DateTime?     
+  ipAddress    String?       
+  userAgent    String?       
+  source       String?       
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
+  handlerId    String?
+  handler      User?         @relation("SubmissionHandler", fields: [handlerId], references: [id])
+
+  @@index([email])
+  @@index([status])
+  @@index([type])
+  @@index([priority])
+  @@index([createdAt])
   @@map("submissions")
 }
 
@@ -166,16 +185,26 @@ enum Status {
 }
 
 enum SubmissionType {
-  GUESTBOOK
-  VOLUNTEER
-  FEEDBACK
-  COMPLAINT
-  BUSINESS
+  GUESTBOOK     
+  FEEDBACK      
+  COMPLAINT     
+  INQUIRY       
+  BUSINESS      
+  VOLUNTEER     
+  OTHER         
 }
 
 enum SubmissionStatus {
   PENDING
-  REVIEWED
-  RESPONDED
+  READ
+  REPLIED
   CLOSED
+  ARCHIVED
+}
+
+enum SubmissionPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
 }

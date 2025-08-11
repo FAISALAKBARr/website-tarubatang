@@ -26,6 +26,11 @@ import {
   Utensils,
   Coffee,
   ExternalLink,
+  Shield,
+  Clock,
+  Mail,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -260,11 +265,70 @@ export default function HomePage() {
   const [guestbookForm, setGuestbookForm] = useState({
     name: "",
     email: "",
+    phone: "",
+    subject: "",
     message: "",
     type: "guestbook",
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!guestbookForm.name.trim() || guestbookForm.name.trim().length < 2) {
+      errors.push("Nama harus diisi minimal 2 karakter");
+    }
+
+    if (!guestbookForm.email.trim()) {
+      errors.push("Email harus diisi");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestbookForm.email)) {
+      errors.push("Format email tidak valid");
+    }
+
+    if (!guestbookForm.subject.trim()) {
+      errors.push("Subjek harus diisi");
+    }
+
+    if (
+      !guestbookForm.message.trim() ||
+      guestbookForm.message.trim().length < 10
+    ) {
+      errors.push("Pesan harus diisi minimal 10 karakter");
+    }
+
+    if (guestbookForm.phone && guestbookForm.phone.length > 20) {
+      errors.push("Nomor telepon terlalu panjang");
+    }
+
+    if (guestbookForm.name.length > 100) {
+      errors.push("Nama terlalu panjang (maksimal 100 karakter)");
+    }
+
+    if (guestbookForm.subject.length > 200) {
+      errors.push("Subjek terlalu panjang (maksimal 200 karakter)");
+    }
+
+    if (guestbookForm.message.length > 2000) {
+      errors.push("Pesan terlalu panjang (maksimal 2000 karakter)");
+    }
+
+    return errors;
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setGuestbookForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // Modal handlers
   const openImageModal = (images: string[], index: number, title: string) => {
@@ -499,8 +563,21 @@ export default function HomePage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Reset status
+    setSubmitStatus({ type: null, message: "" });
+
+    // Validate form
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setSubmitStatus({
+        type: "error",
+        message: errors.join(". "),
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    setSubmitMessage("");
 
     try {
       const response = await fetch("/api/submissions", {
@@ -510,27 +587,42 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           ...guestbookForm,
+          type: "guestbook", // Set type sebagai guestbook untuk homepage
           timestamp: new Date().toISOString(),
         }),
       });
 
-      if (response.ok) {
-        setSubmitMessage("Terima kasih! Pesan Anda telah terkirim.");
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus({
+          type: "success",
+          message:
+            result.message ||
+            "Pesan berhasil dikirim! Terima kasih, kami akan merespons dalam 1-2 hari kerja.",
+        });
+
         setGuestbookForm({
           name: "",
           email: "",
+          phone: "",
+          subject: "",
           message: "",
           type: "guestbook",
         });
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        setSubmitMessage(
-          errorData.message || "Terjadi kesalahan. Silakan coba lagi."
-        );
+        setSubmitStatus({
+          type: "error",
+          message: result.message || "Terjadi kesalahan. Silakan coba lagi.",
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setSubmitMessage("Terjadi kesalahan. Silakan coba lagi.");
+      setSubmitStatus({
+        type: "error",
+        message:
+          "Terjadi kesalahan jaringan. Silakan periksa koneksi dan coba lagi.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -1428,88 +1520,202 @@ export default function HomePage() {
                 Tarubatang
               </p>
             </div>
-            <Card>
-              <CardContent className="p-6">
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Nama Lengkap</Label>
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-8">
+                {/* Status Message */}
+                {submitStatus.type && (
+                  <div
+                    className={`mb-6 p-4 rounded-lg flex items-start space-x-3 ${
+                      submitStatus.type === "success"
+                        ? "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                        : "bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800"
+                    }`}
+                  >
+                    {submitStatus.type === "success" ? (
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      <p
+                        className={`text-sm font-medium ${
+                          submitStatus.type === "success"
+                            ? "text-green-800 dark:text-green-400"
+                            : "text-red-800 dark:text-red-400"
+                        }`}
+                      >
+                        {submitStatus.type === "success"
+                          ? "Berhasil!"
+                          : "Gagal!"}
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          submitStatus.type === "success"
+                            ? "text-green-600 dark:text-green-300"
+                            : "text-red-600 dark:text-red-300"
+                        }`}
+                      >
+                        {submitStatus.message}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-sm font-medium">
+                        Nama Lengkap <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="name"
+                        name="name"
                         type="text"
                         value={guestbookForm.name}
-                        onChange={(e) =>
-                          setGuestbookForm({
-                            ...guestbookForm,
-                            name: e.target.value,
-                          })
-                        }
+                        onChange={handleInputChange}
                         required
+                        disabled={isSubmitting}
                         placeholder="Masukkan nama lengkap"
+                        className="h-11"
+                        maxLength={100}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        {guestbookForm.name.length}/100 karakter
+                      </p>
                     </div>
-                    <div>
-                      <Label htmlFor="email">Email</Label>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        Email <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="email"
+                        name="email"
                         type="email"
                         value={guestbookForm.email}
-                        onChange={(e) =>
-                          setGuestbookForm({
-                            ...guestbookForm,
-                            email: e.target.value,
-                          })
-                        }
+                        onChange={handleInputChange}
                         required
-                        placeholder="Masukkan email"
+                        disabled={isSubmitting}
+                        placeholder="nama@email.com"
+                        className="h-11"
                       />
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="message">Pesan</Label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-medium">
+                        Nomor Telepon
+                      </Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={guestbookForm.phone}
+                        onChange={handleInputChange}
+                        disabled={isSubmitting}
+                        placeholder="08xx-xxxx-xxxx (opsional)"
+                        className="h-11"
+                        maxLength={20}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Opsional - untuk kemudahan follow up
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="subject" className="text-sm font-medium">
+                        Subjek <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="subject"
+                        name="subject"
+                        type="text"
+                        value={guestbookForm.subject}
+                        onChange={handleInputChange}
+                        required
+                        disabled={isSubmitting}
+                        placeholder="Topik/subjek pesan"
+                        className="h-11"
+                        maxLength={200}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {guestbookForm.subject.length}/200 karakter
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message" className="text-sm font-medium">
+                      Pesan <span className="text-red-500">*</span>
+                    </Label>
                     <Textarea
                       id="message"
+                      name="message"
                       value={guestbookForm.message}
-                      onChange={(e) =>
-                        setGuestbookForm({
-                          ...guestbookForm,
-                          message: e.target.value,
-                        })
-                      }
+                      onChange={handleInputChange}
                       required
-                      placeholder="Tulis pesan atau pertanyaan Anda"
-                      rows={4}
+                      disabled={isSubmitting}
+                      placeholder="Tulis pesan, pengalaman, saran, atau pertanyaan Anda di sini..."
+                      rows={6}
+                      className="resize-none"
+                      maxLength={2000}
                     />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Mengirim...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Kirim Pesan
-                      </>
-                    )}
-                  </Button>
-                  {submitMessage && (
-                    <div
-                      className={`text-center text-sm p-3 rounded ${
-                        submitMessage.includes("Terima kasih")
-                          ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                          : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                      }`}
-                    >
-                      {submitMessage}
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Minimal 10 karakter</span>
+                      <span>{guestbookForm.message.length}/2000 karakter</span>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="flex flex-col space-y-4">
+                    <Button
+                      type="submit"
+                      className="w-full h-12 text-base font-medium"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Mengirim Pesan...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-5 w-5" />
+                          Kirim Pesan
+                        </>
+                      )}
+                    </Button>
+
+                    <p className="text-xs text-gray-500 text-center">
+                      <span className="text-red-500">*</span> Field wajib diisi
+                    </p>
+                  </div>
                 </form>
+
+                {/* Help Text */}
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <p className="flex items-center">
+                      <Shield className="h-4 w-4 mr-2 text-green-600" />
+                      Informasi Anda aman dan tidak akan dibagikan kepada pihak
+                      ketiga
+                    </p>
+                    <p className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-blue-600" />
+                      Tim kami akan merespons dalam 1-2 hari kerja
+                    </p>
+                    <p className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2 text-purple-600" />
+                      Untuk pertanyaan mendesak, kunjungi halaman{" "}
+                      <Link
+                        href="/kontak"
+                        className="text-blue-600 hover:underline ml-1"
+                      >
+                        Kontak
+                      </Link>
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

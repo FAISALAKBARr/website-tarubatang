@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,9 +30,10 @@ import Link from "next/link";
 import AdminDestinations from "@/components/admin/admin-destinations";
 import AdminEvents from "@/components/admin/admin-events";
 import AdminGallery from "@/components/admin/admin-gallery";
-import AdminUsers from "@/components/admin/admin-users";
+// import AdminUsers from "@/components/admin/admin-users";
 import AdminUMKM from "@/components/admin/admin-umkm";
 import AdminBasecamp from "@/components/admin/admin-basecamp";
+import AdminSubmissions from "@/components/admin/admin-submissions";
 import ComprehensiveAnalytics from "@/components/admin/admin-analytics";
 
 // Add the interfaces that ComprehensiveAnalytics expects
@@ -146,6 +147,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key for child components
 
   // Add analytics data state with proper initialization
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
@@ -183,6 +185,8 @@ export default function AdminDashboard() {
     }
 
     setUser(parsedUser);
+    // Load initial data
+    loadDashboardData();
   }, [router]);
 
   useEffect(() => {
@@ -200,108 +204,200 @@ export default function AdminDashboard() {
     };
   }, []);
 
+  // Function to load all dashboard data
+  const loadDashboardData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // Fetch stats data
+      // const statsResponse = await fetch('/api/admin/stats', { headers });
+      // if (statsResponse.ok) {
+      //   const statsData = await statsResponse.json();
+      //   setStats(statsData);
+      // }
+
+      // For now, simulate updated stats
+      setStats((prevStats) => ({
+        totalDestinations: Math.max(
+          1,
+          prevStats.totalDestinations + Math.floor(Math.random() * 3) - 1
+        ),
+        totalUsers: Math.max(
+          1,
+          prevStats.totalUsers + Math.floor(Math.random() * 10) - 3
+        ),
+        totalEvents: Math.max(
+          1,
+          prevStats.totalEvents + Math.floor(Math.random() * 2) - 1
+        ),
+        monthlyVisitors: Math.max(
+          100,
+          prevStats.monthlyVisitors + Math.floor(Math.random() * 150) - 75
+        ),
+      }));
+
+      // Simulasi delay loading untuk UX yang lebih baik
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+      throw error; // Re-throw untuk ditangkap oleh refreshStats
+    }
+  };
+
   // Function to load analytics data
   const loadAnalyticsData = async () => {
     setAnalyticsLoading(true);
     try {
-      // This is where you would fetch real data from your API
-      // For now, using mock data that matches the expected structure
-      const mockData: AnalyticsData = {
-        destinations: [
-          {
-            id: "1",
-            name: "Gunung Tarubatang",
-            category: "Gunung",
-            description: "Destinasi hiking populer",
-            price: "Gratis",
-            location: "Desa Tarubatang",
-            images: ["image1.jpg"],
-            rating: 4.5,
-            totalReviews: 45,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          // Add more mock destinations as needed
-        ],
-        events: [
-          {
-            id: "1",
-            name: "Festival Desa",
-            category: "Budaya",
-            description: "Festival tahunan desa",
-            date: new Date().toISOString(),
-            location: "Balai Desa",
-            currentParticipants: 150,
-            maxParticipants: 200,
-            images: ["event1.jpg"],
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          // Add more mock events as needed
-        ],
-        umkm: [
-          {
-            id: "1",
-            name: "Kerajinan Bambu",
-            category: "Kerajinan",
-            description: "Produk kerajinan bambu lokal",
-            price: "50000",
-            stock: 20,
-            images: ["umkm1.jpg"],
-            contact: "081234567890",
-            location: "RT 01 RW 02",
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          // Add more mock UMKM as needed
-        ],
-        basecamps: [
-          {
-            id: "1",
-            namaBasecamp: "Basecamp Gunung",
-            fasilitas: ["Parkir", "Toilet", "Warung"],
-            dayaTampungKendaraan: 50,
-            dayaTampungOrang: 100,
-            nomorWa: "081234567890",
-            images: ["basecamp1.jpg"],
-            lokasi: "Kaki Gunung Tarubatang",
-            pemilik: "Pak Sardi",
-            menuMakanan: ["Nasi Gudeg", "Soto"],
-            menuMinuman: ["Teh", "Kopi"],
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          // Add more mock basecamps as needed
-        ],
-        galleries: [
-          {
-            id: "1",
-            title: "Pemandangan Desa",
-            category: "Landscape",
-            images: ["gallery1.jpg", "gallery2.jpg"],
-            description: "Koleksi foto pemandangan desa",
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          // Add more mock galleries as needed
-        ],
-        users: [
-          {
-            id: "1",
-            name: "Admin User",
-            email: "admin@example.com",
-            role: "ADMIN",
-            status: "ACTIVE",
-            createdAt: new Date().toISOString(),
-          },
-          // Add more mock users as needed
-        ],
+      const token = localStorage.getItem("token");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       };
+
+      // Replace with actual API calls
+      const [destinations, events, produk, basecamps, galleries, users] =
+        await Promise.all([
+          fetch("/api/admin/destinations", { headers }).then((res) =>
+            res.json()
+          ),
+          fetch("/api/events", { headers }).then((res) => res.json()),
+          fetch("/api/produk", { headers }).then((res) => res.json()),
+          fetch("/api/basecamps", { headers }).then((res) => res.json()),
+          fetch("/api/galleries", { headers }).then((res) => res.json()),
+          fetch("/api/users", { headers }).then((res) => res.json()),
+        ]);
+
+      // For now, using mock data with random updates
+      // const mockData: AnalyticsData = {
+      //   destinations: [
+      //     {
+      //       id: "1",
+      //       name: "Gunung Tarubatang",
+      //       category: "Gunung",
+      //       description: "Destinasi hiking populer",
+      //       price: "Gratis",
+      //       location: "Desa Tarubatang",
+      //       images: ["image1.jpg"],
+      //       rating: 4.5,
+      //       totalReviews: 45 + Math.floor(Math.random() * 10),
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Air Terjun Sekumpul",
+      //       category: "Air Terjun",
+      //       description: "Air terjun yang indah",
+      //       price: "10000",
+      //       location: "Desa Sekumpul",
+      //       images: ["waterfall1.jpg"],
+      //       rating: 4.7,
+      //       totalReviews: 32 + Math.floor(Math.random() * 5),
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   events: [
+      //     {
+      //       id: "1",
+      //       name: "Festival Desa",
+      //       category: "Budaya",
+      //       description: "Festival tahunan desa",
+      //       date: new Date().toISOString(),
+      //       location: "Balai Desa",
+      //       currentParticipants: 150 + Math.floor(Math.random() * 20),
+      //       maxParticipants: 200,
+      //       images: ["event1.jpg"],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Workshop Kerajinan",
+      //       category: "Workshop",
+      //       description: "Belajar membuat kerajinan lokal",
+      //       date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      //       location: "Sanggar Seni",
+      //       currentParticipants: 25 + Math.floor(Math.random() * 10),
+      //       maxParticipants: 50,
+      //       images: ["workshop1.jpg"],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   umkm: [
+      //     {
+      //       id: "1",
+      //       name: "Kerajinan Bambu",
+      //       category: "Kerajinan",
+      //       description: "Produk kerajinan bambu lokal",
+      //       price: "50000",
+      //       stock: 20 + Math.floor(Math.random() * 10),
+      //       images: ["umkm1.jpg"],
+      //       contact: "081234567890",
+      //       location: "RT 01 RW 02",
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   basecamps: [
+      //     {
+      //       id: "1",
+      //       namaBasecamp: "Basecamp Gunung",
+      //       fasilitas: ["Parkir", "Toilet", "Warung"],
+      //       dayaTampungKendaraan: 50,
+      //       dayaTampungOrang: 100,
+      //       nomorWa: "081234567890",
+      //       images: ["basecamp1.jpg"],
+      //       lokasi: "Kaki Gunung Tarubatang",
+      //       pemilik: "Pak Sardi",
+      //       menuMakanan: ["Nasi Gudeg", "Soto"],
+      //       menuMinuman: ["Teh", "Kopi"],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   galleries: [
+      //     {
+      //       id: "1",
+      //       title: "Pemandangan Desa",
+      //       category: "Landscape",
+      //       images: ["gallery1.jpg", "gallery2.jpg"],
+      //       description: "Koleksi foto pemandangan desa",
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   users: [
+      //     {
+      //       id: "1",
+      //       name: "Admin User",
+      //       email: "admin@example.com",
+      //       role: "ADMIN",
+      //       status: "ACTIVE",
+      //       createdAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Regular User",
+      //       email: "user@example.com",
+      //       role: "USER",
+      //       status: "ACTIVE",
+      //       createdAt: new Date().toISOString(),
+      //     },
+      //   ],
+      // };
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -309,7 +405,6 @@ export default function AdminDashboard() {
       setAnalyticsData(mockData);
     } catch (error) {
       console.error("Error loading analytics data:", error);
-      // Keep the empty state on error
     } finally {
       setAnalyticsLoading(false);
     }
@@ -321,6 +416,53 @@ export default function AdminDashboard() {
       loadAnalyticsData();
     }
   }, [activeTab]);
+
+  // Enhanced refresh function
+  const refreshStats = async () => {
+    setIsRefreshing(true);
+    try {
+      // Update current time
+      setCurrentTime(new Date());
+
+      // Load dashboard data
+      await loadDashboardData();
+
+      // If analytics tab is active, refresh analytics data
+      if (activeTab === "analytics") {
+        await loadAnalyticsData();
+      }
+
+      // Increment refresh key to force child components to refresh
+      setRefreshKey((prev) => prev + 1);
+
+      // Dispatch custom event to notify child components
+      window.dispatchEvent(
+        new CustomEvent("dashboardRefresh", {
+          detail: {
+            timestamp: new Date().toISOString(),
+            tab: activeTab,
+            success: true,
+          },
+        })
+      );
+
+      // Show success feedback
+      console.log("Dashboard refreshed successfully");
+    } catch (error) {
+      console.error("Error refreshing dashboard:", error);
+      // Dispatch error event
+      window.dispatchEvent(
+        new CustomEvent("dashboardRefreshError", {
+          detail: { error: error.message, timestamp: new Date().toISOString() },
+        })
+      );
+    } finally {
+      // Tambah minimum loading time untuk UX yang lebih baik
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  };
 
   // Update fungsi handleLogout
   const handleLogout = async () => {
@@ -359,22 +501,6 @@ export default function AdminDashboard() {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-  };
-
-  const refreshStats = async () => {
-    setIsRefreshing(true);
-    try {
-      // Simulated API call - replace with actual API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Update stats here
-      if (activeTab === "analytics") {
-        await loadAnalyticsData();
-      }
-    } catch (error) {
-      console.error("Error refreshing stats:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
   };
 
   const handleRefreshAnalytics = () => {
@@ -426,6 +552,11 @@ export default function AdminDashboard() {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
+                  })}{" "}
+                  -{" "}
+                  {currentTime.toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </p>
               </div>
@@ -435,19 +566,23 @@ export default function AdminDashboard() {
                 size="sm"
                 onClick={refreshStats}
                 disabled={isRefreshing}
+                className="relative"
               >
                 <RefreshCw
                   className={`h-4 w-4 mr-2 ${
                     isRefreshing ? "animate-spin" : ""
                   }`}
                 />
-                Refresh
+                {isRefreshing ? "Memuat..." : "Refresh"}
+                {isRefreshing && (
+                  <div className="absolute inset-0 bg-white/50 rounded-md"></div>
+                )}
               </Button>
 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => (window.location.href = "/")} // Gunakan window.location.href
+                onClick={() => (window.location.href = "/")}
               >
                 <Home className="h-4 w-4 mr-2" />
                 Lihat Website
@@ -472,6 +607,9 @@ export default function AdminDashboard() {
               </h2>
               <p className="text-green-100">
                 Kelola website Desa Tarubatang dengan mudah dari dashboard ini
+              </p>
+              <p className="text-green-200 text-sm mt-2">
+                Terakhir diperbarui: {currentTime.toLocaleTimeString("id-ID")}
               </p>
             </div>
             <div className="hidden lg:block">
@@ -631,7 +769,7 @@ export default function AdminDashboard() {
             onValueChange={handleTabChange}
           >
             <div className="p-6 pb-0">
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 h-auto bg-gray-100">
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto bg-gray-100">
                 <TabsTrigger
                   value="destinations"
                   className="flex items-center space-x-2 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -686,48 +824,28 @@ export default function AdminDashboard() {
 
             <div className="p-6 pt-0">
               <TabsContent value="destinations" className="mt-0">
-                <AdminDestinations />
+                <AdminDestinations key={`destinations-${refreshKey}`} />
               </TabsContent>
 
               <TabsContent value="umkm" className="mt-0">
-                <AdminUMKM />
+                <AdminUMKM key={`produk-${refreshKey}`} />
               </TabsContent>
 
               <TabsContent value="basecamp" className="mt-0">
-                <AdminBasecamp />
+                <AdminBasecamp key={`basecamp-${refreshKey}`} />
               </TabsContent>
 
               <TabsContent value="events" className="mt-0">
-                <AdminEvents />
+                <AdminEvents key={`events-${refreshKey}`} />
               </TabsContent>
 
               <TabsContent value="gallery" className="mt-0">
-                <AdminGallery />
-              </TabsContent>
-
-              <TabsContent value="users" className="mt-0">
-                <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Manajemen Pengguna
-                  </h3>
-                  <p className="text-gray-600">
-                    Kelola akun pengguna dan hak akses
-                  </p>
-                </div>
-                <AdminUsers />
+                <AdminGallery key={`gallery-${refreshKey}`} />
               </TabsContent>
 
               <TabsContent value="analytics" className="mt-0">
-                {/* <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Analytics & Laporan
-                  </h3>
-                  <p className="text-gray-600">
-                    Lihat statistik website dan analisis pengunjung
-                  </p>
-                </div> */}
-                {/* Fixed: Now passing the required data prop */}
                 <ComprehensiveAnalytics
+                  key={`analytics-${refreshKey}`}
                   data={analyticsData}
                   loading={analyticsLoading}
                   onRefresh={handleRefreshAnalytics}
@@ -735,29 +853,414 @@ export default function AdminDashboard() {
               </TabsContent>
 
               <TabsContent value="message" className="mt-0">
-                <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Pesan & Buku Tamu
-                  </h3>
-                  <p className="text-gray-600">
-                    Kelola pesan masuk dari pengunjung website
-                  </p>
-                </div>
-                <div className="p-8 text-center bg-gray-50 rounded-lg">
-                  <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Fitur Pesan Segera Hadir
-                  </h3>
-                  <p className="text-gray-600">
-                    Fitur manajemen pesan dan buku tamu sedang dalam
-                    pengembangan
-                  </p>
-                </div>
+                <AdminSubmissions key={`submissions-${refreshKey}`} />
               </TabsContent>
             </div>
           </Tabs>
         </Card>
+
+        {/* Footer dengan informasi refresh terakhir */}
+        <div className="mt-8 text-center text-sm text-gray-500">
+          <p>
+            Dashboard terakhir diperbarui:{" "}
+            {currentTime.toLocaleTimeString("id-ID")}
+          </p>
+          <p className="mt-1">
+            Klik tombol refresh untuk memperbarui data terbaru
+          </p>
+        </div>
       </div>
     </div>
   );
 }
+
+// Tambahan: Custom hook untuk refresh dashboard
+export const useDashboardRefresh = () => {
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const refresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Trigger refresh event
+      window.dispatchEvent(
+        new CustomEvent("dashboardRefresh", {
+          detail: { timestamp: new Date().toISOString() },
+        })
+      );
+
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error("Refresh failed:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  return { lastRefresh, isRefreshing, refresh };
+};
+
+// Enhanced refresh functionality dengan debounce
+const useDebounce = (callback: () => void, delay: number) => {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  return useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      callback();
+    }, delay);
+  }, [callback, delay]);
+};
+
+// Additional utility functions for the dashboard
+
+// Function to show refresh success notification
+const showRefreshNotification = (type: "success" | "error" = "success") => {
+  if (typeof window !== "undefined") {
+    const event = new CustomEvent("showNotification", {
+      detail: {
+        type,
+        message:
+          type === "success"
+            ? "Dashboard berhasil diperbarui!"
+            : "Gagal memperbarui dashboard",
+        duration: 3000,
+      },
+    });
+    window.dispatchEvent(event);
+  }
+};
+
+// Enhanced analytics data loader with error handling
+const loadAnalyticsDataWithRetry = async (
+  retryCount = 3
+): Promise<AnalyticsData> => {
+  for (let i = 0; i < retryCount; i++) {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // In production, replace with actual API calls
+      const responses = await Promise.allSettled([
+        fetch("/api/destinations", { headers }),
+        fetch("/api/events", { headers }),
+        fetch("/api/produk", { headers }),
+        fetch("/api/basecamps", { headers }),
+        fetch("/api/galleries", { headers }),
+        // fetch("/api/users", { headers }),
+      ]);
+
+      // For now, return enhanced mock data
+      // return {
+      //   destinations: [
+      //     {
+      //       id: "1",
+      //       name: "Gunung Tarubatang",
+      //       category: "Gunung",
+      //       description: "Destinasi hiking populer dengan pemandangan indah",
+      //       price: "Gratis",
+      //       location: "Desa Tarubatang",
+      //       images: ["mountain1.jpg"],
+      //       rating: 4.5,
+      //       totalReviews: 45 + Math.floor(Math.random() * 20),
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Air Terjun Sekumpul",
+      //       category: "Air Terjun",
+      //       description:
+      //         "Air terjun yang menakjubkan dengan ketinggian 50 meter",
+      //       price: "15000",
+      //       location: "Desa Sekumpul",
+      //       images: ["waterfall1.jpg"],
+      //       rating: 4.7,
+      //       totalReviews: 32 + Math.floor(Math.random() * 15),
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "3",
+      //       name: "Pantai Sunrise",
+      //       category: "Pantai",
+      //       description:
+      //         "Pantai dengan pemandangan matahari terbit yang spektakuler",
+      //       price: "5000",
+      //       location: "Pesisir Timur",
+      //       images: ["beach1.jpg"],
+      //       rating: 4.3,
+      //       totalReviews: 67 + Math.floor(Math.random() * 25),
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   events: [
+      //     {
+      //       id: "1",
+      //       name: "Festival Budaya Tarubatang",
+      //       category: "Budaya",
+      //       description: "Festival tahunan untuk merayakan budaya lokal",
+      //       date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      //       endDate: new Date(
+      //         Date.now() + 17 * 24 * 60 * 60 * 1000
+      //       ).toISOString(),
+      //       location: "Balai Desa Tarubatang",
+      //       currentParticipants: 150 + Math.floor(Math.random() * 30),
+      //       maxParticipants: 300,
+      //       price: "25000",
+      //       images: ["festival1.jpg"],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Workshop Kerajinan Tradisional",
+      //       category: "Workshop",
+      //       description:
+      //         "Belajar membuat kerajinan tangan tradisional dari pengrajin lokal",
+      //       date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      //       location: "Sanggar Seni Desa",
+      //       currentParticipants: 25 + Math.floor(Math.random() * 15),
+      //       maxParticipants: 50,
+      //       price: "50000",
+      //       images: ["workshop1.jpg"],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   umkm: [
+      //     {
+      //       id: "1",
+      //       name: "Kerajinan Bambu Berkah",
+      //       category: "Kerajinan",
+      //       description:
+      //         "Produk kerajinan bambu berkualitas tinggi buatan tangan",
+      //       price: "75000",
+      //       stock: 20 + Math.floor(Math.random() * 15),
+      //       images: ["bamboo1.jpg"],
+      //       contact: "081234567890",
+      //       location: "RT 01 RW 02, Desa Tarubatang",
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Kopi Robusta Tarubatang",
+      //       category: "Makanan & Minuman",
+      //       description: "Kopi robusta premium hasil kebun lokal",
+      //       price: "45000",
+      //       stock: 50 + Math.floor(Math.random() * 20),
+      //       images: ["coffee1.jpg"],
+      //       contact: "081234567891",
+      //       location: "RT 03 RW 01, Desa Tarubatang",
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   basecamps: [
+      //     {
+      //       id: "1",
+      //       namaBasecamp: "Basecamp Gunung Tarubatang",
+      //       fasilitas: [
+      //         "Tempat Parkir",
+      //         "Toilet Umum",
+      //         "Warung Makan",
+      //         "Musholla",
+      //         "Area Istirahat",
+      //       ],
+      //       dayaTampungKendaraan: 50,
+      //       dayaTampungOrang: 150,
+      //       nomorWa: "081234567890",
+      //       images: ["basecamp1.jpg"],
+      //       lokasi: "Kaki Gunung Tarubatang, Jalur Utama",
+      //       pemilik: "Pak Sardi Wijaya",
+      //       menuMakanan: ["Nasi Gudeg", "Soto Ayam", "Mie Ayam", "Nasi Rames"],
+      //       menuMinuman: [
+      //         "Teh Manis",
+      //         "Kopi Tubruk",
+      //         "Jus Jeruk",
+      //         "Air Mineral",
+      //       ],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       namaBasecamp: "Pos Pendakian Sekumpul",
+      //       fasilitas: ["Tempat Parkir", "Toilet", "Warung", "Penyewaan Alat"],
+      //       dayaTampungKendaraan: 30,
+      //       dayaTampungOrang: 100,
+      //       nomorWa: "081234567892",
+      //       images: ["basecamp2.jpg"],
+      //       lokasi: "Dekat Air Terjun Sekumpul",
+      //       pemilik: "Bu Siti Aminah",
+      //       menuMakanan: ["Nasi Pecel", "Bakso", "Gado-gado"],
+      //       menuMinuman: ["Es Teh", "Kopi", "Jus Alpukat"],
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   galleries: [
+      //     {
+      //       id: "1",
+      //       title: "Keindahan Alam Tarubatang",
+      //       category: "Landscape",
+      //       images: ["landscape1.jpg", "landscape2.jpg", "landscape3.jpg"],
+      //       description:
+      //         "Koleksi foto pemandangan alam yang menakjubkan di sekitar Desa Tarubatang",
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       title: "Budaya dan Tradisi",
+      //       category: "Budaya",
+      //       images: ["culture1.jpg", "culture2.jpg"],
+      //       description:
+      //         "Dokumentasi kegiatan budaya dan tradisi masyarakat Desa Tarubatang",
+      //       isActive: true,
+      //       createdAt: new Date().toISOString(),
+      //       updatedAt: new Date().toISOString(),
+      //     },
+      //   ],
+      //   users: [
+      //     {
+      //       id: "1",
+      //       name: "Admin Utama",
+      //       email: "admin@tarubatang.com",
+      //       phone: "081234567890",
+      //       role: "ADMIN",
+      //       status: "ACTIVE",
+      //       createdAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "2",
+      //       name: "Pengguna Regular",
+      //       email: "user1@gmail.com",
+      //       phone: "081234567891",
+      //       role: "USER",
+      //       status: "ACTIVE",
+      //       createdAt: new Date().toISOString(),
+      //     },
+      //     {
+      //       id: "3",
+      //       name: "Moderator Konten",
+      //       email: "moderator@tarubatang.com",
+      //       phone: "081234567892",
+      //       role: "ADMIN",
+      //       status: "ACTIVE",
+      //       createdAt: new Date().toISOString(),
+      //     },
+      //   ],
+      // };
+    } catch (error) {
+      console.error(`Attempt ${i + 1} failed:`, error);
+      if (i === retryCount - 1) throw error;
+
+      // Wait before retry
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+
+  throw new Error("Max retries exceeded");
+};
+
+// Enhanced refresh function with better error handling and user feedback
+const createEnhancedRefreshFunction = (
+  setIsRefreshing: (loading: boolean) => void,
+  setCurrentTime: (time: Date) => void,
+  setStats: (stats: any) => void,
+  setRefreshKey: (key: number | ((prev: number) => number)) => void,
+  setAnalyticsData: (data: AnalyticsData) => void,
+  activeTab: string
+) => {
+  return async () => {
+    setIsRefreshing(true);
+
+    try {
+      // Show loading notification
+      showRefreshNotification("success");
+
+      // Update current time immediately
+      const now = new Date();
+      setCurrentTime(now);
+
+      // Simulate stats update (replace with real API call)
+      setStats((prevStats) => ({
+        totalDestinations: Math.max(
+          1,
+          prevStats.totalDestinations + Math.floor(Math.random() * 3) - 1
+        ),
+        totalUsers: Math.max(
+          1,
+          prevStats.totalUsers + Math.floor(Math.random() * 10) - 5
+        ),
+        totalEvents: Math.max(
+          1,
+          prevStats.totalEvents + Math.floor(Math.random() * 2) - 1
+        ),
+        monthlyVisitors: Math.max(
+          100,
+          prevStats.monthlyVisitors + Math.floor(Math.random() * 200) - 100
+        ),
+      }));
+
+      // If analytics tab is active, refresh analytics data
+      if (activeTab === "analytics") {
+        const newAnalyticsData = await loadAnalyticsDataWithRetry();
+        setAnalyticsData(newAnalyticsData);
+      }
+
+      // Increment refresh key to force child components to refresh
+      setRefreshKey((prev) => prev + 1);
+
+      // Dispatch custom event to notify child components
+      window.dispatchEvent(
+        new CustomEvent("dashboardRefresh", {
+          detail: {
+            timestamp: now.toISOString(),
+            tab: activeTab,
+            success: true,
+          },
+        })
+      );
+
+      console.log(
+        "Dashboard refreshed successfully at:",
+        now.toLocaleTimeString("id-ID")
+      );
+    } catch (error) {
+      console.error("Error refreshing dashboard:", error);
+      showRefreshNotification("error");
+
+      // Dispatch error event
+      window.dispatchEvent(
+        new CustomEvent("dashboardRefreshError", {
+          detail: { error: error.message, timestamp: new Date().toISOString() },
+        })
+      );
+    } finally {
+      // Add minimum loading time for better UX
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  };
+};

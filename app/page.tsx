@@ -1089,7 +1089,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Desa Tarubatang dalam Angka
+              Data Sumber Daya Aktif di Desa Tarubatang
             </h2>
             <p className="text-muted-foreground">
               Statistik lengkap destinasi wisata dan aktivitas di desa kami

@@ -176,7 +176,7 @@ export default function AboutPage() {
             </div>
             <div className="relative order-1 lg:order-2">
               <Image
-                src="/placeholder.svg?height=400&width=500"
+                src="/kantor-desa.jpg?height=400&width=500"
                 alt="Pemandangan Desa Tarubatang"
                 width={500}
                 height={400}
@@ -305,7 +305,7 @@ export default function AboutPage() {
             </div>
             <div className="relative order-1 lg:order-2">
               <Image
-                src="/placeholder.svg?height=400&width=500"
+                src="/view.jpg?height=400&width=500"
                 alt="Sejarah Desa Tarubatang"
                 width={500}
                 height={400}

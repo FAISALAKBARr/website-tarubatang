@@ -535,7 +535,7 @@ export default function Header() {
                           className="flex items-center px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/10 rounded-md transition-colors"
                         >
                           <User className="mr-3 h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">Masuk ke Akun</span>
+                          <span className="truncate">Masuk Sebagai Admin</span>
                         </Link>
                       )}
                     </div>

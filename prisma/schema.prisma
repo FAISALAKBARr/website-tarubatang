@@ -9,20 +9,19 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(cuid())
-  email        String       @unique
-  name         String
-  password     String
-  phone        String?
-  address      String?
-  role         Role         @default(USER)
-  status       Status       @default(ACTIVE)
-  avatar       String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-
-  umkmProducts UMKM[]
+  id                 String       @id @default(cuid())
+  email              String       @unique
+  name               String
+  password           String
+  phone              String?
+  address            String?
+  role               Role         @default(USER)
+  status             Status       @default(ACTIVE)
+  avatar             String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
   handledSubmissions Submission[] @relation("SubmissionHandler")
+  umkmProducts       UMKM[]
 
   @@map("users")
 }
@@ -112,30 +111,26 @@ model Basecamp {
 }
 
 model Submission {
-  id        String           @id @default(cuid())
-  name      String           
-  email     String           
-  phone     String?          
-  subject   String?          
-  message   String           
-  type      SubmissionType   @default(GUESTBOOK)
-  status    SubmissionStatus @default(PENDING)
-  priority  SubmissionPriority @default(NORMAL)
-  
-  response     String?       
-  responseBy   String?       
-  responseAt   DateTime?     
-  
-  readAt       DateTime?     
-  ipAddress    String?       
-  userAgent    String?       
-  source       String?       
-  
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-
-  handlerId    String?
-  handler      User?         @relation("SubmissionHandler", fields: [handlerId], references: [id])
+  id         String             @id @default(cuid())
+  name       String
+  email      String
+  message    String
+  type       SubmissionType     @default(GUESTBOOK)
+  status     SubmissionStatus   @default(PENDING)
+  response   String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  handlerId  String?
+  ipAddress  String?
+  phone      String?
+  priority   SubmissionPriority @default(NORMAL)
+  readAt     DateTime?
+  responseAt DateTime?
+  responseBy String?
+  source     String?
+  subject    String?
+  userAgent  String?
+  handler    User?              @relation("SubmissionHandler", fields: [handlerId], references: [id])
 
   @@index([email])
   @@index([status])
@@ -185,13 +180,13 @@ enum Status {
 }
 
 enum SubmissionType {
-  GUESTBOOK     
-  FEEDBACK      
-  COMPLAINT     
-  INQUIRY       
-  BUSINESS      
-  VOLUNTEER     
-  OTHER         
+  GUESTBOOK
+  VOLUNTEER
+  FEEDBACK
+  COMPLAINT
+  BUSINESS
+  INQUIRY
+  OTHER
 }
 
 enum SubmissionStatus {

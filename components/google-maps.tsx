@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   MapPin,
@@ -10,96 +7,9 @@ import {
   Camera,
   Tent,
   TreePine,
-  Waves,
-  Home,
-  Coffee,
   Navigation,
   ExternalLink,
 } from "lucide-react";
-
-// Tourist spots data with coordinates
-const touristSpots = [
-  {
-    id: 1,
-    name: "Air Terjun Sekumpul",
-    type: "waterfall",
-    lat: -7.4167,
-    lng: 110.4833,
-    description: "Air terjun setinggi 25 meter dengan kolam alami yang jernih",
-    icon: "waterfall",
-    category: "Wisata Alam",
-  },
-  {
-    id: 2,
-    name: "Basecamp Pendakian Merbabu",
-    type: "hiking",
-    lat: -7.415,
-    lng: 110.485,
-    description: "Basecamp resmi pendakian Gunung Merbabu via Tarubatang",
-    icon: "mountain",
-    category: "Pendakian",
-  },
-  {
-    id: 3,
-    name: "Camping Ground Sunrise",
-    type: "camping",
-    lat: -7.418,
-    lng: 110.482,
-    description: "Area camping dengan view sunrise terbaik",
-    icon: "tent",
-    category: "Camping",
-  },
-  {
-    id: 4,
-    name: "Hutan Pinus Tarubatang",
-    type: "forest",
-    lat: -7.42,
-    lng: 110.48,
-    description: "Hutan pinus dengan jalur trekking yang indah",
-    icon: "tree",
-    category: "Wisata Alam",
-  },
-  {
-    id: 5,
-    name: "Sungai Jernih Merbabu",
-    type: "river",
-    lat: -7.419,
-    lng: 110.487,
-    description: "Sungai dengan air jernih untuk refreshing",
-    icon: "waves",
-    category: "Wisata Alam",
-  },
-  {
-    id: 6,
-    name: "Homestay Merbabu View",
-    type: "homestay",
-    lat: -7.416,
-    lng: 110.484,
-    description: "Homestay dengan pemandangan Gunung Merbabu",
-    icon: "home",
-    category: "Akomodasi",
-  },
-  {
-    id: 7,
-    name: "Warung Kopi Lereng",
-    type: "cafe",
-    lat: -7.417,
-    lng: 110.486,
-    description: "Warung kopi dengan kopi lokal Merbabu",
-    icon: "coffee",
-    category: "Kuliner",
-  },
-  {
-    id: 8,
-    name: "Spot Foto Panorama",
-    type: "viewpoint",
-    lat: -7.414,
-    lng: 110.488,
-    description: "Spot foto terbaik dengan panorama pegunungan",
-    icon: "camera",
-    category: "Spot Foto",
-  },
-];
 
 // Village center coordinates (Tarubatang, Selo, Boyolali)
 const VILLAGE_CENTER = {
@@ -108,49 +18,6 @@ const VILLAGE_CENTER = {
 };
 
 export default function GoogleMapsComponent() {
-  const [selectedSpot, setSelectedSpot] = useState<
-    (typeof touristSpots)[0] | null
-  >(null);
-
-  const getIconComponent = (type: string) => {
-    const iconMap: { [key: string]: any } = {
-      waterfall: Waves,
-      hiking: Mountain,
-      camping: Tent,
-      forest: TreePine,
-      river: Waves,
-      homestay: Home,
-      cafe: Coffee,
-      viewpoint: Camera,
-    };
-    return iconMap[type] || Camera;
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "Wisata Alam":
-        return "bg-green-100 text-green-800";
-      case "Pendakian":
-        return "bg-red-100 text-red-800";
-      case "Camping":
-        return "bg-blue-100 text-blue-800";
-      case "Spot Foto":
-        return "bg-purple-100 text-purple-800";
-      case "Akomodasi":
-        return "bg-orange-100 text-orange-800";
-      case "Kuliner":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const focusOnSpot = (spot: (typeof touristSpots)[0]) => {
-    setSelectedSpot(spot);
-    // Scroll to the map
-    document.getElementById("main-map")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <div className="space-y-6">
       {/* Map Container */}
@@ -247,102 +114,6 @@ export default function GoogleMapsComponent() {
           Rute dari Lokasi Saya
         </Button>
       </div>
-
-      {/* Tourist Spots List */}
-      <div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-          Destinasi Wisata di Tarubatang
-        </h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {touristSpots.map((spot) => {
-            const IconComponent = getIconComponent(spot.type);
-            return (
-              <Card
-                key={spot.id}
-                className={`cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
-                  selectedSpot?.id === spot.id
-                    ? "ring-2 ring-green-500 shadow-lg"
-                    : ""
-                }`}
-                onClick={() => focusOnSpot(spot)}
-              >
-                <CardContent className="p-4">
-                  <div className="text-center space-y-3">
-                    <div className="flex justify-center">
-                      <div className="p-3 bg-green-50 rounded-full">
-                        <IconComponent className="h-6 w-6 text-green-600" />
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm mb-1">{spot.name}</h4>
-                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                        {spot.description}
-                      </p>
-                      <Badge
-                        className={`text-xs ${getCategoryColor(spot.category)}`}
-                      >
-                        {spot.category}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Selected Spot Details */}
-      {selectedSpot && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4">
-                {(() => {
-                  const IconComponent = getIconComponent(selectedSpot.type);
-                  return (
-                    <div className="p-3 bg-green-100 rounded-full">
-                      <IconComponent className="h-8 w-8 text-green-600" />
-                    </div>
-                  );
-                })()}
-                <div>
-                  <h3 className="font-semibold text-xl text-green-800 mb-2">
-                    {selectedSpot.name}
-                  </h3>
-                  <p className="text-gray-700 mb-3 leading-relaxed">
-                    {selectedSpot.description}
-                  </p>
-                  <Badge
-                    className={`${getCategoryColor(selectedSpot.category)}`}
-                  >
-                    {selectedSpot.category}
-                  </Badge>
-                </div>
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedSpot.lat},${selectedSpot.lng}`;
-                    window.open(url, "_blank");
-                  }}
-                >
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Petunjuk Arah
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setSelectedSpot(null)}
-                >
-                  Tutup Detail
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Additional Info */}
       <div className="bg-blue-50 rounded-lg p-6">

@@ -372,52 +372,68 @@ const GuestAnalyticsPage: React.FC = () => {
     loadAnalyticsData(true);
   };
 
-  // Loading state
-  if (loading && !analyticsData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center space-y-4 p-8">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900">
-              Memuat Data Analytics
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Mengumpulkan data statistik platform...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Analytics Platform Desa Tarubatang
-          </h1>
-          <p className="text-gray-600">
-            Statistik dan analisis data platform pariwisata dan UMKM
-          </p>
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Analytics Platform Desa Tarubatang
+        </h1>
+        <p className="text-gray-600 mb-3">
+          Statistik dan analisis data platform pariwisata dan UMKM
+        </p>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert className="mb-6 border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <strong>Error:</strong> {error}
-                  {retryCount > 0 && (
-                    <div className="text-sm mt-1">
-                      Percobaan ke-{retryCount}/3
-                      {retryCount < 3 && " (otomatis mencoba ulang...)"}
-                    </div>
-                  )}
+        {/* Loading state - consistent with UMKM page */}
+        {loading && !analyticsData ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <p className="text-gray-600 mt-4">Memuat data analytics...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <AlertCircle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+            <p className="text-red-600 mb-4">{error}</p>
+            {retryCount > 0 && (
+              <p className="text-sm text-gray-500 mb-4">
+                Percobaan ke-{retryCount}/3
+                {retryCount < 3 && " (otomatis mencoba ulang...)"}
+              </p>
+            )}
+            <Button onClick={handleRefresh} disabled={loading}>
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Coba Lagi
+            </Button>
+          </div>
+        ) : !analyticsData ? (
+          <div className="text-center py-12">
+            <WifiOff className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600 mb-4">
+              Belum ada data yang tersedia untuk ditampilkan.
+            </p>
+            <Button onClick={handleRefresh} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Muat Ulang
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Status Bar */}
+            <div className="flex items-center justify-between text-sm bg-white p-4 rounded-lg shadow-sm border">
+              <div className="text-gray-600">
+                Terakhir diperbarui:{" "}
+                {lastUpdated?.toLocaleString("id-ID", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-green-600">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>Data Terkini</span>
                 </div>
                 <Button
                   variant="outline"
@@ -430,67 +446,11 @@ const GuestAnalyticsPage: React.FC = () => {
                   ) : (
                     <RefreshCw className="h-4 w-4 mr-2" />
                   )}
-                  Coba Lagi
+                  Refresh
                 </Button>
               </div>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Status Bar */}
-        {analyticsData && (
-          <div className="mb-6 flex items-center justify-between text-sm bg-white p-4 rounded-lg shadow-sm">
-            <div className="text-gray-600">
-              Terakhir diperbarui:{" "}
-              {lastUpdated?.toLocaleString("id-ID", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Data Terkini</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Refresh
-              </Button>
-            </div>
-          </div>
-        )}
 
-        {/* No Data State */}
-        {!loading && !error && !analyticsData && (
-          <Card className="mb-6">
-            <CardContent className="p-8 text-center">
-              <WifiOff className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Tidak Ada Data
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Belum ada data yang tersedia untuk ditampilkan.
-              </p>
-              <Button onClick={handleRefresh} variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Muat Ulang
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Main Content */}
-        {analyticsData && (
-          <div className="space-y-8">
             {/* Summary Cards Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
@@ -842,56 +802,6 @@ const GuestAnalyticsPage: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-teal-50 rounded-lg">
-                      <p className="text-2xl font-bold text-teal-600">
-                        {analyticsData.stats.submissions.responseRate.toFixed(
-                          1
-                        )}
-                        %
-                      </p>
-                      <p className="text-sm text-gray-600">Response Rate</p>
-                    </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <p className="text-2xl font-bold text-red-600">
-                        {analyticsData.stats.submissions.pending}
-                      </p>
-                      <p className="text-sm text-gray-600">Pending</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">
-                      Status Submission
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="text-center p-2 bg-yellow-50 rounded">
-                        <p className="font-bold text-yellow-600">
-                          {analyticsData.stats.submissions.read}
-                        </p>
-                        <p className="text-gray-600">Dibaca</p>
-                      </div>
-                      <div className="text-center p-2 bg-green-50 rounded">
-                        <p className="font-bold text-green-600">
-                          {analyticsData.stats.submissions.replied}
-                        </p>
-                        <p className="text-gray-600">Dibalas</p>
-                      </div>
-                      <div className="text-center p-2 bg-blue-50 rounded">
-                        <p className="font-bold text-blue-600">
-                          {analyticsData.stats.submissions.closed}
-                        </p>
-                        <p className="text-gray-600">Ditutup</p>
-                      </div>
-                      <div className="text-center p-2 bg-gray-50 rounded">
-                        <p className="font-bold text-gray-600">
-                          {analyticsData.stats.submissions.archived}
-                        </p>
-                        <p className="text-gray-600">Diarsip</p>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="space-y-2">
                     <h4 className="font-medium text-gray-900">
                       Tipe Submission

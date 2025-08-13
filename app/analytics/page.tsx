@@ -384,10 +384,16 @@ const GuestAnalyticsPage: React.FC = () => {
         </p>
 
         {/* Loading state - consistent with UMKM page */}
+        {/* Loading state - centered on page */}
+        {/* Loading state - responsive centered on page */}
         {loading && !analyticsData ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            <p className="text-gray-600 mt-4">Memuat data analytics...</p>
+          <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+            <div className="text-center px-4">
+              <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 border-b-2 sm:border-b-3 md:border-b-4 lg:border-b-4 border-green-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4 sm:mt-6 md:mt-8 text-sm sm:text-base md:text-lg lg:text-xl font-medium">
+                Memuat data analytics...
+              </p>
+            </div>
           </div>
         ) : error ? (
           <div className="text-center py-12">

@@ -144,16 +144,16 @@ const ImageModal: React.FC<ImageModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="relative max-w-4xl max-h-full">
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="relative max-w-[95vw] max-w-4xl max-h-[95vh] w-full">
         <button
           onClick={onClose}
-          className="absolute -top-12 right-0 text-white hover:text-gray-300 z-10"
+          className="absolute -top-8 sm:-top-12 right-0 text-white hover:text-gray-300 z-10 p-2"
         >
-          <X className="h-8 w-8" />
+          <X className="h-6 w-6 sm:h-8 sm:w-8" />
         </button>
 
-        <div className="relative">
+        <div className="relative w-full h-full flex items-center justify-center">
           <Image
             src={
               images[currentIndex] || "/placeholder.svg?height=600&width=800"
@@ -161,31 +161,31 @@ const ImageModal: React.FC<ImageModalProps> = ({
             alt={title}
             width={800}
             height={600}
-            className="object-contain max-h-[80vh] w-auto"
+            className="object-contain max-h-[80vh] w-auto max-w-full"
           />
 
           {images.length > 1 && (
             <>
               <button
                 onClick={onPrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full"
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
               <button
                 onClick={onNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full"
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
             </>
           )}
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded">
-          <h3 className="font-semibold">{title}</h3>
+        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-black/70 text-white p-2 sm:p-4 rounded">
+          <h3 className="font-semibold text-sm sm:text-base">{title}</h3>
           {images.length > 1 && (
-            <p className="text-sm text-gray-300">
+            <p className="text-xs sm:text-sm text-gray-300">
               {currentIndex + 1} dari {images.length}
             </p>
           )}
@@ -210,18 +210,18 @@ const DetailModal: React.FC<DetailModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-background rounded-lg max-w-2xl max-h-[90vh] overflow-y-auto w-full">
-        <div className="sticky top-0 bg-background border-b p-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Detail</h2>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-background rounded-lg max-w-full sm:max-w-2xl max-h-[95vh] overflow-y-auto w-full mx-2 sm:mx-0">
+        <div className="sticky top-0 bg-background border-b p-3 sm:p-4 flex justify-between items-center">
+          <h2 className="text-lg sm:text-xl font-semibold">Detail</h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground p-1"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="p-4 sm:p-6">{children}</div>
       </div>
     </div>
   );
@@ -393,8 +393,8 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
         return {
-          items: data.destinations?.slice(0, 6) || [], // Untuk display di grid
-          total: data.destinations?.length || 0, // Untuk stats
+          items: data.destinations?.slice(0, 6) || [],
+          total: data.destinations?.length || 0,
         };
       }
       return { items: [], total: 0 };
@@ -410,8 +410,8 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
         return {
-          items: data.umkm?.slice(0, 6) || [], // Untuk display di grid
-          total: data.umkm?.length || 0, // Untuk stats
+          items: data.umkm?.slice(0, 6) || [],
+          total: data.umkm?.length || 0,
         };
       }
       return { items: [], total: 0 };
@@ -427,8 +427,8 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
         return {
-          items: data.events?.slice(0, 6) || [], // Untuk display di grid
-          total: data.events?.length || 0, // Untuk stats
+          items: data.events?.slice(0, 6) || [],
+          total: data.events?.length || 0,
         };
       }
       return { items: [], total: 0 };
@@ -444,8 +444,8 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
         return {
-          items: data.items?.slice(0, 8) || [], // Untuk display di grid
-          total: data.items?.length || 0, // Untuk stats
+          items: data.items?.slice(0, 8) || [],
+          total: data.items?.length || 0,
         };
       }
       return { items: [], total: 0 };
@@ -461,7 +461,7 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
         return {
-          items: data.basecamp?.slice(0, 6) || [], // Ubah dari basecamps ke basecamp
+          items: data.basecamp?.slice(0, 6) || [],
           total: data.basecamp?.length || 0,
         };
       }
@@ -509,14 +509,12 @@ export default function HomePage() {
           fetchStats(),
         ]);
 
-        // Set items untuk display di grid
         setDestinations(destinationsData.items);
         setUMKM(umkmData.items);
         setEvents(eventsData.items);
         setGallery(galleryData.items);
         setBasecamp(basecampData.items);
 
-        // Set stats dengan total yang sebenarnya
         setStats({
           totalDestinations: destinationsData.total,
           totalEvents: eventsData.total,
@@ -564,10 +562,8 @@ export default function HomePage() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Reset status
     setSubmitStatus({ type: null, message: "" });
 
-    // Validate form
     const errors = validateForm();
     if (errors.length > 0) {
       setSubmitStatus({
@@ -587,7 +583,7 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           ...guestbookForm,
-          type: "guestbook", // Set type sebagai guestbook untuk homepage
+          type: "guestbook",
           timestamp: new Date().toISOString(),
         }),
       });
@@ -636,8 +632,8 @@ export default function HomePage() {
       case "destination":
         const destination = detailModal.data as Destination;
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               {destination.images?.map((image, index) => (
                 <Image
                   key={index}
@@ -645,7 +641,7 @@ export default function HomePage() {
                   alt={destination.name}
                   width={300}
                   height={200}
-                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80 w-full h-32 sm:h-48"
                   onClick={() =>
                     openImageModal(destination.images, index, destination.name)
                   }
@@ -653,20 +649,22 @@ export default function HomePage() {
               ))}
             </div>
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold">{destination.name}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold">
+                  {destination.name}
+                </h3>
               </div>
-              <div className="flex items-center space-x-4 mb-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
                 <Badge>{destination.category}</Badge>
-                <span className="text-lg font-semibold text-green-600">
+                <span className="text-base sm:text-lg font-semibold text-green-600">
                   {destination.price}
                 </span>
               </div>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
                 {destination.description}
               </p>
-              <div className="mt-6 flex space-x-4">
-                <Button asChild>
+              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <Button asChild className="w-full sm:w-auto">
                   <Link href="/tourism">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Lihat Detail Destinasi
@@ -680,8 +678,8 @@ export default function HomePage() {
       case "umkm":
         const umkmItem = detailModal.data as UMKM;
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               {umkmItem.images?.map((image, index) => (
                 <Image
                   key={index}
@@ -689,7 +687,7 @@ export default function HomePage() {
                   alt={umkmItem.name}
                   width={300}
                   height={200}
-                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80 w-full h-32 sm:h-48"
                   onClick={() =>
                     openImageModal(umkmItem.images, index, umkmItem.name)
                   }
@@ -697,31 +695,37 @@ export default function HomePage() {
               ))}
             </div>
             <div>
-              <h3 className="text-2xl font-bold mb-4">{umkmItem.name}</h3>
-              <div className="flex items-center space-x-4 mb-4">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4">
+                {umkmItem.name}
+              </h3>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
                 <Badge>{umkmItem.category}</Badge>
-                <span className="text-lg font-semibold text-green-600">
+                <span className="text-base sm:text-lg font-semibold text-green-600">
                   {umkmItem.price}
                 </span>
               </div>
-              <p className="text-muted-foreground leading-relaxed mb-4">
+              <p className="text-muted-foreground leading-relaxed mb-4 text-sm sm:text-base">
                 {umkmItem.description}
               </p>
               {umkmItem.contact && (
                 <div className="flex items-center space-x-2 mb-4">
-                  <Phone className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">{umkmItem.contact}</span>
+                  <Phone className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span className="text-sm break-all">{umkmItem.contact}</span>
                 </div>
               )}
-              <div className="flex space-x-4">
-                <Button asChild>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <Button asChild className="w-full sm:w-auto">
                   <Link href="/umkm">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Lihat Detail UMKM
                   </Link>
                 </Button>
                 {umkmItem.contact && (
-                  <Button variant="outline" asChild>
+                  <Button
+                    variant="outline"
+                    asChild
+                    className="w-full sm:w-auto"
+                  >
                     <a
                       href={`https://wa.me/${umkmItem.contact.replace(
                         /\D/g,
@@ -743,8 +747,8 @@ export default function HomePage() {
       case "basecamp":
         const basecampItem = detailModal.data as Basecamp;
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               {basecampItem.images?.map((image, index) => (
                 <Image
                   key={index}
@@ -752,7 +756,7 @@ export default function HomePage() {
                   alt={basecampItem.namaBasecamp}
                   width={300}
                   height={200}
-                  className="rounded-lg object-cover cursor-pointer hover:opacity-80"
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-80 w-full h-32 sm:h-48"
                   onClick={() =>
                     openImageModal(
                       basecampItem.images,
@@ -764,41 +768,47 @@ export default function HomePage() {
               ))}
             </div>
             <div>
-              <h3 className="text-2xl font-bold mb-4">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4">
                 {basecampItem.namaBasecamp}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">{basecampItem.lokasi}</span>
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 mb-4">
+                <div className="flex items-start sm:items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                  <span className="text-sm break-words">
+                    {basecampItem.lokasi}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-green-600" />
+                  <Users className="h-4 w-4 text-green-600 flex-shrink-0" />
                   <span className="text-sm">
                     Kapasitas: {basecampItem.dayaTampungOrang} orang
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Car className="h-4 w-4 text-green-600" />
+                  <Car className="h-4 w-4 text-green-600 flex-shrink-0" />
                   <span className="text-sm">
                     Parkir: {basecampItem.dayaTampungKendaraan} kendaraan
                   </span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">{basecampItem.nomorWa}</span>
+                <div className="flex items-start sm:items-center space-x-2">
+                  <Phone className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                  <span className="text-sm break-all">
+                    {basecampItem.nomorWa}
+                  </span>
                 </div>
               </div>
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Pemilik:</h4>
-                <p className="text-muted-foreground">{basecampItem.pemilik}</p>
+                <p className="text-muted-foreground text-sm sm:text-base">
+                  {basecampItem.pemilik}
+                </p>
               </div>
               {basecampItem.fasilitas && basecampItem.fasilitas.length > 0 && (
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Fasilitas:</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
                     {basecampItem.fasilitas.map((fasilitas, index) => (
-                      <Badge key={index} variant="outline">
+                      <Badge key={index} variant="outline" className="text-xs">
                         {fasilitas}
                       </Badge>
                     ))}
@@ -812,9 +822,13 @@ export default function HomePage() {
                       <Utensils className="h-4 w-4 mr-2" />
                       Menu Makanan:
                     </h4>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
                       {basecampItem.menuMakanan.map((menu, index) => (
-                        <Badge key={index} variant="outline">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {menu}
                         </Badge>
                       ))}
@@ -828,23 +842,27 @@ export default function HomePage() {
                       <Coffee className="h-4 w-4 mr-2" />
                       Menu Minuman:
                     </h4>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
                       {basecampItem.menuMinuman.map((menu, index) => (
-                        <Badge key={index} variant="outline">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {menu}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
-              <div className="flex space-x-4">
-                <Button asChild>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <Button asChild className="w-full sm:w-auto">
                   <Link href="/basecamp">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Lihat Detail Basecamp
                   </Link>
                 </Button>
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild className="w-full sm:w-auto">
                   <a
                     href={`https://wa.me/${basecampItem.nomorWa.replace(
                       /\D/g,

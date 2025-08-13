@@ -27,15 +27,15 @@ export async function GET(request: NextRequest) {
           slug: true,
           category: true,
           description: true,
+          content: true,
           price: true,
-          location: true,
-          images: true,
-          rating: true,
-          totalReviews: true,
-          isActive: true,
           facilities: true,
+          location: true,
           latitude: true,
           longitude: true,
+          images: true,
+          contact: true,
+          isActive: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
           slug: true,
           category: true,
           description: true,
+          content: true,
           date: true,
           endDate: true,
           location: true,
@@ -121,7 +122,6 @@ export async function GET(request: NextRequest) {
 
       // Admin users only with counts
       prisma.user.findMany({
-        where: { role: "ADMIN" },
         select: {
           id: true,
           name: true,
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
           _count: {
             select: {
               umkmProducts: true,
-              submissions: true,
+              handledSubmissions: true,
             },
           },
         },
@@ -147,11 +147,23 @@ export async function GET(request: NextRequest) {
           id: true,
           name: true,
           email: true,
+          phone: true,
+          subject: true,
+          message: true,
           type: true,
           status: true,
+          priority: true,
+          response: true,
+          responseBy: true,
+          responseAt: true,
+          readAt: true,
+          ipAddress: true,
+          userAgent: true,
+          source: true,
           createdAt: true,
           updatedAt: true,
-          user: {
+          handlerId: true,
+          handler: {
             select: {
               id: true,
               name: true,
@@ -177,6 +189,7 @@ export async function GET(request: NextRequest) {
           visitors: true,
           page: true,
           createdAt: true,
+          updatedAt: true,
         },
       }),
     ]);
@@ -231,18 +244,16 @@ export async function GET(request: NextRequest) {
         categories: [
           ...new Set(processedData.destinations.map((d) => d.category)),
         ].length,
-        avgRating:
-          processedData.destinations.length > 0
-            ? processedData.destinations.reduce((sum, d) => sum + d.rating, 0) /
-              processedData.destinations.length
-            : 0,
-        totalReviews: processedData.destinations.reduce(
-          (sum, d) => sum + d.totalReviews,
-          0
-        ),
         withLocation: processedData.destinations.filter(
           (d) => d.latitude && d.longitude
         ).length,
+        withImages: processedData.destinations.filter(
+          (d) => d.images && d.images.length > 0
+        ).length,
+        withFacilities: processedData.destinations.filter(
+          (d) => d.facilities && d.facilities.length > 0
+        ).length,
+        withContact: processedData.destinations.filter((d) => d.contact).length,
         recentlyAdded: {
           last7Days: processedData.destinations.filter(
             (d) => new Date(d.createdAt) >= last7Days
@@ -267,17 +278,18 @@ export async function GET(request: NextRequest) {
           return eventDate <= now && endDate >= now;
         }).length,
         totalParticipants: processedData.events.reduce(
-          (sum, e) => sum + e.currentParticipants,
+          (sum, e) => sum + (e.currentParticipants || 0),
           0
         ),
         avgParticipants:
           processedData.events.length > 0
             ? processedData.events.reduce(
-                (sum, e) => sum + e.currentParticipants,
+                (sum, e) => sum + (e.currentParticipants || 0),
                 0
               ) / processedData.events.length
             : 0,
         capacityUtilization: calculateCapacityUtilization(processedData.events),
+        withPrice: processedData.events.filter((e) => e.price).length,
         recentlyAdded: {
           last7Days: processedData.events.filter(
             (e) => new Date(e.createdAt) >= last7Days
@@ -305,6 +317,10 @@ export async function GET(request: NextRequest) {
               processedData.umkm.length
             : 0,
         withUsers: processedData.umkm.filter((u) => u.user).length,
+        withLocation: processedData.umkm.filter((u) => u.location).length,
+        withImages: processedData.umkm.filter(
+          (u) => u.images && u.images.length > 0
+        ).length,
         categories: [...new Set(processedData.umkm.map((u) => u.category))]
           .length,
         recentlyAdded: {
@@ -322,24 +338,24 @@ export async function GET(request: NextRequest) {
         active: processedData.basecamps.filter((b) => b.isActive).length,
         inactive: processedData.basecamps.filter((b) => !b.isActive).length,
         totalCapacityPeople: processedData.basecamps.reduce(
-          (sum, b) => sum + b.dayaTampungOrang,
+          (sum, b) => sum + (b.dayaTampungOrang || 0),
           0
         ),
         totalCapacityVehicles: processedData.basecamps.reduce(
-          (sum, b) => sum + b.dayaTampungKendaraan,
+          (sum, b) => sum + (b.dayaTampungKendaraan || 0),
           0
         ),
         avgCapacityPeople:
           processedData.basecamps.length > 0
             ? processedData.basecamps.reduce(
-                (sum, b) => sum + b.dayaTampungOrang,
+                (sum, b) => sum + (b.dayaTampungOrang || 0),
                 0
               ) / processedData.basecamps.length
             : 0,
         avgCapacityVehicles:
           processedData.basecamps.length > 0
             ? processedData.basecamps.reduce(
-                (sum, b) => sum + b.dayaTampungKendaraan,
+                (sum, b) => sum + (b.dayaTampungKendaraan || 0),
                 0
               ) / processedData.basecamps.length
             : 0,
@@ -353,6 +369,9 @@ export async function GET(request: NextRequest) {
           (b) =>
             (b.menuMakanan && b.menuMakanan.length > 0) ||
             (b.menuMinuman && b.menuMinuman.length > 0)
+        ).length,
+        withImages: processedData.basecamps.filter(
+          (b) => b.images && b.images.length > 0
         ).length,
         recentlyAdded: {
           last7Days: processedData.basecamps.filter(
@@ -368,17 +387,19 @@ export async function GET(request: NextRequest) {
         active: processedData.galleries.filter((g) => g.isActive).length,
         inactive: processedData.galleries.filter((g) => !g.isActive).length,
         totalImages: processedData.galleries.reduce(
-          (sum, g) => sum + g.images.length,
+          (sum, g) => sum + (g.images?.length || 0),
           0
         ),
         avgImagesPerGallery:
           processedData.galleries.length > 0
             ? processedData.galleries.reduce(
-                (sum, g) => sum + g.images.length,
+                (sum, g) => sum + (g.images?.length || 0),
                 0
               ) / processedData.galleries.length
             : 0,
         categories: [...new Set(processedData.galleries.map((g) => g.category))]
+          .length,
+        withDescription: processedData.galleries.filter((g) => g.description)
           .length,
         recentlyAdded: {
           last7Days: processedData.galleries.filter(
@@ -392,6 +413,9 @@ export async function GET(request: NextRequest) {
       },
       users: {
         total: processedData.users.length,
+        admins: processedData.users.filter((u) => u.role === "ADMIN").length,
+        regularUsers: processedData.users.filter((u) => u.role === "USER")
+          .length,
         active: processedData.users.filter((u) => u.status === "ACTIVE").length,
         inactive: processedData.users.filter((u) => u.status === "INACTIVE")
           .length,
@@ -400,16 +424,17 @@ export async function GET(request: NextRequest) {
         withUmkm: processedData.users.filter((u) => u._count.umkmProducts > 0)
           .length,
         withSubmissions: processedData.users.filter(
-          (u) => u._count.submissions > 0
+          (u) => u._count.handledSubmissions > 0
         ).length,
         totalUmkmProducts: processedData.users.reduce(
-          (sum, u) => sum + u._count.umkmProducts,
+          (sum, u) => sum + (u._count.umkmProducts || 0),
           0
         ),
-        totalSubmissions: processedData.users.reduce(
-          (sum, u) => sum + u._count.submissions,
+        totalHandledSubmissions: processedData.users.reduce(
+          (sum, u) => sum + (u._count.handledSubmissions || 0),
           0
         ),
+        withPhone: processedData.users.filter((u) => u.phone).length,
         recentlyJoined: {
           last7Days: processedData.users.filter(
             (u) => new Date(u.createdAt) >= last7Days
@@ -423,14 +448,15 @@ export async function GET(request: NextRequest) {
         total: processedData.submissions.length,
         pending: processedData.submissions.filter((s) => s.status === "PENDING")
           .length,
-        reviewed: processedData.submissions.filter(
-          (s) => s.status === "REVIEWED"
-        ).length,
-        responded: processedData.submissions.filter(
-          (s) => s.status === "RESPONDED"
-        ).length,
+        read: processedData.submissions.filter((s) => s.status === "READ")
+          .length,
+        replied: processedData.submissions.filter((s) => s.status === "REPLIED")
+          .length,
         closed: processedData.submissions.filter((s) => s.status === "CLOSED")
           .length,
+        archived: processedData.submissions.filter(
+          (s) => s.status === "ARCHIVED"
+        ).length,
         byType: {
           guestbook: processedData.submissions.filter(
             (s) => s.type === "GUESTBOOK"
@@ -447,7 +473,28 @@ export async function GET(request: NextRequest) {
           business: processedData.submissions.filter(
             (s) => s.type === "BUSINESS"
           ).length,
+          inquiry: processedData.submissions.filter((s) => s.type === "INQUIRY")
+            .length,
+          other: processedData.submissions.filter((s) => s.type === "OTHER")
+            .length,
         },
+        byPriority: {
+          low: processedData.submissions.filter((s) => s.priority === "LOW")
+            .length,
+          normal: processedData.submissions.filter(
+            (s) => s.priority === "NORMAL"
+          ).length,
+          high: processedData.submissions.filter((s) => s.priority === "HIGH")
+            .length,
+          urgent: processedData.submissions.filter(
+            (s) => s.priority === "URGENT"
+          ).length,
+        },
+        withResponse: processedData.submissions.filter((s) => s.response)
+          .length,
+        withHandler: processedData.submissions.filter((s) => s.handlerId)
+          .length,
+        withPhone: processedData.submissions.filter((s) => s.phone).length,
         recentlySubmitted: {
           last7Days: processedData.submissions.filter(
             (s) => new Date(s.createdAt) >= last7Days
@@ -459,7 +506,7 @@ export async function GET(request: NextRequest) {
         responseRate:
           processedData.submissions.length > 0
             ? (processedData.submissions.filter(
-                (s) => s.status === "RESPONDED" || s.status === "CLOSED"
+                (s) => s.status === "REPLIED" || s.status === "CLOSED"
               ).length /
                 processedData.submissions.length) *
               100
@@ -467,31 +514,35 @@ export async function GET(request: NextRequest) {
       },
       analytics: {
         totalPageViews: processedData.analytics.reduce(
-          (sum, a) => sum + a.pageViews,
+          (sum, a) => sum + (a.pageViews || 0),
           0
         ),
         totalVisitors: processedData.analytics.reduce(
-          (sum, a) => sum + a.visitors,
+          (sum, a) => sum + (a.visitors || 0),
           0
         ),
         uniquePages: [...new Set(processedData.analytics.map((a) => a.page))]
           .length,
         avgPageViewsPerDay:
           processedData.analytics.length > 0
-            ? processedData.analytics.reduce((sum, a) => sum + a.pageViews, 0) /
-              processedData.analytics.length
+            ? processedData.analytics.reduce(
+                (sum, a) => sum + (a.pageViews || 0),
+                0
+              ) / processedData.analytics.length
             : 0,
         avgVisitorsPerDay:
           processedData.analytics.length > 0
-            ? processedData.analytics.reduce((sum, a) => sum + a.visitors, 0) /
-              processedData.analytics.length
+            ? processedData.analytics.reduce(
+                (sum, a) => sum + (a.visitors || 0),
+                0
+              ) / processedData.analytics.length
             : 0,
         last7Days: processedData.analytics
           .filter((a) => new Date(a.date) >= last7Days)
-          .reduce((sum, a) => sum + a.pageViews, 0),
+          .reduce((sum, a) => sum + (a.pageViews || 0), 0),
         last30Days: processedData.analytics
           .filter((a) => new Date(a.date) >= last30Days)
-          .reduce((sum, a) => sum + a.pageViews, 0),
+          .reduce((sum, a) => sum + (a.pageViews || 0), 0),
         topPages: getTopPages(processedData.analytics),
       },
     };
@@ -577,6 +628,8 @@ export async function GET(request: NextRequest) {
 function getTopCategories(
   items: any[]
 ): Array<{ category: string; count: number; percentage: number }> {
+  if (!items || items.length === 0) return [];
+
   const categoryMap = new Map<string, number>();
 
   items.forEach((item) => {
@@ -598,13 +651,16 @@ function getTopCategories(
 function getTopPages(
   analytics: any[]
 ): Array<{ page: string; views: number; visitors: number }> {
+  if (!analytics || analytics.length === 0) return [];
+
   const pageMap = new Map<string, { views: number; visitors: number }>();
 
   analytics.forEach((item) => {
+    if (!item.page) return;
     const existing = pageMap.get(item.page) || { views: 0, visitors: 0 };
     pageMap.set(item.page, {
-      views: existing.views + item.pageViews,
-      visitors: existing.visitors + item.visitors,
+      views: existing.views + (item.pageViews || 0),
+      visitors: existing.visitors + (item.visitors || 0),
     });
   });
 
@@ -619,13 +675,15 @@ function getTopPages(
 }
 
 function calculateCapacityUtilization(events: any[]): number {
+  if (!events || events.length === 0) return 0;
+
   const eventsWithCapacity = events.filter(
     (e) => e.maxParticipants && e.maxParticipants > 0
   );
   if (eventsWithCapacity.length === 0) return 0;
 
   const totalUtilization = eventsWithCapacity.reduce((sum, e) => {
-    return sum + (e.currentParticipants / e.maxParticipants) * 100;
+    return sum + ((e.currentParticipants || 0) / e.maxParticipants) * 100;
   }, 0);
 
   return totalUtilization / eventsWithCapacity.length;
@@ -636,14 +694,18 @@ function calculateMonthlyTrends(data: any): any[] {
 
   // Process all data types
   const allItems = [
-    ...data.destinations.map((d: any) => ({ ...d, type: "destination" })),
-    ...data.events.map((e: any) => ({ ...e, type: "event" })),
-    ...data.umkm.map((u: any) => ({ ...u, type: "umkm" })),
-    ...data.basecamps.map((b: any) => ({ ...b, type: "basecamp" })),
-    ...data.galleries.map((g: any) => ({ ...g, type: "gallery" })),
+    ...(data.destinations || []).map((d: any) => ({
+      ...d,
+      type: "destinations",
+    })),
+    ...(data.events || []).map((e: any) => ({ ...e, type: "events" })),
+    ...(data.umkm || []).map((u: any) => ({ ...u, type: "umkm" })),
+    ...(data.basecamps || []).map((b: any) => ({ ...b, type: "basecamps" })),
+    ...(data.galleries || []).map((g: any) => ({ ...g, type: "galleries" })),
   ];
 
   allItems.forEach((item) => {
+    if (!item.createdAt) return;
     const date = new Date(item.createdAt);
     const monthKey = `${date.getFullYear()}-${String(
       date.getMonth() + 1
@@ -659,7 +721,7 @@ function calculateMonthlyTrends(data: any): any[] {
       total: 0,
     };
 
-    existing[item.type as keyof typeof existing] += 1;
+    existing[item.type] += 1;
     existing.total += 1;
     monthMap.set(monthKey, existing);
   });
@@ -671,10 +733,13 @@ function calculateMonthlyTrends(data: any): any[] {
 
 function calculateGrowthRates(data: any, last30Days: Date): any {
   const calculateGrowth = (items: any[]) => {
+    if (!items || items.length === 0) return 0;
+
     const recent = items.filter(
-      (item) => new Date(item.createdAt) >= last30Days
+      (item) => item.createdAt && new Date(item.createdAt) >= last30Days
     ).length;
     const previous = items.filter((item) => {
+      if (!item.createdAt) return false;
       const date = new Date(item.createdAt);
       const previous30Days = new Date(
         last30Days.getTime() - 30 * 24 * 60 * 60 * 1000
@@ -687,12 +752,12 @@ function calculateGrowthRates(data: any, last30Days: Date): any {
   };
 
   return {
-    destinations: calculateGrowth(data.destinations),
-    events: calculateGrowth(data.events),
-    umkm: calculateGrowth(data.umkm),
-    basecamps: calculateGrowth(data.basecamps),
-    galleries: calculateGrowth(data.galleries),
-    users: calculateGrowth(data.users),
-    submissions: calculateGrowth(data.submissions),
+    destinations: calculateGrowth(data.destinations || []),
+    events: calculateGrowth(data.events || []),
+    umkm: calculateGrowth(data.umkm || []),
+    basecamps: calculateGrowth(data.basecamps || []),
+    galleries: calculateGrowth(data.galleries || []),
+    users: calculateGrowth(data.users || []),
+    submissions: calculateGrowth(data.submissions || []),
   };
 }

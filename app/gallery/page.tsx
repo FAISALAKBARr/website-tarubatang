@@ -582,84 +582,95 @@ export default function GalleryPage() {
 
       {/* Lightbox */}
       {lightboxIndex !== null && galleryItems[lightboxIndex] && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center justify-center p-4">
-            <Button
-              variant="ghost"
-              className="absolute top-4 right-4 text-white hover:bg-white/20 z-10"
-              onClick={closeLightbox}
-            >
-              <X className="h-6 w-6" />
-            </Button>
-            <Button
-              variant="ghost"
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10"
-              onClick={prevImage}
-              disabled={galleryItems.length <= 1}
-            >
-              <ChevronLeft className="h-8 w-8" />
-            </Button>
-            <Button
-              variant="ghost"
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10"
-              onClick={nextImage}
-              disabled={galleryItems.length <= 1}
-            >
-              <ChevronRight className="h-8 w-8" />
-            </Button>
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          {/* Close Button */}
+          <Button
+            variant="ghost"
+            className="absolute top-4 right-4 text-white hover:bg-white/20 z-10"
+            onClick={closeLightbox}
+          >
+            <X className="h-6 w-6" />
+          </Button>
 
-            <div className="max-w-4xl max-h-full flex flex-col">
-              <div className="relative flex-1 flex items-center justify-center">
-                <Image
+          {/* Navigation Buttons */}
+          <Button
+            variant="ghost"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10"
+            onClick={prevImage}
+            disabled={galleryItems.length <= 1}
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </Button>
+          <Button
+            variant="ghost"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10"
+            onClick={nextImage}
+            disabled={galleryItems.length <= 1}
+          >
+            <ChevronRight className="h-8 w-8" />
+          </Button>
+
+          {/* Main Content Container */}
+          <div className="w-full h-full flex flex-col max-w-7xl">
+            {/* Image Container - Full responsive */}
+            <div className="flex-1 flex items-center justify-center min-h-0 pb-4">
+              <div className="relative w-full h-full flex items-center justify-center">
+                <img
                   src={
                     getImageUrl(galleryItems[lightboxIndex]) ||
                     "/placeholder.svg"
                   }
                   alt={galleryItems[lightboxIndex].title || "Gallery image"}
-                  width={800}
-                  height={600}
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full w-auto h-auto object-contain"
+                  style={{
+                    maxWidth: "calc(100vw - 8rem)", // Account for navigation buttons
+                    maxHeight: "calc(100vh - 12rem)", // Account for info panel
+                  }}
                   onError={(e) => {
                     e.currentTarget.src =
                       "/placeholder.svg?height=600&width=800";
                   }}
                 />
               </div>
-              <div className="bg-black/70 text-white p-4 rounded-b-lg mt-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-1">
-                      {galleryItems[lightboxIndex].title || "Untitled"}
-                    </h3>
-                    <p className="text-sm text-gray-300">
-                      {galleryItems[lightboxIndex].description || ""}
+            </div>
+
+            {/* Info Panel - Fixed height */}
+            <div className="bg-black/70 text-white p-4 rounded-lg mx-4 flex-shrink-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl font-semibold mb-1 truncate">
+                    {galleryItems[lightboxIndex].title || "Untitled"}
+                  </h3>
+                  {galleryItems[lightboxIndex].description && (
+                    <p className="text-sm text-gray-300 line-clamp-2">
+                      {galleryItems[lightboxIndex].description}
                     </p>
-                  </div>
-                  <div className="text-right">
-                    <Badge
-                      className={getCategoryColor(
-                        galleryItems[lightboxIndex].category || "Other"
-                      )}
-                    >
-                      {galleryItems[lightboxIndex].category || "Other"}
-                    </Badge>
-                    <p className="text-sm text-gray-300 mt-1">
-                      {formatDate(galleryItems[lightboxIndex].createdAt)}
-                    </p>
-                  </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between mt-2 text-sm text-gray-400">
-                  <span>
-                    {lightboxIndex + 1} dari {galleryItems.length} foto
-                  </span>
-                  <span className="flex items-center">
-                    <ImageIcon className="h-4 w-4 mr-1" />
-                    {Array.isArray(galleryItems[lightboxIndex].images)
-                      ? galleryItems[lightboxIndex].images.length
-                      : 0}{" "}
-                    gambar
-                  </span>
+                <div className="text-right flex-shrink-0">
+                  <Badge
+                    className={getCategoryColor(
+                      galleryItems[lightboxIndex].category || "Other"
+                    )}
+                  >
+                    {galleryItems[lightboxIndex].category || "Other"}
+                  </Badge>
+                  <p className="text-sm text-gray-300 mt-1">
+                    {formatDate(galleryItems[lightboxIndex].createdAt)}
+                  </p>
                 </div>
+              </div>
+              <div className="flex items-center justify-between mt-3 text-sm text-gray-400">
+                <span>
+                  {lightboxIndex + 1} dari {galleryItems.length} foto
+                </span>
+                <span className="flex items-center">
+                  <ImageIcon className="h-4 w-4 mr-1" />
+                  {Array.isArray(galleryItems[lightboxIndex].images)
+                    ? galleryItems[lightboxIndex].images.length
+                    : 0}{" "}
+                  gambar
+                </span>
               </div>
             </div>
           </div>

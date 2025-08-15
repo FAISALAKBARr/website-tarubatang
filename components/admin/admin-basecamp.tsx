@@ -1393,6 +1393,180 @@ export default function AdminBasecampPage() {
                 )}
               </div>
 
+              {/* Social Media */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sosial Media
+                </label>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="url"
+                    value={newSocialMedia}
+                    onChange={(e) => setNewSocialMedia(e.target.value)}
+                    placeholder="https://instagram.com/basecamp"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={formLoading}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addArrayItem("sosialMedia", newSocialMedia);
+                        setNewSocialMedia("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addArrayItem("sosialMedia", newSocialMedia);
+                      setNewSocialMedia("");
+                    }}
+                    disabled={formLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                {formData.sosialMedia.length > 0 && (
+                  <div className="space-y-2">
+                    {formData.sosialMedia.map((social, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                      >
+                        <span className="text-sm text-blue-600 truncate">
+                          {social}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem("sosialMedia", index)}
+                          disabled={formLoading}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Menu */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Food Menu */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Menu Makanan
+                  </label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={newFood}
+                      onChange={(e) => setNewFood(e.target.value)}
+                      placeholder="Nasi Gudeg"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={formLoading}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addArrayItem("menuMakanan", newFood);
+                          setNewFood("");
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addArrayItem("menuMakanan", newFood);
+                        setNewFood("");
+                      }}
+                      disabled={formLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {formData.menuMakanan.length > 0 && (
+                    <div className="space-y-1">
+                      {formData.menuMakanan.map((food, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-orange-50 rounded"
+                        >
+                          <span className="text-sm">{food}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeArrayItem("menuMakanan", index)
+                            }
+                            disabled={formLoading}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Drink Menu */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Menu Minuman
+                  </label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={newDrink}
+                      onChange={(e) => setNewDrink(e.target.value)}
+                      placeholder="Teh Hangat"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={formLoading}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addArrayItem("menuMinuman", newDrink);
+                          setNewDrink("");
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addArrayItem("menuMinuman", newDrink);
+                        setNewDrink("");
+                      }}
+                      disabled={formLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {formData.menuMinuman.length > 0 && (
+                    <div className="space-y-1">
+                      {formData.menuMinuman.map((drink, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-blue-50 rounded"
+                        >
+                          <span className="text-sm">{drink}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeArrayItem("menuMinuman", index)
+                            }
+                            disabled={formLoading}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Image Upload Section */}
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -1578,180 +1752,6 @@ export default function AdminBasecampPage() {
                     <div className="flex items-center text-red-600">
                       <AlertCircle className="h-3 w-3 mr-1" />
                       <span>Minimal 1 gambar diperlukan</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Social Media */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sosial Media
-                </label>
-                <div className="flex gap-2 mb-3">
-                  <input
-                    type="url"
-                    value={newSocialMedia}
-                    onChange={(e) => setNewSocialMedia(e.target.value)}
-                    placeholder="https://instagram.com/basecamp"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    disabled={formLoading}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addArrayItem("sosialMedia", newSocialMedia);
-                        setNewSocialMedia("");
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addArrayItem("sosialMedia", newSocialMedia);
-                      setNewSocialMedia("");
-                    }}
-                    disabled={formLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-                {formData.sosialMedia.length > 0 && (
-                  <div className="space-y-2">
-                    {formData.sosialMedia.map((social, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
-                      >
-                        <span className="text-sm text-blue-600 truncate">
-                          {social}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeArrayItem("sosialMedia", index)}
-                          disabled={formLoading}
-                          className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Menu */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Food Menu */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Menu Makanan
-                  </label>
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="text"
-                      value={newFood}
-                      onChange={(e) => setNewFood(e.target.value)}
-                      placeholder="Nasi Gudeg"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={formLoading}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addArrayItem("menuMakanan", newFood);
-                          setNewFood("");
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addArrayItem("menuMakanan", newFood);
-                        setNewFood("");
-                      }}
-                      disabled={formLoading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {formData.menuMakanan.length > 0 && (
-                    <div className="space-y-1">
-                      {formData.menuMakanan.map((food, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-orange-50 rounded"
-                        >
-                          <span className="text-sm">{food}</span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removeArrayItem("menuMakanan", index)
-                            }
-                            disabled={formLoading}
-                            className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Drink Menu */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Menu Minuman
-                  </label>
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="text"
-                      value={newDrink}
-                      onChange={(e) => setNewDrink(e.target.value)}
-                      placeholder="Teh Hangat"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={formLoading}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addArrayItem("menuMinuman", newDrink);
-                          setNewDrink("");
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addArrayItem("menuMinuman", newDrink);
-                        setNewDrink("");
-                      }}
-                      disabled={formLoading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {formData.menuMinuman.length > 0 && (
-                    <div className="space-y-1">
-                      {formData.menuMinuman.map((drink, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-blue-50 rounded"
-                        >
-                          <span className="text-sm">{drink}</span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removeArrayItem("menuMinuman", index)
-                            }
-                            disabled={formLoading}
-                            className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
                     </div>
                   )}
                 </div>

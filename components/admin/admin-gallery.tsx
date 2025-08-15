@@ -40,6 +40,10 @@ import {
   ChevronRight,
   Upload,
   AlertCircle,
+  Eye,
+  EyeOff,
+  FolderOpen,
+  Camera,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -81,10 +85,15 @@ export default function AdminGallery() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  // File upload states
+  // File upload states - Enhanced for edit
   const [uploadMethod, setUploadMethod] = useState<"url" | "file">("file");
+  const [editUploadMethod, setEditUploadMethod] = useState<"url" | "file">(
+    "url"
+  );
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [editSelectedFiles, setEditSelectedFiles] = useState<File[]>([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
+  const [editUploadErrors, setEditUploadErrors] = useState<string[]>([]);
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,6 +110,11 @@ export default function AdminGallery() {
 
   // Lightbox
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Image preview states for edit
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imagesToRemove, setImagesToRemove] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     title: "",
@@ -191,6 +205,20 @@ export default function AdminGallery() {
       currentPage: Number(pagination?.currentPage) || 1,
       limit: Number(pagination?.limit) || 12,
     };
+  };
+
+  // Create preview URL for file
+  const createPreviewUrl = (file: File): string => {
+    return URL.createObjectURL(file);
+  };
+
+  // Clean up preview URLs
+  const cleanupPreviewUrls = (urls: string[]) => {
+    urls.forEach((url) => {
+      if (url.startsWith("blob:")) {
+        URL.revokeObjectURL(url);
+      }
+    });
   };
 
   // Fetch gallery items from API
@@ -295,6 +323,13 @@ export default function AdminGallery() {
     }
   }, [searchTerm, selectedCategory]);
 
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      cleanupPreviewUrls(previewImages);
+    };
+  }, [previewImages]);
+
   // Reset form function
   const resetForm = () => {
     setFormData({
@@ -305,9 +340,22 @@ export default function AdminGallery() {
     });
     setSelectedFiles([]);
     setUploadErrors([]);
+    cleanupPreviewUrls(previewImages);
+    setPreviewImages([]);
   };
 
-  // Handle file selection
+  // Reset edit form function
+  const resetEditForm = () => {
+    setEditSelectedFiles([]);
+    setEditUploadErrors([]);
+    cleanupPreviewUrls(previewImages);
+    setPreviewImages([]);
+    setExistingImages([]);
+    setImagesToRemove([]);
+    setEditUploadMethod("url");
+  };
+
+  // Handle file selection for add
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const validFiles: File[] = [];
@@ -330,8 +378,61 @@ export default function AdminGallery() {
     setUploadErrors([]);
   };
 
+  // Handle file selection for edit
+  const handleEditFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    files.forEach((file) => {
+      const validation = validateImageFile(file);
+      if (validation.isValid) {
+        validFiles.push(file);
+      } else {
+        errors.push(validation.error!);
+      }
+    });
+
+    if (errors.length > 0) {
+      alert(`Beberapa file tidak valid:\n${errors.join("\n")}`);
+    }
+
+    // Clean up previous preview URLs
+    cleanupPreviewUrls(previewImages);
+
+    // Create new preview URLs
+    const newPreviewImages = validFiles.map((file) => createPreviewUrl(file));
+    setPreviewImages(newPreviewImages);
+
+    setEditSelectedFiles(validFiles);
+    setEditUploadErrors([]);
+  };
+
   const removeFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeEditFile = (index: number) => {
+    // Clean up the preview URL
+    const urlToCleanup = previewImages[index];
+    if (urlToCleanup && urlToCleanup.startsWith("blob:")) {
+      URL.revokeObjectURL(urlToCleanup);
+    }
+
+    setEditSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle removing existing images in edit mode
+  const handleRemoveExistingImage = (imageUrl: string) => {
+    setImagesToRemove((prev) => [...prev, imageUrl]);
+    setExistingImages((prev) => prev.filter((img) => img !== imageUrl));
+  };
+
+  // Handle restoring removed image
+  const handleRestoreExistingImage = (imageUrl: string) => {
+    setImagesToRemove((prev) => prev.filter((img) => img !== imageUrl));
+    setExistingImages((prev) => [...prev, imageUrl]);
   };
 
   // Handle form submission for adding new item
@@ -438,7 +539,7 @@ export default function AdminGallery() {
     }
   };
 
-  // Handle editing an item
+  // Handle editing an item - Enhanced
   const handleEditItem = (item: GalleryItem) => {
     setEditingItem(item);
     setFormData({
@@ -447,12 +548,22 @@ export default function AdminGallery() {
       category: item.category || "",
       images: Array.isArray(item.images) ? item.images.filter(Boolean) : [],
     });
-    setUploadMethod("url"); // Default to URL method for editing
-    setSelectedFiles([]);
-    setUploadErrors([]);
+
+    // Set existing images for preview
+    setExistingImages(
+      Array.isArray(item.images) ? item.images.filter(Boolean) : []
+    );
+    setImagesToRemove([]);
+
+    // Default to URL method but allow switching
+    setEditUploadMethod("url");
+    setEditSelectedFiles([]);
+    setEditUploadErrors([]);
+    cleanupPreviewUrls(previewImages);
+    setPreviewImages([]);
   };
 
-  // Handle updating an item
+  // Handle updating an item - Enhanced to support file upload
   const handleUpdateItem = async () => {
     if (!editingItem) return;
 
@@ -461,33 +572,104 @@ export default function AdminGallery() {
       return;
     }
 
+    // Validate that there will be at least one image after update
+    const remainingExistingImages = existingImages.length;
+    const newFilesCount = editSelectedFiles.length;
+    const newUrlsCount =
+      editUploadMethod === "url"
+        ? formData.images.filter((img) => img.trim() !== "").length
+        : 0;
+
+    if (remainingExistingImages + newFilesCount + newUrlsCount === 0) {
+      alert("Item galeri harus memiliki minimal satu gambar");
+      return;
+    }
+
     try {
       setSubmitting(true);
 
-      const payload = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        category: formData.category,
-        images: formData.images.filter((img) => img.trim() !== ""),
-      };
+      let response: Response;
 
-      const response = await fetch(`/api/gallery/${editingItem.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      if (editUploadMethod === "file" && editSelectedFiles.length > 0) {
+        // Use FormData for file upload with existing images
+        const formDataToSend = new FormData();
+        formDataToSend.append("title", formData.title.trim());
+        formDataToSend.append("description", formData.description.trim());
+        formDataToSend.append("category", formData.category);
+
+        // Add existing images that should be kept
+        formDataToSend.append("existingImages", JSON.stringify(existingImages));
+
+        // Add images to remove
+        if (imagesToRemove.length > 0) {
+          formDataToSend.append(
+            "imagesToRemove",
+            JSON.stringify(imagesToRemove)
+          );
+        }
+
+        // Add new files
+        editSelectedFiles.forEach((file) => {
+          formDataToSend.append("images", file);
+        });
+
+        console.log(
+          `Updating gallery item with ${editSelectedFiles.length} new files`
+        );
+
+        response = await fetch(`/api/gallery/${editingItem.id}`, {
+          method: "PUT",
+          body: formDataToSend,
+        });
+      } else {
+        // Use JSON for URL-only update
+        const finalImages =
+          editUploadMethod === "url"
+            ? formData.images.filter((img) => img.trim() !== "")
+            : existingImages;
+
+        const payload = {
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          category: formData.category,
+          images: finalImages,
+        };
+
+        console.log("Updating gallery item with URLs only");
+
+        response = await fetch(`/api/gallery/${editingItem.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update gallery item");
       }
 
+      const result = await response.json();
+
+      // Enhanced success message
+      let successMessage = "Item galeri berhasil diperbarui!";
+
+      if (result.uploadedCount && result.uploadedCount > 0) {
+        successMessage += `\n\n✅ ${result.uploadedCount} gambar baru berhasil diupload`;
+      }
+
+      if (result.removedCount && result.removedCount > 0) {
+        successMessage += `\n\n🗑️ ${result.removedCount} gambar berhasil dihapus`;
+      }
+
+      alert(successMessage);
+
       await fetchGalleryItems();
       setEditingItem(null);
       resetForm();
-      alert("Item galeri berhasil diperbarui!");
+      resetEditForm();
     } catch (error) {
       console.error("Error updating gallery item:", error);
       alert(
@@ -624,12 +806,12 @@ export default function AdminGallery() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Kelola Galeri</h2>
-          <p className="text-gray-600">
+          <h2 className="text-xl md:text-2xl font-bold">Kelola Galeri</h2>
+          <p className="text-sm md:text-base text-gray-600">
             Upload dan organisir foto-foto dokumentasi Desa Tarubatang
           </p>
         </div>
@@ -639,29 +821,36 @@ export default function AdminGallery() {
             size="sm"
             onClick={handleRetry}
             disabled={loading}
+            className="text-xs md:text-sm"
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 mr-1 md:mr-2 ${
+                loading ? "animate-spin" : ""
+              }`}
             />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button size="sm" className="text-xs md:text-sm">
+                <Plus className="h-4 w-4 mr-1 md:mr-2" />
                 Tambah Foto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Tambah Foto Baru</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-lg md:text-xl">
+                  Tambah Foto Baru
+                </DialogTitle>
+                <DialogDescription className="text-sm md:text-base">
                   Isi form di bawah untuk menambah foto baru ke galeri
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Judul</Label>
+                  <Label htmlFor="title" className="text-sm font-medium">
+                    Judul
+                  </Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -669,22 +858,29 @@ export default function AdminGallery() {
                       setFormData({ ...formData, title: e.target.value })
                     }
                     placeholder="Masukkan judul foto"
+                    className="text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Kategori</Label>
+                  <Label htmlFor="category" className="text-sm font-medium">
+                    Kategori
+                  </Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) =>
                       setFormData({ ...formData, category: value })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm">
                       <SelectValue placeholder="Pilih kategori" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.slice(1).map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
+                        <SelectItem
+                          key={category.value}
+                          value={category.value}
+                          className="text-sm"
+                        >
                           {category.label}
                         </SelectItem>
                       ))}
@@ -692,7 +888,9 @@ export default function AdminGallery() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Deskripsi (Opsional)</Label>
+                  <Label htmlFor="description" className="text-sm font-medium">
+                    Deskripsi (Opsional)
+                  </Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -701,13 +899,14 @@ export default function AdminGallery() {
                     }
                     placeholder="Masukkan deskripsi foto"
                     rows={3}
+                    className="text-sm"
                   />
                 </div>
 
                 {/* Upload Method Selection */}
                 <div className="space-y-2">
-                  <Label>Metode Upload</Label>
-                  <div className="flex space-x-4">
+                  <Label className="text-sm font-medium">Metode Upload</Label>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:space-x-4">
                     <label className="flex items-center">
                       <input
                         type="radio"
@@ -718,7 +917,7 @@ export default function AdminGallery() {
                         }
                         className="mr-2"
                       />
-                      Upload File
+                      <span className="text-sm">Upload File</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -730,7 +929,7 @@ export default function AdminGallery() {
                         }
                         className="mr-2"
                       />
-                      URL Gambar
+                      <span className="text-sm">URL Gambar</span>
                     </label>
                   </div>
                 </div>
@@ -739,8 +938,10 @@ export default function AdminGallery() {
                 {uploadMethod === "file" && (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="images">Pilih Gambar</Label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                      <Label htmlFor="images" className="text-sm font-medium">
+                        Pilih Gambar
+                      </Label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center hover:border-gray-400 transition-colors">
                         <Input
                           id="images"
                           type="file"
@@ -750,8 +951,8 @@ export default function AdminGallery() {
                           className="hidden"
                         />
                         <label htmlFor="images" className="cursor-pointer">
-                          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-600">
+                          <Upload className="h-6 w-6 md:h-8 md:w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-xs md:text-sm text-gray-600">
                             Klik untuk memilih gambar atau drag & drop
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
@@ -767,7 +968,7 @@ export default function AdminGallery() {
                         <p className="text-sm text-gray-600">
                           File terpilih ({selectedFiles.length}):
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 gap-2">
                           {selectedFiles.map((file, index) => {
                             const isHeic =
                               file.name.toLowerCase().endsWith(".heic") ||
@@ -783,7 +984,7 @@ export default function AdminGallery() {
                                 className="flex items-center justify-between bg-gray-50 p-3 rounded border"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center space-x-2">
+                                  <div className="flex items-center space-x-2 flex-wrap">
                                     <span className="text-sm font-medium truncate">
                                       {file.name}
                                     </span>
@@ -810,7 +1011,7 @@ export default function AdminGallery() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => removeFile(index)}
-                                  className="ml-2"
+                                  className="ml-2 flex-shrink-0"
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
@@ -839,7 +1040,7 @@ export default function AdminGallery() {
                 {/* URL Upload */}
                 {uploadMethod === "url" && (
                   <div className="space-y-2">
-                    <Label>URL Gambar</Label>
+                    <Label className="text-sm font-medium">URL Gambar</Label>
                     {formData.images.map((image, index) => (
                       <div key={index} className="flex gap-2">
                         <Input
@@ -848,13 +1049,14 @@ export default function AdminGallery() {
                             updateImageUrl(index, e.target.value)
                           }
                           placeholder="https://example.com/image.jpg"
-                          className="flex-1"
+                          className="flex-1 text-sm"
                         />
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => removeImageUrl(index)}
+                          className="flex-shrink-0"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -865,6 +1067,7 @@ export default function AdminGallery() {
                       variant="outline"
                       size="sm"
                       onClick={addImageUrl}
+                      className="text-sm"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Tambah URL Gambar
@@ -872,7 +1075,7 @@ export default function AdminGallery() {
                   </div>
                 )}
               </div>
-              <div className="flex justify-end space-x-2 mt-6">
+              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 mt-6">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -880,10 +1083,15 @@ export default function AdminGallery() {
                     resetForm();
                   }}
                   disabled={submitting}
+                  className="text-sm"
                 >
                   Batal
                 </Button>
-                <Button onClick={handleAddItem} disabled={submitting}>
+                <Button
+                  onClick={handleAddItem}
+                  disabled={submitting}
+                  className="text-sm"
+                >
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -901,54 +1109,69 @@ export default function AdminGallery() {
 
       {/* Search and Filter */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="relative flex-1 max-w-md">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-stretch lg:items-center">
+            <div className="relative flex-1 max-w-full lg:max-w-md">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Cari foto..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm"
               />
             </div>
-            <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-600" />
-              <Select
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex items-center space-x-1">
-                <Button
-                  size="sm"
-                  variant={selectedView === "grid" ? "default" : "outline"}
-                  onClick={() => setSelectedView("grid")}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
                 >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
+                  <SelectTrigger className="w-full sm:w-48 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem
+                        key={category.value}
+                        value={category.value}
+                        className="text-sm"
+                      >
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between sm:justify-start space-x-2">
+                <div className="flex items-center space-x-1">
+                  <Button
+                    size="sm"
+                    variant={selectedView === "grid" ? "default" : "outline"}
+                    onClick={() => setSelectedView("grid")}
+                    className="text-xs"
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={selectedView === "masonry" ? "default" : "outline"}
+                    onClick={() => setSelectedView("masonry")}
+                    className="text-xs"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Button
+                  variant="outline"
                   size="sm"
-                  variant={selectedView === "masonry" ? "default" : "outline"}
-                  onClick={() => setSelectedView("masonry")}
+                  onClick={handleResetFilters}
+                  className="text-xs"
                 >
-                  <LayoutGrid className="h-4 w-4" />
+                  Reset
                 </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={handleResetFilters}>
-                Reset
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -958,32 +1181,38 @@ export default function AdminGallery() {
       {loading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">Memuat galeri...</p>
+          <p className="text-gray-600 text-sm md:text-base">Memuat galeri...</p>
         </div>
       ) : error ? (
-        <div className="text-center py-12">
+        <div className="text-center py-8 md:py-12">
           <Card className="bg-red-50 border-red-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-center mb-4">
-                <AlertCircle className="h-8 w-8 text-red-600 mr-2" />
-                <h3 className="text-lg font-semibold text-red-800">
+                <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600 mr-2" />
+                <h3 className="text-base md:text-lg font-semibold text-red-800">
                   Error Loading Gallery
                 </h3>
               </div>
               <p className="text-red-700 text-sm mb-4 max-w-2xl mx-auto">
                 {error}
               </p>
-              <div className="space-y-2">
-                <Button onClick={handleRetry}>Coba Lagi</Button>
-                <Button variant="outline" onClick={handleResetFilters}>
+              <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-2">
+                <Button onClick={handleRetry} size="sm">
+                  Coba Lagi
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleResetFilters}
+                  size="sm"
+                >
                   Reset Filter
                 </Button>
               </div>
               <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-left">
-                <h4 className="font-semibold text-yellow-800 mb-2">
+                <h4 className="font-semibold text-yellow-800 mb-2 text-sm">
                   Troubleshooting Tips:
                 </h4>
-                <ul className="text-sm text-yellow-700 space-y-1">
+                <ul className="text-xs text-yellow-700 space-y-1">
                   <li>• Pastikan database sudah terhubung dengan benar</li>
                   <li>
                     • Jalankan{" "}
@@ -1001,17 +1230,19 @@ export default function AdminGallery() {
         </div>
       ) : galleryItems.length > 0 ? (
         <div
-          className={`grid gap-6 ${
+          className={`grid gap-4 md:gap-6 ${
             selectedView === "grid"
-              ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              : "columns-1 md:columns-2 lg:columns-3 xl:columns-4"
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "columns-1 sm:columns-2 lg:columns-3 xl:columns-4"
           }`}
         >
           {galleryItems.map((item, index) => (
             <Card
               key={item.id}
               className={`overflow-hidden hover:shadow-lg transition-shadow group ${
-                selectedView === "masonry" ? "mb-6 break-inside-avoid" : ""
+                selectedView === "masonry"
+                  ? "mb-4 md:mb-6 break-inside-avoid"
+                  : ""
               }`}
             >
               <div className="relative">
@@ -1021,7 +1252,7 @@ export default function AdminGallery() {
                   width={400}
                   height={300}
                   className={`w-full object-cover cursor-pointer ${
-                    selectedView === "grid" ? "h-48" : "h-auto"
+                    selectedView === "grid" ? "h-36 sm:h-48" : "h-auto"
                   }`}
                   onClick={() => openLightbox(index)}
                   onError={(e) => {
@@ -1030,7 +1261,11 @@ export default function AdminGallery() {
                   }}
                 />
                 <div className="absolute top-2 left-2">
-                  <Badge className={getCategoryColor(item.category || "Other")}>
+                  <Badge
+                    className={`text-xs ${getCategoryColor(
+                      item.category || "Other"
+                    )}`}
+                  >
                     {item.category || "Other"}
                   </Badge>
                 </div>
@@ -1060,20 +1295,20 @@ export default function AdminGallery() {
                   </div>
                 </div>
               </div>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-2 line-clamp-2">
+              <CardContent className="p-3 md:p-4">
+                <h3 className="font-semibold mb-2 line-clamp-2 text-sm md:text-base">
                   {item.title || "Untitled"}
                 </h3>
                 {item.description && (
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                  <p className="text-xs md:text-sm text-gray-600 mb-2 line-clamp-2">
                     {item.description}
                   </p>
                 )}
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-xs md:text-sm text-gray-500">
                   <span>{formatDate(item.createdAt)}</span>
                   <div className="flex items-center space-x-2">
                     <span className="flex items-center">
-                      <ImageIcon className="h-4 w-4 mr-1" />
+                      <ImageIcon className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                       {Array.isArray(item.images) ? item.images.length : 0}
                     </span>
                     <Badge
@@ -1089,22 +1324,22 @@ export default function AdminGallery() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 mb-4">
+        <div className="text-center py-8 md:py-12">
+          <ImageIcon className="h-8 w-8 md:h-12 md:w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4 text-sm md:text-base">
             {searchTerm || selectedCategory !== "all"
               ? "Tidak ada foto yang sesuai dengan pencarian."
               : "Belum ada foto di galeri."}
           </p>
-          <div className="space-x-2">
+          <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-2">
             {(searchTerm || selectedCategory !== "all") && (
-              <Button variant="outline" onClick={handleResetFilters}>
+              <Button variant="outline" onClick={handleResetFilters} size="sm">
                 Reset Filter
               </Button>
             )}
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Tambah Foto Pertama
                 </Button>
@@ -1116,16 +1351,17 @@ export default function AdminGallery() {
 
       {/* Pagination */}
       {!loading && !error && pagination.totalPages > 1 && (
-        <div className="flex justify-center mt-8">
-          <div className="flex items-center space-x-2">
+        <div className="flex justify-center mt-6 md:mt-8">
+          <div className="flex items-center space-x-1 md:space-x-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handlePaginationChange(pagination.currentPage - 1)}
               disabled={pagination.currentPage === 1}
+              className="text-xs md:text-sm"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              <span className="hidden sm:inline">Previous</span>
             </Button>
 
             {/* Page numbers */}
@@ -1173,6 +1409,7 @@ export default function AdminGallery() {
                       : undefined
                   }
                   disabled={typeof page !== "number"}
+                  className="text-xs md:text-sm"
                 >
                   {page}
                 </Button>
@@ -1183,31 +1420,41 @@ export default function AdminGallery() {
               size="sm"
               onClick={() => handlePaginationChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}
+              className="text-xs md:text-sm"
             >
-              Next
+              <span className="hidden sm:inline">Next</span>
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Edit Dialog */}
+      {/* Enhanced Edit Dialog */}
       <Dialog
         open={!!editingItem}
-        onOpenChange={(open) => !open && setEditingItem(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingItem(null);
+            resetForm();
+            resetEditForm();
+          }
+        }}
       >
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Foto</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg md:text-xl">Edit Foto</DialogTitle>
+            <DialogDescription className="text-sm md:text-base">
               Perbarui informasi foto di galeri
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
+
+          <div className="space-y-4 md:space-y-6">
             {/* Basic Info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-title">Judul</Label>
+                <Label htmlFor="edit-title" className="text-sm font-medium">
+                  Judul
+                </Label>
                 <Input
                   id="edit-title"
                   value={formData.title}
@@ -1215,22 +1462,29 @@ export default function AdminGallery() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Masukkan judul foto"
+                  className="text-sm"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-category">Kategori</Label>
+                <Label htmlFor="edit-category" className="text-sm font-medium">
+                  Kategori
+                </Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) =>
                     setFormData({ ...formData, category: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm">
                     <SelectValue placeholder="Pilih kategori" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.slice(1).map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
+                      <SelectItem
+                        key={category.value}
+                        value={category.value}
+                        className="text-sm"
+                      >
                         {category.label}
                       </SelectItem>
                     ))}
@@ -1240,7 +1494,9 @@ export default function AdminGallery() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Deskripsi (Opsional)</Label>
+              <Label htmlFor="edit-description" className="text-sm font-medium">
+                Deskripsi (Opsional)
+              </Label>
               <Textarea
                 id="edit-description"
                 value={formData.description}
@@ -1249,18 +1505,18 @@ export default function AdminGallery() {
                 }
                 placeholder="Masukkan deskripsi foto"
                 rows={3}
+                className="text-sm"
               />
             </div>
 
-            {/* Current Images Preview */}
-            <div className="space-y-2">
-              <Label>Gambar Saat Ini</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {formData.images
-                  .filter((img) => img?.trim())
-                  .map((image, index) => (
+            {/* Current Images Management */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Gambar Saat Ini</Label>
+              {existingImages.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {existingImages.map((image, index) => (
                     <div key={index} className="relative group">
-                      <div className="aspect-square relative rounded border overflow-hidden">
+                      <div className="aspect-square relative rounded border overflow-hidden bg-gray-100">
                         <Image
                           src={image || "/placeholder.svg"}
                           alt={`Current ${index + 1}`}
@@ -1271,78 +1527,367 @@ export default function AdminGallery() {
                               "/placeholder.svg?height=100&width=100";
                           }}
                         />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeImageUrl(index)}
-                          disabled={formData.images.length === 1}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleRemoveExistingImage(image)}
+                            disabled={
+                              existingImages.length === 1 &&
+                              editSelectedFiles.length === 0
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-xs text-center mt-1 text-gray-500 truncate">
                         Gambar {index + 1}
                       </p>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 italic">
+                  Tidak ada gambar tersisa
+                </p>
+              )}
+            </div>
+
+            {/* Removed Images (with restore option) */}
+            {imagesToRemove.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-red-600">
+                  Gambar yang Akan Dihapus
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {imagesToRemove.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square relative rounded border overflow-hidden bg-red-50 opacity-60">
+                        <Image
+                          src={image || "/placeholder.svg"}
+                          alt={`Removed ${index + 1}`}
+                          fill
+                          className="object-cover grayscale"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              "/placeholder.svg?height=100&width=100";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-red-500 bg-opacity-30 flex items-center justify-center">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0 bg-white"
+                            onClick={() => handleRestoreExistingImage(image)}
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-center mt-1 text-red-500 truncate">
+                        Akan dihapus
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Edit Upload Method Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Tambah Gambar Baru</Label>
+              <div className="flex flex-col sm:flex-row gap-2 sm:space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="file"
+                    checked={editUploadMethod === "file"}
+                    onChange={(e) =>
+                      setEditUploadMethod(e.target.value as "file" | "url")
+                    }
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Upload File</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="url"
+                    checked={editUploadMethod === "url"}
+                    onChange={(e) =>
+                      setEditUploadMethod(e.target.value as "file" | "url")
+                    }
+                    className="mr-2"
+                  />
+                  <span className="text-sm">URL Gambar</span>
+                </label>
               </div>
             </div>
 
-            {/* URL Upload for Edit */}
-            <div className="space-y-2">
-              <Label>URL Gambar</Label>
-              {formData.images.map((image, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={image}
-                    onChange={(e) => updateImageUrl(index, e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeImageUrl(index)}
-                    disabled={formData.images.length === 1}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+            {/* Edit File Upload Section */}
+            {editUploadMethod === "file" && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-images" className="text-sm font-medium">
+                    Pilih Gambar Baru
+                  </Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center hover:border-gray-400 transition-colors">
+                    <Input
+                      id="edit-images"
+                      type="file"
+                      multiple
+                      accept="image/*,.heic,.heif"
+                      onChange={handleEditFileSelect}
+                      className="hidden"
+                    />
+                    <label htmlFor="edit-images" className="cursor-pointer">
+                      <Upload className="h-6 w-6 md:h-8 md:w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-xs md:text-sm text-gray-600">
+                        Klik untuk memilih gambar atau drag & drop
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Mendukung JPG, PNG, GIF, WebP, HEIC (maksimal 10MB per
+                        file)
+                      </p>
+                    </label>
+                  </div>
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addImageUrl}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah URL Gambar
-              </Button>
+
+                {/* Preview of new files */}
+                {editSelectedFiles.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 font-medium">
+                      File baru terpilih ({editSelectedFiles.length}):
+                    </p>
+
+                    {/* File list view */}
+                    <div className="space-y-2">
+                      {editSelectedFiles.map((file, index) => {
+                        const isHeic =
+                          file.name.toLowerCase().endsWith(".heic") ||
+                          file.name.toLowerCase().endsWith(".heif") ||
+                          file.type.toLowerCase().includes("heic");
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between bg-gray-50 p-3 rounded border"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 flex-wrap">
+                                <span className="text-sm font-medium truncate">
+                                  {file.name}
+                                </span>
+                                {isHeic && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs bg-blue-100 text-blue-800"
+                                  >
+                                    HEIC → JPG
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500">
+                                {fileSize} MB
+                              </p>
+                              {isHeic && (
+                                <p className="text-xs text-blue-600 font-medium mt-1">
+                                  ⚡ Akan dikonversi ke JPG saat upload
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeEditFile(index)}
+                              className="ml-2 flex-shrink-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Image Preview Grid for new files */}
+                    {previewImages.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600 font-medium">
+                          Preview gambar baru:
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                          {previewImages.map((previewUrl, index) => (
+                            <div key={index} className="relative group">
+                              <div className="aspect-square relative rounded border overflow-hidden bg-gray-100">
+                                <Image
+                                  src={previewUrl}
+                                  alt={`Preview ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => removeEditFile(index)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-xs text-center mt-1 text-gray-500 truncate">
+                                Baru {index + 1}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {editUploadErrors.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded p-3">
+                    <p className="text-sm text-red-800 font-medium mb-1">
+                      Upload Errors:
+                    </p>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      {editUploadErrors.map((error, index) => (
+                        <li key={index}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Edit URL Upload */}
+            {editUploadMethod === "url" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">URL Gambar</Label>
+                {formData.images.map((image, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={image}
+                      onChange={(e) => updateImageUrl(index, e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="flex-1 text-sm"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeImageUrl(index)}
+                      disabled={
+                        existingImages.length === 0 &&
+                        formData.images.filter((img) => img.trim()).length ===
+                          1 &&
+                        editSelectedFiles.length === 0
+                      }
+                      className="flex-shrink-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addImageUrl}
+                  className="text-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah URL Gambar
+                </Button>
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-800 mb-2 text-sm">
+                Summary Perubahan:
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-600">
+                    {existingImages.length}
+                  </div>
+                  <div className="text-xs text-gray-600">Gambar Tersisa</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-600">
+                    {editSelectedFiles.length +
+                      (editUploadMethod === "url"
+                        ? formData.images.filter((img) => img.trim()).length
+                        : 0)}
+                  </div>
+                  <div className="text-xs text-gray-600">Gambar Baru</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-600">
+                    {imagesToRemove.length}
+                  </div>
+                  <div className="text-xs text-gray-600">Akan Dihapus</div>
+                </div>
+              </div>
+              <div className="mt-2 text-center">
+                <div className="text-sm text-gray-600">
+                  Total akhir:{" "}
+                  <span className="font-medium text-gray-800">
+                    {existingImages.length +
+                      editSelectedFiles.length +
+                      (editUploadMethod === "url"
+                        ? formData.images.filter((img) => img.trim()).length
+                        : 0)}{" "}
+                    gambar
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 mt-6">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 mt-6 pt-4 border-t">
             <Button
               variant="outline"
               onClick={() => {
                 setEditingItem(null);
                 resetForm();
+                resetEditForm();
               }}
               disabled={submitting}
+              className="text-sm order-2 sm:order-1"
             >
               Batal
             </Button>
-            <Button onClick={handleUpdateItem} disabled={submitting}>
+            <Button
+              onClick={handleUpdateItem}
+              disabled={
+                submitting ||
+                (existingImages.length === 0 &&
+                  editSelectedFiles.length === 0 &&
+                  formData.images.filter((img) => img.trim()).length === 0)
+              }
+              className="text-sm order-1 sm:order-2"
+            >
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Memperbarui...
+                  {editSelectedFiles.length > 0
+                    ? "Mengupload..."
+                    : "Memperbarui..."}
                 </>
               ) : (
-                "Perbarui"
+                "Perbarui Foto"
               )}
             </Button>
           </div>
@@ -1351,38 +1896,40 @@ export default function AdminGallery() {
 
       {/* Lightbox */}
       {lightboxIndex !== null && galleryItems[lightboxIndex] && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 md:p-4">
           {/* Close Button */}
           <Button
             variant="ghost"
-            className="absolute top-4 right-4 text-white hover:bg-white/20 z-10"
+            className="absolute top-2 right-2 md:top-4 md:right-4 text-white hover:bg-white/20 z-10 h-10 w-10 p-0"
             onClick={closeLightbox}
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5 md:h-6 md:w-6" />
           </Button>
 
           {/* Navigation Buttons */}
-          <Button
-            variant="ghost"
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10"
-            onClick={prevImage}
-            disabled={galleryItems.length <= 1}
-          >
-            <ChevronLeft className="h-8 w-8" />
-          </Button>
-          <Button
-            variant="ghost"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10"
-            onClick={nextImage}
-            disabled={galleryItems.length <= 1}
-          >
-            <ChevronRight className="h-8 w-8" />
-          </Button>
+          {galleryItems.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10 h-12 w-12 p-0"
+                onClick={prevImage}
+              >
+                <ChevronLeft className="h-6 w-6 md:h-8 md:w-8" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 z-10 h-12 w-12 p-0"
+                onClick={nextImage}
+              >
+                <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
+              </Button>
+            </>
+          )}
 
           {/* Main Content Container */}
-          <div className="w-full h-full flex flex-col max-w-7xl">
-            {/* Image Container - Full responsive */}
-            <div className="flex-1 flex items-center justify-center min-h-0 pb-4">
+          <div className="w-full h-full flex flex-col max-w-7xl mx-auto">
+            {/* Image Container */}
+            <div className="flex-1 flex items-center justify-center min-h-0 pb-2 md:pb-4">
               <div className="relative w-full h-full flex items-center justify-center">
                 <img
                   src={
@@ -1392,8 +1939,11 @@ export default function AdminGallery() {
                   alt={galleryItems[lightboxIndex].title || "Gallery image"}
                   className="max-w-full max-h-full w-auto h-auto object-contain"
                   style={{
-                    maxWidth: "calc(100vw - 8rem)", // Account for navigation buttons
-                    maxHeight: "calc(100vh - 12rem)", // Account for info panel
+                    maxWidth:
+                      galleryItems.length > 1
+                        ? "calc(100vw - 6rem)"
+                        : "calc(100vw - 2rem)",
+                    maxHeight: "calc(100vh - 8rem)",
                   }}
                   onError={(e) => {
                     e.currentTarget.src =
@@ -1403,38 +1953,38 @@ export default function AdminGallery() {
               </div>
             </div>
 
-            {/* Info Panel - Fixed height */}
-            <div className="bg-black/70 text-white p-4 rounded-lg mx-4 flex-shrink-0">
-              <div className="flex items-start justify-between gap-4">
+            {/* Info Panel */}
+            <div className="bg-black/70 text-white p-3 md:p-4 rounded-lg mx-2 md:mx-4 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-2 md:gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xl font-semibold mb-1 truncate">
+                  <h3 className="text-lg md:text-xl font-semibold mb-1 line-clamp-2">
                     {galleryItems[lightboxIndex].title || "Untitled"}
                   </h3>
                   {galleryItems[lightboxIndex].description && (
-                    <p className="text-sm text-gray-300 line-clamp-2">
+                    <p className="text-xs md:text-sm text-gray-300 line-clamp-2 md:line-clamp-3">
                       {galleryItems[lightboxIndex].description}
                     </p>
                   )}
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-left sm:text-right flex-shrink-0 w-full sm:w-auto">
                   <Badge
-                    className={getCategoryColor(
+                    className={`text-xs mb-1 ${getCategoryColor(
                       galleryItems[lightboxIndex].category || "Other"
-                    )}
+                    )}`}
                   >
                     {galleryItems[lightboxIndex].category || "Other"}
                   </Badge>
-                  <p className="text-sm text-gray-300 mt-1">
+                  <p className="text-xs md:text-sm text-gray-300">
                     {formatDate(galleryItems[lightboxIndex].createdAt)}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3 text-sm text-gray-400">
+              <div className="flex items-center justify-between mt-2 md:mt-3 text-xs md:text-sm text-gray-400">
                 <span>
                   {lightboxIndex + 1} dari {galleryItems.length} foto
                 </span>
                 <span className="flex items-center">
-                  <ImageIcon className="h-4 w-4 mr-1" />
+                  <ImageIcon className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                   {Array.isArray(galleryItems[lightboxIndex].images)
                     ? galleryItems[lightboxIndex].images.length
                     : 0}{" "}
@@ -1443,36 +1993,62 @@ export default function AdminGallery() {
               </div>
             </div>
           </div>
+
+          {/* Touch/Swipe indicators for mobile */}
+          {galleryItems.length > 1 && (
+            <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 md:hidden">
+              <div className="flex items-center space-x-1 bg-black/50 rounded-full px-3 py-1">
+                {Array.from({ length: Math.min(galleryItems.length, 5) }).map(
+                  (_, i) => {
+                    const isActive = i === lightboxIndex % 5;
+                    return (
+                      <div
+                        key={i}
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          isActive ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    );
+                  }
+                )}
+                {galleryItems.length > 5 && (
+                  <span className="text-xs text-white/60 ml-2">
+                    +{galleryItems.length - 5}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Statistics Card */}
-      <Card className="mt-8">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-green-600">
+      <Card className="mt-6 md:mt-8">
+        <CardContent className="p-4 md:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
+            <div className="p-2 md:p-0">
+              <div className="text-lg md:text-2xl font-bold text-green-600">
                 {pagination.totalItems || 0}
               </div>
-              <div className="text-sm text-gray-600">Total Foto</div>
+              <div className="text-xs md:text-sm text-gray-600">Total Foto</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="p-2 md:p-0">
+              <div className="text-lg md:text-2xl font-bold text-blue-600">
                 {categories.slice(1).length}
               </div>
-              <div className="text-sm text-gray-600">Kategori</div>
+              <div className="text-xs md:text-sm text-gray-600">Kategori</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-600">
+            <div className="p-2 md:p-0">
+              <div className="text-lg md:text-2xl font-bold text-purple-600">
                 {galleryItems.filter((item) => item.active).length}
               </div>
-              <div className="text-sm text-gray-600">Aktif</div>
+              <div className="text-xs md:text-sm text-gray-600">Aktif</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">
+            <div className="p-2 md:p-0">
+              <div className="text-lg md:text-2xl font-bold text-orange-600">
                 {pagination.currentPage || 1}
               </div>
-              <div className="text-sm text-gray-600">Halaman</div>
+              <div className="text-xs md:text-sm text-gray-600">Halaman</div>
             </div>
           </div>
         </CardContent>

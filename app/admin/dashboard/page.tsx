@@ -26,14 +26,13 @@ import {
 import AdminDestinations from "@/components/admin/admin-destinations";
 import AdminEvents from "@/components/admin/admin-events";
 import AdminGallery from "@/components/admin/admin-gallery";
-// import AdminUsers from "@/components/admin/admin-users";
 import AdminUMKM from "@/components/admin/admin-umkm";
 import AdminBasecamp from "@/components/admin/admin-basecamp";
 import AboutEditor from "@/components/admin/admin-about";
 import AdminSubmissions from "@/components/admin/admin-submissions";
 import ComprehensiveAnalytics from "@/components/admin/admin-analytics";
 
-// Add the interfaces that ComprehensiveAnalytics expects
+// Fixed interfaces with proper types
 interface User {
   id: string;
   name: string;
@@ -120,6 +119,7 @@ interface Gallery {
   updatedAt: string;
 }
 
+// Fixed analytics data interface
 interface AnalyticsData {
   destinations: Destination[];
   events: Event[];
@@ -129,24 +129,38 @@ interface AnalyticsData {
   users: User[];
 }
 
+// Utility functions to ensure numeric values
+const safeNumber = (value: any, fallback = 0): number => {
+  const num = Number(value);
+  return isNaN(num) ? fallback : num;
+};
+
+const formatNumber = (value: any): string => {
+  const num = safeNumber(value);
+  return num.toLocaleString();
+};
+
 export default function AdminDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get("tab") || "destinations";
 
   const [user, setUser] = useState<any>(null);
+  // Fixed stats with safe number handling
   const [stats, setStats] = useState({
-    totalDestinations: 8,
-    totalUsers: 156,
-    totalEvents: 12,
-    monthlyVisitors: 2847,
+    activeDestinations: 0,
+    activeUMKM: 0,
+    activeBasecamps: 0,
+    unreadMessages: 0,
+    totalMessages: 0,
+    upcomingEvents: 0,
   });
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key for child components
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Add analytics data state with proper initialization
+  // Fixed analytics data initialization
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     destinations: [],
     events: [],
@@ -175,15 +189,18 @@ export default function AdminDashboard() {
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    if (parsedUser.role !== "admin") {
-      router.push("/");
-      return;
+    try {
+      const parsedUser = JSON.parse(userData);
+      if (parsedUser.role !== "admin") {
+        router.push("/");
+        return;
+      }
+      setUser(parsedUser);
+      loadDashboardData();
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      router.push("/auth/login");
     }
-
-    setUser(parsedUser);
-    // Load initial data
-    loadDashboardData();
   }, [router]);
 
   useEffect(() => {
@@ -201,7 +218,7 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  // Function to load all dashboard data
+  // Enhanced load dashboard data function
   const loadDashboardData = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -210,42 +227,150 @@ export default function AdminDashboard() {
         "Content-Type": "application/json",
       };
 
-      // Fetch stats data
-      const statsResponse = await fetch("/api/analytics", { headers });
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
+      // Fetch real data from APIs
+      const responses = await Promise.allSettled([
+        // Count active destinations
+        fetch("/api/destinations", { headers }).then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            return Array.isArray(data)
+              ? data.filter((item) => item.isActive).length
+              : 0;
+          }
+          return 0;
+        }),
+
+        // Count active UMKM
+        fetch("/api/produk", { headers }).then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            return Array.isArray(data)
+              ? data.filter((item) => item.isActive).length
+              : 0;
+          }
+          return 0;
+        }),
+
+        // Count active basecamps
+        fetch("/api/basecamps", { headers }).then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            return Array.isArray(data)
+              ? data.filter((item) => item.isActive).length
+              : 0;
+          }
+          return 0;
+        }),
+
+        // Count messages
+        fetch("/api/submissions", { headers }).then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              const unread = data.filter(
+                (item) => item.status === "PENDING" || item.readAt === null
+              ).length;
+              return { unread, total: data.length };
+            }
+          }
+          return { unread: 0, total: 0 };
+        }),
+
+        // Count upcoming events
+        fetch("/api/events", { headers }).then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              const now = new Date();
+              const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+              const nextMonth = new Date(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                1
+              );
+
+              return data.filter((event) => {
+                const eventDate = new Date(event.date);
+                return (
+                  event.isActive &&
+                  eventDate >= thisMonth &&
+                  eventDate < nextMonth
+                );
+              }).length;
+            }
+          }
+          return 0;
+        }),
+      ]);
+
+      // Extract results safely
+      const [
+        activeDestinations,
+        activeUMKM,
+        activeBasecamps,
+        messagesData,
+        upcomingEvents,
+      ] = responses.map((result, index) => {
+        if (result.status === "fulfilled") {
+          return result.value;
+        }
+        console.warn(`Failed to fetch data for stat ${index}:`, result.reason);
+        return index === 3 ? { unread: 0, total: 0 } : 0;
+      });
+
+      // Try to fetch real stats data
+      try {
+        const statsResponse = await fetch("/api/analytics", { headers });
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          // Ensure all stats are numbers
+          setStats({
+            activeDestinations: safeNumber(activeDestinations),
+            activeUMKM: safeNumber(activeUMKM),
+            activeBasecamps: safeNumber(activeBasecamps),
+            unreadMessages: safeNumber(messagesData.unread),
+            totalMessages: safeNumber(messagesData.total),
+            upcomingEvents: safeNumber(upcomingEvents),
+          });
+        }
+      } catch (apiError) {
+        console.log("Using fallback stats data");
+        // Use default values if API fails
       }
 
-      // For now, simulate updated stats
-      setStats((prevStats) => ({
-        totalDestinations: Math.max(
-          1,
-          prevStats.totalDestinations + Math.floor(Math.random() * 3) - 1
-        ),
-        totalUsers: Math.max(
-          1,
-          prevStats.totalUsers + Math.floor(Math.random() * 10) - 3
-        ),
-        totalEvents: Math.max(
-          1,
-          prevStats.totalEvents + Math.floor(Math.random() * 2) - 1
-        ),
-        monthlyVisitors: Math.max(
-          100,
-          prevStats.monthlyVisitors + Math.floor(Math.random() * 150) - 75
-        ),
-      }));
+      // Simulate updated stats with safe number handling
+      // setStats((prevStats) => ({
+      //   totalDestinations: Math.max(
+      //     1,
+      //     safeNumber(prevStats.totalDestinations) +
+      //       Math.floor(Math.random() * 3) -
+      //       1
+      //   ),
+      //   totalUsers: Math.max(
+      //     1,
+      //     safeNumber(prevStats.totalUsers) + Math.floor(Math.random() * 10) - 3
+      //   ),
+      //   totalEvents: Math.max(
+      //     1,
+      //     safeNumber(prevStats.totalEvents) + Math.floor(Math.random() * 2) - 1
+      //   ),
+      //   monthlyVisitors: Math.max(
+      //     100,
+      //     safeNumber(prevStats.monthlyVisitors) +
+      //       Math.floor(Math.random() * 150) -
+      //       75
+      //   ),
+      // }));
 
-      // Simulasi delay loading untuk UX yang lebih baik
+      // Simulate delay for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
     } catch (error) {
       console.error("Error loading dashboard data:", error);
-      throw error; // Re-throw untuk ditangkap oleh refreshStats
+      throw error;
     }
   };
 
-  // Function to load analytics data
+  // Enhanced analytics data loading
   const loadAnalyticsData = async () => {
     setAnalyticsLoading(true);
     try {
@@ -255,61 +380,81 @@ export default function AdminDashboard() {
         "Content-Type": "application/json",
       };
 
-      // Replace with actual API calls
-      const [destinations, events, produk, basecamps, galleries, users] =
-        await Promise.all([
-          fetch("/api/destinations", { headers }).then((res) => res.json()),
-          fetch("/api/events", { headers }).then((res) => res.json()),
-          fetch("/api/produk", { headers }).then((res) => res.json()),
-          fetch("/api/basecamps", { headers }).then((res) => res.json()),
-          fetch("/api/galleries", { headers }).then((res) => res.json()),
-          fetch("/api/users", { headers }).then((res) => res.json()),
-        ]);
+      // Use Promise.allSettled to handle individual API failures gracefully
+      const responses = await Promise.allSettled([
+        fetch("/api/destinations", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/events", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/produk", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/basecamps", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/galleries", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/users", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+      ]);
+
+      // Extract results safely
+      const [destinations, events, umkm, basecamps, galleries, users] =
+        responses.map((result) =>
+          result.status === "fulfilled" ? result.value : []
+        );
+
+      setAnalyticsData({
+        destinations: destinations || [],
+        events: events || [],
+        umkm: umkm || [],
+        basecamps: basecamps || [],
+        galleries: galleries || [],
+        users: users || [],
+      });
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setAnalyticsData({
-        totalDestinations: 10,
-        totalEvents: 5,
-        totalUMKM: 3,
-        totalBasecamp: 2,
-        totalGallery: 1,
-        totalSubmissions: 7,
-      });
     } catch (error) {
       console.error("Error loading analytics data:", error);
+      // Set empty arrays on error to prevent crashes
+      setAnalyticsData({
+        destinations: [],
+        events: [],
+        umkm: [],
+        basecamps: [],
+        galleries: [],
+        users: [],
+      });
     } finally {
       setAnalyticsLoading(false);
     }
   };
 
-  // Load analytics data when component mounts or when analytics tab is selected
+  // Load analytics data when analytics tab is selected
   useEffect(() => {
     if (activeTab === "analytics") {
       loadAnalyticsData();
     }
   }, [activeTab]);
 
-  // Enhanced refresh function
+  // Enhanced refresh function with better error handling
   const refreshStats = async () => {
     setIsRefreshing(true);
     try {
-      // Update current time
       setCurrentTime(new Date());
-
-      // Load dashboard data
       await loadDashboardData();
 
-      // If analytics tab is active, refresh analytics data
       if (activeTab === "analytics") {
         await loadAnalyticsData();
       }
 
-      // Increment refresh key to force child components to refresh
       setRefreshKey((prev) => prev + 1);
 
-      // Dispatch custom event to notify child components
       window.dispatchEvent(
         new CustomEvent("dashboardRefresh", {
           detail: {
@@ -320,33 +465,28 @@ export default function AdminDashboard() {
         })
       );
 
-      // Show success feedback
       console.log("Dashboard refreshed successfully");
     } catch (error) {
       console.error("Error refreshing dashboard:", error);
-      // Dispatch error event
       window.dispatchEvent(
         new CustomEvent("dashboardRefreshError", {
           detail: { error: error.message, timestamp: new Date().toISOString() },
         })
       );
     } finally {
-      // Tambah minimum loading time untuk UX yang lebih baik
       setTimeout(() => {
         setIsRefreshing(false);
       }, 500);
     }
   };
 
-  // Update fungsi handleLogout
+  // Enhanced logout function
   const handleLogout = async () => {
     if (confirm("Apakah Anda yakin ingin keluar?")) {
       try {
-        // Clear local storage
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        // Reset states
         setUser(null);
         setStats({
           totalDestinations: 0,
@@ -355,17 +495,13 @@ export default function AdminDashboard() {
           monthlyVisitors: 0,
         });
 
-        // Dispatch storage event untuk update header
         window.dispatchEvent(
           new CustomEvent("authChange", {
             detail: { action: "logout" },
           })
         );
 
-        // Tunggu sebentar sebelum redirect
         await new Promise((resolve) => setTimeout(resolve, 100));
-
-        // Redirect ke login page
         router.replace("/auth/login");
       } catch (error) {
         console.error("Error during logout:", error);
@@ -426,7 +562,7 @@ export default function AdminDashboard() {
               {/* User info - hidden on mobile */}
               <div className="hidden lg:block text-right">
                 <p className="text-sm font-medium text-gray-900">
-                  Selamat datang, {user.name}
+                  Selamat datang, {user?.name || "Admin"}
                 </p>
                 <p className="text-xs text-gray-500">
                   {currentTime.toLocaleDateString("id-ID", {
@@ -519,7 +655,7 @@ export default function AdminDashboard() {
           {/* Mobile user info */}
           <div className="lg:hidden mt-2 pt-2 border-t border-gray-100">
             <p className="text-sm font-medium text-gray-900 truncate">
-              Selamat datang, {user.name}
+              Selamat datang, {user?.name || "Admin"}
             </p>
             <p className="text-xs text-gray-500">
               {currentTime.toLocaleDateString("id-ID", {
@@ -543,7 +679,7 @@ export default function AdminDashboard() {
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                Selamat datang kembali, {user.name}! 👋
+                Selamat datang kembali, {user?.name || "Admin"}! 👋
               </h2>
               <p className="text-green-100 text-sm sm:text-base">
                 Kelola website Desa Tarubatang dengan mudah dari dashboard ini
@@ -560,101 +696,159 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        {/* Enhanced Stats Cards with safe number formatting */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+          {/* Card 1: Konten Aktif */}
           <Card className="border-l-4 border-l-green-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2 p-3 sm:p-4">
               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center justify-between">
-                <span className="truncate">Total Destinasi</span>
-                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+                <span className="truncate">Konten Aktif</span>
+                <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
               <div className="space-y-2">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {stats.totalDestinations}
-                </p>
-                <div className="space-y-1">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs bg-green-100 text-green-800"
-                  >
-                    +2 bulan ini
-                  </Badge>
-                  <p className="text-xs text-gray-500">↗ 25% naik</p>
+                <div className="text-lg sm:text-xl font-bold text-gray-900 space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Destinasi:</span>
+                    <span className="font-semibold">
+                      {stats.activeDestinations || "-"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">UMKM:</span>
+                    <span className="font-semibold">
+                      {stats.activeUMKM || "-"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Basecamp:</span>
+                    <span className="font-semibold">
+                      {stats.activeBasecamps || "-"}
+                    </span>
+                  </div>
                 </div>
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-green-100 text-green-800"
+                >
+                  Status Publikasi
+                </Badge>
               </div>
             </CardContent>
           </Card>
 
+          {/* Card 2: Pesan Masuk */}
           <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2 p-3 sm:p-4">
               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center justify-between">
-                <span className="truncate">Total Users</span>
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                <span className="truncate">Pesan Masuk</span>
+                <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
               <div className="space-y-2">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {stats.totalUsers}
-                </p>
+                <div className="text-lg sm:text-xl font-bold text-gray-900 space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Belum dibaca:</span>
+                    <span className="font-semibold text-red-600">
+                      {stats.unreadMessages || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Total:</span>
+                    <span className="font-semibold">
+                      {stats.totalMessages || 0}
+                    </span>
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs bg-blue-100 text-blue-800"
-                  >
-                    +23 minggu ini
-                  </Badge>
-                  <p className="text-xs text-gray-500">↗ 15% naik</p>
+                  {stats.unreadMessages > 0 ? (
+                    <Badge variant="destructive" className="text-xs">
+                      Perlu Perhatian!
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-green-100 text-green-800"
+                    >
+                      Semua Terbaca
+                    </Badge>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Card 3: Event Mendatang */}
           <Card className="border-l-4 border-l-purple-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2 p-3 sm:p-4">
               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center justify-between">
-                <span className="truncate">Total Events</span>
+                <span className="truncate">Event Mendatang</span>
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
               <div className="space-y-2">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {stats.totalEvents}
-                </p>
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-center">
+                    {stats.upcomingEvents || 0}
+                  </div>
+                  <div className="text-sm text-center text-gray-600 mt-1">
+                    Event aktif bulan ini
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs bg-purple-100 text-purple-800"
-                  >
-                    +1 bulan ini
-                  </Badge>
-                  <p className="text-xs text-gray-500">↗ 8% naik</p>
+                  {stats.upcomingEvents > 0 ? (
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-purple-100 text-purple-800 w-full justify-center"
+                    >
+                      Ada yang akan datang
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="text-xs w-full justify-center"
+                    >
+                      Tidak ada event
+                    </Badge>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 col-span-2 lg:col-span-1">
+          {/* Card 4: Status Website */}
+          <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2 p-3 sm:p-4">
               <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center justify-between">
-                <span className="truncate">Pengunjung Bulanan</span>
+                <span className="truncate">Status Website</span>
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0" />
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
               <div className="space-y-2">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {stats.monthlyVisitors.toLocaleString()}
-                </p>
-                <div className="space-y-1">
-                  <Badge className="text-xs bg-green-100 text-green-800">
-                    +12% dari bulan lalu
-                  </Badge>
-                  <p className="text-xs text-gray-500">↗ Trending naik</p>
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    Website Online
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Terakhir diperbarui:
+                  </div>
+                  <div className="text-xs font-mono text-gray-700">
+                    {currentTime.toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
                 </div>
+                <Badge className="text-xs bg-green-100 text-green-800 w-full justify-center">
+                  Sistem Normal
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -749,7 +943,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Desktop: Grid layout */}
-                <div className="hidden sm:grid grid-cols-4 lg:grid-cols-7 gap-1 w-full">
+                <div className="hidden sm:grid grid-cols-4 lg:grid-cols-6 gap-1 w-full">
                   <TabsTrigger
                     value="destinations"
                     className="flex items-center space-x-2 py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -786,13 +980,6 @@ export default function AdminDashboard() {
                     <span>Galeri</span>
                   </TabsTrigger>
                   <TabsTrigger
-                    value="analytics"
-                    className="flex items-center space-x-2 py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                  >
-                    <BarChart3 className="h-4 w-4" />
-                    <span>Analytics</span>
-                  </TabsTrigger>
-                  <TabsTrigger
                     value="message"
                     className="flex items-center space-x-2 py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   >
@@ -824,15 +1011,6 @@ export default function AdminDashboard() {
                 <AdminGallery key={`gallery-${refreshKey}`} />
               </TabsContent>
 
-              <TabsContent value="analytics" className="mt-0">
-                <ComprehensiveAnalytics
-                  key={`analytics-${refreshKey}`}
-                  data={analyticsData}
-                  loading={analyticsLoading}
-                  onRefresh={handleRefreshAnalytics}
-                />
-              </TabsContent>
-
               <TabsContent value="message" className="mt-0">
                 <AdminSubmissions key={`submissions-${refreshKey}`} />
               </TabsContent>
@@ -855,7 +1033,7 @@ export default function AdminDashboard() {
   );
 }
 
-// Tambahan: Custom hook untuk refresh dashboard
+// Custom hook untuk refresh dashboard
 export const useDashboardRefresh = () => {
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -896,8 +1074,6 @@ const useDebounce = (callback: () => void, delay: number) => {
   }, [callback, delay]);
 };
 
-// Additional utility functions for the dashboard
-
 // Function to show refresh success notification
 const showRefreshNotification = (type: "success" | "error" = "success") => {
   if (typeof window !== "undefined") {
@@ -915,7 +1091,7 @@ const showRefreshNotification = (type: "success" | "error" = "success") => {
   }
 };
 
-// Enhanced analytics data loader with error handling
+// Enhanced analytics data loader with error handling and safe number handling
 const loadAnalyticsDataWithRetry = async (
   retryCount = 3
 ): Promise<AnalyticsData> => {
@@ -927,25 +1103,70 @@ const loadAnalyticsDataWithRetry = async (
         "Content-Type": "application/json",
       };
 
-      // In production, replace with actual API calls
+      // Use Promise.allSettled to handle individual API failures gracefully
       const responses = await Promise.allSettled([
-        fetch("/api/destinations", { headers }),
-        fetch("/api/events", { headers }),
-        fetch("/api/produk", { headers }),
-        fetch("/api/basecamps", { headers }),
-        fetch("/api/galleries", { headers }),
-        // fetch("/api/users", { headers }),
+        fetch("/api/destinations", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/events", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/produk", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/basecamps", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/galleries", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
+        fetch("/api/users", { headers }).then((res) =>
+          res.ok ? res.json() : []
+        ),
       ]);
+
+      // Extract results safely with fallback to empty arrays
+      const [destinations, events, umkm, basecamps, galleries, users] =
+        responses.map((result) =>
+          result.status === "fulfilled" ? result.value || [] : []
+        );
+
+      return {
+        destinations: Array.isArray(destinations) ? destinations : [],
+        events: Array.isArray(events) ? events : [],
+        umkm: Array.isArray(umkm) ? umkm : [],
+        basecamps: Array.isArray(basecamps) ? basecamps : [],
+        galleries: Array.isArray(galleries) ? galleries : [],
+        users: Array.isArray(users) ? users : [],
+      };
     } catch (error) {
       console.error(`Attempt ${i + 1} failed:`, error);
-      if (i === retryCount - 1) throw error;
+      if (i === retryCount - 1) {
+        // Return empty data structure on final failure
+        return {
+          destinations: [],
+          events: [],
+          umkm: [],
+          basecamps: [],
+          galleries: [],
+          users: [],
+        };
+      }
 
       // Wait before retry
       await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
     }
   }
 
-  throw new Error("Max retries exceeded");
+  // This should never be reached due to the return in the catch block
+  return {
+    destinations: [],
+    events: [],
+    umkm: [],
+    basecamps: [],
+    galleries: [],
+    users: [],
+  };
 };
 
 // Enhanced refresh function with better error handling and user feedback
@@ -961,41 +1182,58 @@ const createEnhancedRefreshFunction = (
     setIsRefreshing(true);
 
     try {
-      // Show loading notification
-      showRefreshNotification("success");
-
       // Update current time immediately
       const now = new Date();
       setCurrentTime(now);
 
-      // Simulate stats update (replace with real API call)
-      setStats((prevStats) => ({
-        totalDestinations: Math.max(
-          1,
-          prevStats.totalDestinations + Math.floor(Math.random() * 3) - 1
-        ),
-        totalUsers: Math.max(
-          1,
-          prevStats.totalUsers + Math.floor(Math.random() * 10) - 5
-        ),
-        totalEvents: Math.max(
-          1,
-          prevStats.totalEvents + Math.floor(Math.random() * 2) - 1
-        ),
-        monthlyVisitors: Math.max(
-          100,
-          prevStats.monthlyVisitors + Math.floor(Math.random() * 200) - 100
-        ),
-      }));
+      // Enhanced stats update with safe number handling
+      setStats((prevStats: any) => {
+        const currentDestinations = safeNumber(prevStats?.totalDestinations, 8);
+        const currentUsers = safeNumber(prevStats?.totalUsers, 156);
+        const currentEvents = safeNumber(prevStats?.totalEvents, 12);
+        const currentVisitors = safeNumber(prevStats?.monthlyVisitors, 2847);
+
+        return {
+          totalDestinations: Math.max(
+            1,
+            currentDestinations + Math.floor(Math.random() * 3) - 1
+          ),
+          totalUsers: Math.max(
+            1,
+            currentUsers + Math.floor(Math.random() * 10) - 5
+          ),
+          totalEvents: Math.max(
+            1,
+            currentEvents + Math.floor(Math.random() * 2) - 1
+          ),
+          monthlyVisitors: Math.max(
+            100,
+            currentVisitors + Math.floor(Math.random() * 200) - 100
+          ),
+        };
+      });
 
       // If analytics tab is active, refresh analytics data
       if (activeTab === "analytics") {
-        const newAnalyticsData = await loadAnalyticsDataWithRetry();
-        setAnalyticsData(newAnalyticsData);
+        try {
+          const newAnalyticsData = await loadAnalyticsDataWithRetry();
+          setAnalyticsData(newAnalyticsData);
+        } catch (analyticsError) {
+          console.error("Failed to load analytics data:", analyticsError);
+          // Set safe fallback data
+          setAnalyticsData({
+            destinations: [],
+            events: [],
+            umkm: [],
+            basecamps: [],
+            galleries: [],
+            users: [],
+          });
+        }
       }
 
       // Increment refresh key to force child components to refresh
-      setRefreshKey((prev) => prev + 1);
+      setRefreshKey((prev: number) => prev + 1);
 
       // Dispatch custom event to notify child components
       window.dispatchEvent(
@@ -1012,6 +1250,8 @@ const createEnhancedRefreshFunction = (
         "Dashboard refreshed successfully at:",
         now.toLocaleTimeString("id-ID")
       );
+
+      showRefreshNotification("success");
     } catch (error) {
       console.error("Error refreshing dashboard:", error);
       showRefreshNotification("error");
@@ -1019,7 +1259,10 @@ const createEnhancedRefreshFunction = (
       // Dispatch error event
       window.dispatchEvent(
         new CustomEvent("dashboardRefreshError", {
-          detail: { error: error.message, timestamp: new Date().toISOString() },
+          detail: {
+            error: error instanceof Error ? error.message : "Unknown error",
+            timestamp: new Date().toISOString(),
+          },
         })
       );
     } finally {

@@ -275,13 +275,6 @@ export default function Header() {
                           <Images className="mr-2 h-4 w-4 flex-shrink-0" />
                           <span className="truncate">Kelola Galeri</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => handleAdminNavigation("analytics")}
-                          className="cursor-pointer"
-                        >
-                          <ChartColumn className="mr-2 h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">Analisis & Statistik</span>
-                        </DropdownMenuItem>
                       </>
                     )}
 

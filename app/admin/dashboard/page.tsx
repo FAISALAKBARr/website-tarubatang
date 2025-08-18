@@ -548,6 +548,75 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          {/* Quick Tips Card */}
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                Tips Pengelolaan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-sm text-gray-700 space-y-2">
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <span>Periksa dan balas pesan pengunjung secara berkala</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <span>Update informasi destinasi dan UMKM terbaru</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <span>Upload foto galeri kegiatan desa secara rutin</span>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                Panduan Admin
+              </Badge>
+            </CardContent>
+          </Card>
+
+          {/* Website Health Card */}
+          <Card className="border-l-4 border-l-green-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+                <Activity className="h-5 w-5 mr-2 text-green-600" />
+                Status Sistem
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Website</span>
+                  <Badge className="bg-green-100 text-green-800 text-xs">
+                    Online
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Database</span>
+                  <Badge className="bg-green-100 text-green-800 text-xs">
+                    Normal
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Update</span>
+                  <span className="text-xs text-gray-500">
+                    {currentTime.toLocaleTimeString("id-ID")}
+                  </span>
+                </div>
+              </div>
+              <Badge
+                variant="outline"
+                className="text-xs w-full justify-center"
+              >
+                Semua Sistem Berjalan Normal
+              </Badge>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Main Tabs */}
         <Tabs
           value={activeTab}

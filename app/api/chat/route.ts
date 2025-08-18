@@ -36,14 +36,6 @@ PEMERINTAHAN DESA:
 - Kepala Dusun 1 (Wilayah Utara): Sumarlan
 - Kepala Dusun 2 (Wilayah Selatan): Mantep, L
 
-PRESTASI DESA:
-- 2023: Juara 1 Desa Wisata Terbaik Jawa Tengah
-- 2023: **Resmi menjadi Desa Wisata Dirgantara Paralayang** (SK Februari 2023)
-- 2022: Desa Mandiri Energi & Juara 2 Lomba Desa Sehat Nasional
-- 2022: Rintisan desa wisata paralayang dimulai
-- 2021: Desa Digital Terpadu & Juara 1 Pengelolaan Dana Desa Terbaik
-- 2020: Kampung KB Berprestasi
-
 DESTINASI WISATA UTAMA:
 1. Jalur Pendakian Gunung Merbabu via Selo (basecamp utama)
 2. **WISATA DIRGANTARA PARALAYANG** (TERBARU 2023 - Unggulan!)

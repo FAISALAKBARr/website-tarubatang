@@ -661,12 +661,6 @@ export default function AdminSubmissions() {
                                 <Eye className="h-4 w-4 mr-2" />
                                 Lihat Detail
                               </DropdownMenuItem>
-                              {/* <DropdownMenuItem
-                                onClick={() => handleReply(submission)}
-                              >
-                                <Reply className="h-4 w-4 mr-2" />
-                                {submission.response ? "Edit Balasan" : "Balas"}
-                              </DropdownMenuItem> */}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => handleArchive(submission)}

@@ -1064,24 +1064,10 @@ export default function TourismPage() {
             Siap Menjelajahi Tarubatang?
           </h2>
           <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
-            Hubungi kami untuk informasi lebih lanjut atau bantuan perencanaan
-            perjalanan wisata Anda
+            Hubungi pemandu wisata yang tercantum untuk informasi lebih lanjut
+            atau bantuan perencanaan perjalanan wisata Anda
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-white text-green-600 hover:bg-gray-100"
-            >
-              Hubungi Pemandu Wisata
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-white border-white hover:bg-white hover:text-green-600 bg-transparent"
-            >
-              Lihat Paket Wisata
-            </Button>
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center"></div>
         </div>
       </section>
 

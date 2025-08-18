@@ -1155,12 +1155,12 @@ export default function BasecampPage() {
                 <Phone className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="font-bold text-lg text-gray-800 mb-2">
-                Hubungi Pemilik Terlebih Dahulu
+                Hubungi Pemilik Terlebih Dahulu Lebih Baik
               </h3>
               <p className="text-gray-600 text-sm">
-                Selalu konfirmasi ketersediaan dan detail menginap dengan
-                pemilik basecamp sebelum datang. Tanyakan tentang aturan khusus
-                dan fasilitas yang tersedia.
+                Untuk konfirmasi ketersediaan dan detail menginap dengan pemilik
+                basecamp sebelum datang. Tanyakan tentang aturan khusus dan
+                fasilitas yang tersedia.
               </p>
             </div>
 

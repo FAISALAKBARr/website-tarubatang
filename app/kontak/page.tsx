@@ -215,7 +215,7 @@ export default function ContactPage() {
                 <h3 className="font-semibold text-lg mb-2">Telepon</h3>
                 <p className="text-gray-600 text-sm space-y-1">
                   <span className="block">Kantor Desa:</span>
-                  <span className="block font-medium">(0276) 123-456</span>
+                  <span className="block font-medium">(0838)-3666-6262</span>
                   <span className="block">Info Wisata:</span>
                   <span className="block font-medium">0812-3456-7890</span>
                 </p>

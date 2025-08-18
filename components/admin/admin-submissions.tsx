@@ -397,7 +397,7 @@ export default function AdminSubmissions() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
@@ -420,20 +420,6 @@ export default function AdminSubmissions() {
                 <p className="text-sm font-medium text-gray-600">Dibaca</p>
                 <p className="text-2xl font-bold text-blue-600">
                   {stats.READ || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Dibalas</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {stats.REPLIED || 0}
                 </p>
               </div>
             </div>
@@ -675,12 +661,12 @@ export default function AdminSubmissions() {
                                 <Eye className="h-4 w-4 mr-2" />
                                 Lihat Detail
                               </DropdownMenuItem>
-                              <DropdownMenuItem
+                              {/* <DropdownMenuItem
                                 onClick={() => handleReply(submission)}
                               >
                                 <Reply className="h-4 w-4 mr-2" />
                                 {submission.response ? "Edit Balasan" : "Balas"}
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => handleArchive(submission)}

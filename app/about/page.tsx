@@ -777,7 +777,7 @@ export default function AboutPage() {
                 </div>
                 <div className="relative mb-4 sm:mb-6">
                   <Image
-                    src="/peta-tarubatang.png"
+                    src="/peta-tarubatang-1.png"
                     alt="Peta Desa Tarubatang"
                     width={1000}
                     height={700}

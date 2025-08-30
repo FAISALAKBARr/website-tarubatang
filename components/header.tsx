@@ -187,8 +187,8 @@ export default function Header() {
 
           {/* Right Section - Auth & Controls */}
           <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-            {/* Mode Toggle - Hidden on smallest screens */}
-            <div className="hidden xs:block">
+            {/* Mode Toggle - Always visible */}
+            <div className="hidden xl:flex items-center">
               <ModeToggle />
             </div>
 
@@ -354,7 +354,7 @@ export default function Header() {
                   {/* Content */}
                   <div className="flex-1 px-4 py-4">
                     {/* Mode Toggle - Show on mobile */}
-                    <div className="xs:hidden mb-4">
+                    <div className="xl:hidden mb-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Tema</span>
                         <ModeToggle />

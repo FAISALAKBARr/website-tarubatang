@@ -106,9 +106,9 @@ function getDefaultContent(): WebsiteContent {
   return {
     contact: {
       village: "0838-3666-6262",
-      tourism: "0812-3456-7890",
+      tourism: "-",
       emergency: "0811-2233-4455",
-      email: "info@tarubatang.desa.id",
+      email: "pemerintahdesatarubatang@gmail.com",
       address:
         "Desa Tarubatang, Kecamatan Selo, Kabupaten Boyolali, Jawa Tengah 57365",
     },

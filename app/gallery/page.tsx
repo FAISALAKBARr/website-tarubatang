@@ -275,19 +275,32 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative h-[350px] bg-gradient-to-r from-teal-800 to-teal-600">
-        <div className="absolute inset-0 bg-black/40" />
-        <Image
-          src="/merbabuu.png"
-          alt="Galeri Desa Tarubatang"
-          fill
-          className="object-cover"
-          priority
-          onError={(e) => {
-            // Fallback to gradient background if image fails to load
-            e.currentTarget.style.display = "none";
+      <section id="beranda" className="hero-section">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="hero-video"
+        >
+          <source src="/opening-web.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Fallback Image for when video doesn't load */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/merbabuu.png')",
+            display: "none",
           }}
-        />
+        ></div>
+
+        {/* Dark Overlay for better text readability and aesthetic */}
+        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white">
             <h1 className="text-4xl font-bold mb-4">Galeri Desa Tarubatang</h1>

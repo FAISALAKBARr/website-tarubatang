@@ -1029,43 +1029,59 @@ export default function HomePage() {
       </DetailModal>
 
       {/* Hero Section */}
-      <section
-        id="beranda"
-        className="relative h-[600px] bg-background overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <Image
-          src="/merbabuu.png"
-          alt="Pemandangan Gunung Merbabu dari Desa Tarubatang"
-          fill
-          className="object-cover cursor-pointer"
-          onClick={() =>
-            openImageModal(
-              ["/merbabuu.png"],
-              0,
-              "Pemandangan Gunung Merbabu dari Desa Tarubatang"
-            )
-          }
-        />
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="text-white max-w-2xl">
-            <Badge className="mb-4 bg-green-500 hover:bg-green-600">
+      <section id="beranda" className="hero-section">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="hero-video"
+        >
+          <source src="/opening-web.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Fallback Image for when video doesn't load */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/merbabuu.png')",
+            display: "none",
+          }}
+        ></div>
+
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70 z-10"></div>
+
+        {/* Content */}
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center sm:justify-start z-20">
+          <div className="text-white max-w-full sm:max-w-2xl text-center sm:text-left">
+            <Badge className="mb-3 sm:mb-4 bg-green-500 hover:bg-green-600 text-xs sm:text-sm">
               Kawasan Taman Nasional Gunung Merbabu
             </Badge>
-            <h1 className="text-5xl font-bold mb-4">Desa Tarubatang</h1>
-            <p className="text-xl mb-6 text-green-100">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 leading-tight">
+              Desa Tarubatang
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl mb-4 sm:mb-6 text-green-100 leading-relaxed px-2 sm:px-0">
               Destinasi wisata alam terbaik di kaki Gunung Merbabu dengan
               keindahan yang memukau dan budaya yang kaya
             </p>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-center">
               <Button
                 size="lg"
-                className="bg-green-500 hover:bg-green-600"
+                className="bg-green-500 hover:bg-green-600 w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8"
                 asChild
               >
                 <Link href="/tourism">Jelajahi Wisata</Link>
               </Button>
-              <Button size="lg" variant="secondary" asChild>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8"
+                asChild
+              >
                 <Link href="/events">Lihat Acara</Link>
               </Button>
             </div>

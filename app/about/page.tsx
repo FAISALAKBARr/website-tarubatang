@@ -112,17 +112,34 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <section className="relative h-[300px] sm:h-[400px] lg:h-[500px] bg-gradient-to-r from-green-800 to-green-600">
-        <div className="absolute inset-0 bg-black/40"></div>
-        <Image
-          src="/merbabuu.png"
-          alt="Panorama Desa Tarubatang"
-          fill
-          className="object-cover"
-          priority
-        />
+      <section id="beranda" className="hero-section">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="hero-video"
+        >
+          <source src="/opening-web.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Fallback Image for when video doesn't load */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/merbabuu.png')",
+            display: "none",
+          }}
+        ></div>
+
+        {/* Dark Overlay for better text readability and aesthetic */}
+        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
           <div className="text-white max-w-4xl">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">
@@ -137,21 +154,64 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* About Desa Tarubatang */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      {/* Video Profile Desa */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <Badge className="mb-4 bg-green-100 text-green-800">
+            <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              Video Profile
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              Video Profile Desa Tarubatang
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+              Saksikan keindahan dan potensi Desa Tarubatang melalui video
+              profil resmi yang menampilkan pesona alam, budaya, dan kehidupan
+              masyarakat desa
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="relative w-full rounded-xl overflow-hidden shadow-2xl bg-black">
+              <div
+                className="aspect-w-16 aspect-h-9"
+                style={{ paddingBottom: "56.25%" }}
+              >
+                <iframe
+                  src="https://www.youtube.com/embed/HuKVePRBheQ"
+                  title="Video Profil Desa Tarubatang"
+                  className="absolute inset-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+            <div className="text-center mt-4 sm:mt-6">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Video ini menampilkan keindahan alam, potensi wisata, dan
+                kehidupan masyarakat Desa Tarubatang
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Desa Tarubatang */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Tentang Desa
             </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Tentang Desa Tarubatang
             </h2>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <div className="space-y-4 sm:space-y-6 text-gray-600 text-sm sm:text-base">
+              <div className="space-y-4 sm:space-y-6 text-muted-foreground text-sm sm:text-base">
                 <p>
                   Desa Tarubatang adalah sebuah desa yang terletak di lereng
                   Gunung Merbabu, Kabupaten Boyolali, Jawa Tengah. Desa ini
@@ -188,13 +248,13 @@ export default function AboutPage() {
       </section>
 
       {/* Vision & Mission */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-green-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <Badge className="mb-4 bg-blue-100 text-blue-800">
+            <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
               Visi & Misi
             </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Visi dan Misi Desa Tarubatang
             </h2>
           </div>
@@ -208,7 +268,7 @@ export default function AboutPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                <p className="text-base sm:text-lg text-foreground leading-relaxed">
                   "Mewujudkan sistem Pemerintahan yang efektif dan demokratis
                   serta terciptanya masyarakat yang aman, tentram, sejahtera,
                   dan membangun Desa bareng-bareng dengan masyarakat"
@@ -224,7 +284,7 @@ export default function AboutPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <ul className="space-y-3 sm:space-y-4 text-gray-700 text-sm sm:text-base">
+                <ul className="space-y-3 sm:space-y-4 text-foreground text-sm sm:text-base">
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                     <span>
@@ -265,17 +325,17 @@ export default function AboutPage() {
       </section>
 
       {/* Village History */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <Badge className="mb-4 bg-amber-100 text-amber-800">
+              <Badge className="mb-4 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
                 Sejarah Desa
               </Badge>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4 lg:mb-6">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 lg:mb-6">
                 Sejarah Desa Tarubatang
               </h2>
-              <div className="space-y-4 sm:space-y-6 text-gray-600 text-sm sm:text-base">
+              <div className="space-y-4 sm:space-y-6 text-muted-foreground text-sm sm:text-base">
                 <p>
                   Desa Tarubatang memiliki sejarah panjang yang dimulai pada
                   abad ke-18, ketika para pendatang dari Jawa mulai membuka
@@ -311,12 +371,12 @@ export default function AboutPage() {
                 height={400}
                 className="w-full h-[250px] sm:h-[300px] lg:h-[400px] object-cover rounded-lg shadow-lg"
               />
-              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-white p-3 sm:p-4 rounded-lg shadow-lg">
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-card p-3 sm:p-4 rounded-lg shadow-lg">
                 <div className="text-center">
                   <p className="text-xl sm:text-2xl font-bold text-green-600">
                     1750
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Tahun Berdiri
                   </p>
                 </div>
@@ -327,16 +387,16 @@ export default function AboutPage() {
       </section>
 
       {/* Geography */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-green-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <Badge className="mb-4 bg-green-100 text-green-800">
+            <Badge className="mb-4 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Geografis
             </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Geografis Desa Tarubatang
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Desa Tarubatang terletak di lokasi strategis dengan kondisi
               geografis yang mendukung pengembangan wisata alam dan pertanian
               berkelanjutan
@@ -353,7 +413,7 @@ export default function AboutPage() {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   1,200m
                 </p>
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   di atas permukaan laut
                 </p>
               </CardContent>
@@ -368,10 +428,10 @@ export default function AboutPage() {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   380,4 Ha
                 </p>
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Bujur 110° 29'12"BT
                 </p>
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Lintang 07° 29'42"LS
                 </p>
               </CardContent>
@@ -386,7 +446,9 @@ export default function AboutPage() {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   2,822
                 </p>
-                <p className="text-xs sm:text-sm text-gray-600">jiwa (2024)</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  jiwa (2024)
+                </p>
               </CardContent>
             </Card>
 
@@ -399,7 +461,7 @@ export default function AboutPage() {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   15-28°C
                 </p>
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   sepanjang tahun
                 </p>
               </CardContent>
@@ -417,21 +479,29 @@ export default function AboutPage() {
               <CardContent className="pt-0">
                 <div className="space-y-3 text-sm sm:text-base">
                   <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                    <span className="text-gray-600 font-medium">Utara:</span>
+                    <span className="text-muted-foreground font-medium">
+                      Utara:
+                    </span>
                     <span className="font-medium">Desa Senden</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                    <span className="text-gray-600 font-medium">Selatan:</span>
+                    <span className="text-muted-foreground font-medium">
+                      Selatan:
+                    </span>
                     <span className="font-medium">Desa Selo</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                    <span className="text-gray-600 font-medium">Timur:</span>
+                    <span className="text-muted-foreground font-medium">
+                      Timur:
+                    </span>
                     <span className="font-medium">
                       Desa Cepogo, Kecamatan Cepogo
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                    <span className="text-gray-600 font-medium">Barat:</span>
+                    <span className="text-muted-foreground font-medium">
+                      Barat:
+                    </span>
                     <span className="font-medium">
                       Kawasan Hutan Taman Nasional Gunung Merbabu
                     </span>
@@ -450,19 +520,21 @@ export default function AboutPage() {
               <CardContent className="pt-0">
                 <div className="space-y-3 text-sm sm:text-base">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Dataran Tinggi:</span>
+                    <span className="text-muted-foreground">
+                      Dataran Tinggi:
+                    </span>
                     <span className="font-medium">65%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Perbukitan:</span>
+                    <span className="text-muted-foreground">Perbukitan:</span>
                     <span className="font-medium">25%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Lembah:</span>
+                    <span className="text-muted-foreground">Lembah:</span>
                     <span className="font-medium">10%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Kemiringan:</span>
+                    <span className="text-muted-foreground">Kemiringan:</span>
                     <span className="font-medium">15-45°</span>
                   </div>
                 </div>
@@ -473,16 +545,16 @@ export default function AboutPage() {
       </section>
 
       {/* Monografi Desa */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <Badge className="mb-4 bg-purple-100 text-purple-800">
+            <Badge className="mb-4 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
               Monografi
             </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Monografi Desa Tarubatang
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Data lengkap kependudukan dan sosial ekonomi masyarakat Desa
               Tarubatang
             </p>
@@ -494,7 +566,9 @@ export default function AboutPage() {
                 <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">
                   1,417
                 </div>
-                <p className="text-gray-600 text-xs sm:text-sm">Laki-laki</p>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  Laki-laki
+                </p>
               </CardContent>
             </Card>
 
@@ -503,7 +577,9 @@ export default function AboutPage() {
                 <div className="text-2xl sm:text-3xl font-bold text-pink-600 mb-2">
                   1,405
                 </div>
-                <p className="text-gray-600 text-xs sm:text-sm">Perempuan</p>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  Perempuan
+                </p>
               </CardContent>
             </Card>
 
@@ -512,7 +588,7 @@ export default function AboutPage() {
                 <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">
                   687
                 </div>
-                <p className="text-gray-600 text-xs sm:text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Kepala Keluarga
                 </p>
               </CardContent>
@@ -523,7 +599,7 @@ export default function AboutPage() {
                 <div className="text-2xl sm:text-3xl font-bold text-orange-600 mb-2">
                   3.7
                 </div>
-                <p className="text-gray-600 text-xs sm:text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Rata-rata per KK
                 </p>
               </CardContent>
@@ -542,7 +618,7 @@ export default function AboutPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm sm:text-base">Petani</span>
                     <div className="flex items-center space-x-2">
-                      <div className="w-16 sm:w-24 bg-gray-200 rounded-full h-2">
+                      <div className="w-16 sm:w-24 bg-muted rounded-full h-2">
                         <div
                           className="bg-green-500 h-2 rounded-full"
                           style={{ width: "45%" }}
@@ -556,7 +632,7 @@ export default function AboutPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm sm:text-base">Pedagang/UMKM</span>
                     <div className="flex items-center space-x-2">
-                      <div className="w-16 sm:w-24 bg-gray-200 rounded-full h-2">
+                      <div className="w-16 sm:w-24 bg-muted rounded-full h-2">
                         <div
                           className="bg-blue-500 h-2 rounded-full"
                           style={{ width: "25%" }}
@@ -718,16 +794,16 @@ export default function AboutPage() {
       </section> */}
 
       {/* Profile Dukuh */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <Badge className="mb-4 bg-indigo-100 text-indigo-800">
               Wilayah
             </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Profile Dukuh-dukuh Tarubatang
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Desa Tarubatang terdiri dari 14 dukuh yang tersebar di seluruh
               wilayah desa, masing-masing dengan karakteristik dan keunikan
               tersendiri
@@ -739,7 +815,7 @@ export default function AboutPage() {
               <Card key={index} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-3 sm:p-4 text-center">
                   <Home className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 mx-auto mb-2" />
-                  <p className="font-medium text-gray-800 text-xs sm:text-sm leading-tight">
+                  <p className="font-medium text-muted-foreground text-xs sm:text-sm leading-tight">
                     {dukuh}
                   </p>
                 </CardContent>
@@ -750,14 +826,14 @@ export default function AboutPage() {
       </section>
 
       {/* Peta Desa */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-blue-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <Badge className="mb-4 bg-blue-100 text-blue-800">Peta Desa</Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Peta Desa Tarubatang
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Peta lengkap wilayah Desa Tarubatang yang menunjukkan batas-batas
               dukuh, infrastruktur, dan potensi wisata
             </p>
@@ -785,20 +861,20 @@ export default function AboutPage() {
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-center p-3 rounded-lg">
                     <Map className="h-4 w-4 sm:h-5 sm:w-5 mx-auto mb-2 text-blue-600" />
                     <p className="font-medium">Luas Total</p>
-                    <p className="text-gray-600">380,4 Hektar</p>
+                    <p className="text-foreground">380,4 Hektar</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-center p-3 rounded-lg">
                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mx-auto mb-2 text-green-600" />
                     <p className="font-medium">14 Dukuh</p>
-                    <p className="text-gray-600">Wilayah Administrasi</p>
+                    <p className="text-foreground">Wilayah Administrasi</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-center p-3 rounded-lg">
                     <Mountain className="h-4 w-4 sm:h-5 sm:w-5 mx-auto mb-2 text-purple-600" />
                     <p className="font-medium">Ketinggian</p>
-                    <p className="text-gray-600">1.200 mdpl</p>
+                    <p className="text-foreground">1.200 mdpl</p>
                   </div>
                 </div>
               </CardContent>
@@ -808,14 +884,14 @@ export default function AboutPage() {
       </section>
 
       {/* Struktur Organisasi */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <Badge className="mb-4 bg-red-100 text-red-800">Pemerintahan</Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Struktur Organisasi Pemerintahan Desa
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Struktur organisasi pemerintahan Desa Tarubatang yang dipimpin
               oleh Kepala Desa beserta perangkat desa
             </p>
@@ -823,7 +899,7 @@ export default function AboutPage() {
 
           {/* Struktur Organisasi Chart */}
           <div className="max-w-6xl mx-auto mb-8 sm:mb-12">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8 rounded-xl">
+            <div className="bg-background p-4 sm:p-6 lg:p-8 rounded-xl">
               <div className="flex flex-col items-center space-y-4 sm:space-y-6">
                 {/* Kepala Desa */}
                 <div className="text-center">
@@ -940,10 +1016,10 @@ export default function AboutPage() {
                   >
                     <perangkat.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base leading-tight">
+                  <h3 className="font-semibold text-foreground mb-2 text-sm sm:text-base leading-tight">
                     {perangkat.jabatan}
                   </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm">
+                  <p className="text-muted-foreground text-xs sm:text-sm">
                     {perangkat.nama}
                   </p>
                 </CardContent>
@@ -954,14 +1030,14 @@ export default function AboutPage() {
       </section>
 
       {/* Contact & Location */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-green-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <Badge className="mb-4 bg-green-100 text-green-800">Kontak</Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
               Hubungi Kami
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Informasi kontak dan alamat lengkap Pemerintah Desa Tarubatang
             </p>
           </div>
@@ -971,7 +1047,7 @@ export default function AboutPage() {
               <CardContent className="p-4 sm:p-6 lg:p-8">
                 <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
                   <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-4">
                       Kantor Desa Tarubatang
                     </h3>
                     <div className="space-y-4">
@@ -981,7 +1057,7 @@ export default function AboutPage() {
                           <p className="font-medium text-sm sm:text-base">
                             Alamat
                           </p>
-                          <p className="text-gray-600 text-sm sm:text-base">
+                          <p className="text-muted-foreground text-sm sm:text-base">
                             Dusun II, Tarubatang, Kec. Selo, Kabupaten Boyolali,
                             Jawa Tengah
                           </p>
@@ -993,7 +1069,7 @@ export default function AboutPage() {
                           <p className="font-medium text-sm sm:text-base">
                             Kode Pos
                           </p>
-                          <p className="text-gray-600 text-sm sm:text-base">
+                          <p className="text-muted-foreground text-sm sm:text-base">
                             57363
                           </p>
                         </div>
@@ -1004,10 +1080,10 @@ export default function AboutPage() {
                           <p className="font-medium text-sm sm:text-base">
                             Jam Pelayanan
                           </p>
-                          <p className="text-gray-600 text-sm sm:text-base">
+                          <p className="text-muted-foreground text-sm sm:text-base">
                             Senin - Jumat: 08:00 - 14:00 WIB
                           </p>
-                          <p className="text-gray-600 text-sm sm:text-base">
+                          <p className="text-muted-foreground text-sm sm:text-base">
                             Sabtu: 08:00 - 12:00 WIB
                           </p>
                         </div>
@@ -1015,7 +1091,7 @@ export default function AboutPage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-4">
                       Media Sosial
                     </h3>
                     <div className="space-y-3">
@@ -1028,7 +1104,7 @@ export default function AboutPage() {
                             f
                           </span>
                         </div>
-                        <span className="text-sm sm:text-base">
+                        <span className="text-foreground sm:text-base">
                           Facebook: Desa Tarubatang
                         </span>
                       </Link>
@@ -1041,12 +1117,12 @@ export default function AboutPage() {
                             @
                           </span>
                         </div>
-                        <span className="text-sm sm:text-base">
+                        <span className="text-foreground sm:text-base">
                           Instagram: @desa_tarubatang
                         </span>
                       </Link>
                       <Link
-                        href="#"
+                        href="https://www.youtube.com/@PemerintahDesaTarubatang"
                         className="flex items-center space-x-3 text-gray-600 hover:text-green-600 transition-colors group"
                       >
                         <div className="w-7 h-7 sm:w-8 sm:h-8 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-red-700 transition-colors">
@@ -1054,8 +1130,8 @@ export default function AboutPage() {
                             ▶
                           </span>
                         </div>
-                        <span className="text-sm sm:text-base">
-                          YouTube: Desa Tarubatang Official
+                        <span className="text-foreground sm:text-base">
+                          YouTube: Pemerintah Desa Tarubatang
                         </span>
                       </Link>
                     </div>

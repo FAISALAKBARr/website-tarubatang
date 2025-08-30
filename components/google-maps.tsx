@@ -136,7 +136,7 @@ export default function GoogleMapsComponent() {
             </div>
             <div>
               <strong className="text-blue-700">Koordinat:</strong>
-              <p className="text-gray-700">-7.492°S, 110.461°E</p>
+              <p className="text-gray-700">-7.492°S, 110.482°E</p>
             </div>
           </div>
         </div>

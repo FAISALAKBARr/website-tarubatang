@@ -383,14 +383,32 @@ export default function EventsPage() {
       <header className="bg-white shadow-sm border-b"></header>
 
       {/* Hero Section */}
-      <section className="relative h-[300px] bg-gradient-to-r from-purple-800 to-purple-600">
-        <div className="absolute inset-0 bg-black/40"></div>
-        <Image
-          src="/merbabuu.png"
-          alt="Event Desa Tarubatang"
-          fill
-          className="object-cover"
-        />
+      <section id="beranda" className="hero-section">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="hero-video"
+        >
+          <source src="/opening-web.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Fallback Image for when video doesn't load */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/merbabuu.png')",
+            display: "none",
+          }}
+        ></div>
+
+        {/* Dark Overlay for better text readability and aesthetic */}
+        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white">
             <h1 className="text-4xl font-bold mb-4">

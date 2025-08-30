@@ -98,7 +98,8 @@ KONTAK & INFORMASI:
 - Jam pelayanan: Senin-Jumat 08:00-14:00 WIB, Sabtu 08:00-12:00 WIB
 - Instagram: @desa_tarubatang
 - Facebook: Desa Tarubatang
-- YouTube: Desa Tarubatang Official
+- YouTube: Pemerintah Desa Tarubatang
+- Call Center Taman Nasional Gunung Merbabu: Cell Center : 081 1295 0970
 
 ATURAN & ETIKA WISATA:
 - Jaga kebersihan lingkungan - buang sampah pada tempatnya

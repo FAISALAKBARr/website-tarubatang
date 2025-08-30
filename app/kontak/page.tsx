@@ -156,15 +156,32 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative h-[400px] bg-gradient-to-r from-green-800 to-green-600">
-        <div className="absolute inset-0 bg-black/40"></div>
-        <Image
-          src="/merbabuu.png"
-          alt="Kontak Desa Tarubatang"
-          fill
-          className="object-cover"
-          priority
-        />
+      <section id="beranda" className="hero-section">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="hero-video"
+        >
+          <source src="/opening-web.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Fallback Image for when video doesn't load */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/merbabuu.png')",
+            display: "none",
+          }}
+        ></div>
+
+        {/* Dark Overlay for better text readability and aesthetic */}
+        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="text-white">
             <h1 className="text-4xl font-bold mb-4">Hubungi Kami</h1>
@@ -188,7 +205,7 @@ export default function ContactPage() {
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Berikut adalah berbagai cara untuk menghubungi Pemerintah Desa
-              Tarubatang dan tim pariwisata
+              Tarubatang
             </p>
           </div>
 
@@ -216,8 +233,8 @@ export default function ContactPage() {
                 <p className="text-gray-600 text-sm space-y-1">
                   <span className="block">Kantor Desa:</span>
                   <span className="block font-medium">(0838)-3666-6262</span>
-                  <span className="block">Info Wisata:</span>
-                  <span className="block font-medium">0812-3456-7890</span>
+                  {/* <span className="block">Info Wisata:</span>
+                  <span className="block font-medium">0812-3456-7890</span> */}
                 </p>
               </CardContent>
             </Card>
@@ -227,8 +244,9 @@ export default function ContactPage() {
                 <Mail className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <h3 className="font-semibold text-lg mb-2">Email</h3>
                 <p className="text-gray-600 text-sm space-y-1">
-                  <span className="block">info@tarubatang.desa.id</span>
-                  <span className="block">wisata@tarubatang.desa.id</span>
+                  <span className="block">
+                    pemerintahdesatarubatang@gmail.com
+                  </span>
                 </p>
               </CardContent>
             </Card>
@@ -531,7 +549,7 @@ export default function ContactPage() {
                         Koordinat GPS:
                       </span>
                       <p className="text-gray-600 mt-1">
-                        -7.4918°S, 110.4609°E
+                        -7.4918°S, 110.4815°E
                       </p>
                     </div>
                   </div>
@@ -564,7 +582,7 @@ export default function ContactPage() {
               size="lg"
               className="flex items-center space-x-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
               onClick={() =>
-                window.open("https://facebook.com/desatarubatang", "_blank")
+                window.open("https://facebook.com/Desatarubatang", "_blank")
               }
             >
               <Facebook className="h-5 w-5 text-blue-600" />
@@ -576,7 +594,10 @@ export default function ContactPage() {
               size="lg"
               className="flex items-center space-x-2 hover:bg-pink-50 hover:border-pink-300 transition-colors"
               onClick={() =>
-                window.open("https://instagram.com/desatarubatang", "_blank")
+                window.open(
+                  "https://www.instagram.com/desa_tarubatang/",
+                  "_blank"
+                )
               }
             >
               <Instagram className="h-5 w-5 text-pink-600" />
@@ -588,7 +609,10 @@ export default function ContactPage() {
               size="lg"
               className="flex items-center space-x-2 hover:bg-red-50 hover:border-red-300 transition-colors"
               onClick={() =>
-                window.open("https://youtube.com/desatarubatang", "_blank")
+                window.open(
+                  "https://www.youtube.com/@PemerintahDesaTarubatang",
+                  "_blank"
+                )
               }
             >
               <Youtube className="h-5 w-5 text-red-600" />
@@ -600,7 +624,7 @@ export default function ContactPage() {
               size="lg"
               className="flex items-center space-x-2 hover:bg-green-50 hover:border-green-300 transition-colors"
               onClick={() =>
-                window.open("https://tarubatang.desa.id", "_blank")
+                window.open("https://website-tarubatang.vercel.app/", "_blank")
               }
             >
               <Globe className="h-5 w-5 text-green-600" />
@@ -632,7 +656,7 @@ export default function ContactPage() {
                 <Phone className="h-8 w-8 text-red-600 mx-auto mb-3" />
                 <h3 className="font-semibold mb-2">Polsek Selo</h3>
                 <p className="text-lg font-bold text-red-600">110</p>
-                <p className="text-sm text-gray-600">(0276) 321-110</p>
+                <p className="text-sm text-gray-600">(0276) 326-110</p>
               </CardContent>
             </Card>
 
@@ -640,8 +664,8 @@ export default function ContactPage() {
               <CardContent className="p-6">
                 <Phone className="h-8 w-8 text-red-600 mx-auto mb-3" />
                 <h3 className="font-semibold mb-2">Puskesmas Selo</h3>
-                <p className="text-lg font-bold text-red-600">119</p>
-                <p className="text-sm text-gray-600">(0276) 321-119</p>
+                <p className="text-lg font-bold text-red-600">010</p>
+                <p className="text-sm text-gray-600">(0276) 326-010</p>
               </CardContent>
             </Card>
 
@@ -649,17 +673,19 @@ export default function ContactPage() {
               <CardContent className="p-6">
                 <Phone className="h-8 w-8 text-red-600 mx-auto mb-3" />
                 <h3 className="font-semibold mb-2">Damkar Boyolali</h3>
-                <p className="text-lg font-bold text-red-600">113</p>
-                <p className="text-sm text-gray-600">(0276) 321-113</p>
+                <p className="text-lg font-bold text-red-600">313</p>
+                <p className="text-sm text-gray-600">(0276) 321-313</p>
               </CardContent>
             </Card>
 
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <Phone className="h-8 w-8 text-red-600 mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">SAR Merbabu</h3>
+                <h3 className="font-semibold mb-2">
+                  Balai Taman Nasional Gunung Merbabu
+                </h3>
                 <p className="text-lg font-bold text-red-600">115</p>
-                <p className="text-sm text-gray-600">0812-2700-115</p>
+                <p className="text-sm text-gray-600">081 1295 0970</p>
               </CardContent>
             </Card>
           </div>

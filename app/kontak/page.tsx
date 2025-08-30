@@ -182,10 +182,12 @@ export default function ContactPage() {
         {/* Dark Overlay for better text readability and aesthetic */}
         <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
 
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="text-white">
-            <h1 className="text-4xl font-bold mb-4">Hubungi Kami</h1>
-            <p className="text-xl text-green-100 max-w-2xl">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+          <div className="text-white max-w-4xl">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">
+              Hubungi Kami
+            </h1>
+            <p className="text-sm sm:text-lg md:text-xl text-green-100 max-w-2xl leading-relaxed">
               Siap membantu Anda merencanakan kunjungan ke Desa Tarubatang.
               Jangan ragu untuk menghubungi kami kapan saja!
             </p>

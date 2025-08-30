@@ -1061,10 +1061,10 @@ export default function HomePage() {
             <Badge className="mb-3 sm:mb-4 bg-green-500 hover:bg-green-600 text-xs sm:text-sm">
               Kawasan Taman Nasional Gunung Merbabu
             </Badge>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 leading-tight">
               Desa Tarubatang
             </h1>
-            <p className="text-base sm:text-lg md:text-xl mb-4 sm:mb-6 text-green-100 leading-relaxed px-2 sm:px-0">
+            <p className="text-sm sm:text-lg md:text-xl text-green-100 max-w-2xl leading-relaxed mb-6 sm:mb-8">
               Destinasi wisata alam terbaik di kaki Gunung Merbabu dengan
               keindahan yang memukau dan budaya yang kaya
             </p>

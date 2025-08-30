@@ -648,10 +648,7 @@ export default function TourismPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section
-        id="beranda"
-        className="relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] xl:h-[600px] bg-background overflow-hidden"
-      >
+      <section id="beranda" className="hero-section">
         {/* Video Background */}
         <video
           autoPlay
@@ -659,17 +656,9 @@ export default function TourismPage() {
           muted
           playsInline
           preload="metadata"
-          className="absolute top-0 left-0 w-full h-full object-cover scale-105 sm:scale-100"
-          style={{
-            minWidth: "100%",
-            minHeight: "100%",
-            transform: "translate(-50%, -50%)",
-            top: "50%",
-            left: "50%",
-          }}
+          className="hero-video"
         >
           <source src="/opening-web.mp4" type="video/mp4" />
-          {/* Fallback image if video fails to load */}
           Your browser does not support the video tag.
         </video>
 
@@ -682,15 +671,15 @@ export default function TourismPage() {
           }}
         ></div>
 
-        {/* Dark Overlay for better text readability and aesthetic */}
-        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/50 to-black/70"></div>
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/50 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
 
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="text-white">
-            <h1 className="text-4xl font-bold mb-4">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+          <div className="text-white max-w-4xl">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">
               Destinasi Wisata Tarubatang
             </h1>
-            <p className="text-xl text-green-100 max-w-2xl">
+            <p className="text-sm sm:text-lg md:text-xl text-green-100 max-w-2xl leading-relaxed">
               Jelajahi keindahan alam yang menakjubkan di kaki Gunung Merbabu
               dengan berbagai destinasi wisata yang memikat hati
             </p>

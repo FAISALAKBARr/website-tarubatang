@@ -883,6 +883,135 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Selayang Pandang */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              Selayang Pandang
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              Selayang Pandang Desa Tarubatang
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+              Dapatkan informasi lengkap tentang profil dan potensi Desa
+              Tarubatang dalam dokumen resmi
+            </p>
+          </div>
+
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center">
+              {/* Preview Image */}
+              <div className="order-2 lg:order-1">
+                <Card className="overflow-hidden shadow-xl">
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      <Image
+                        src="/image.png"
+                        alt="Preview Selayang Pandang Desa Tarubatang"
+                        width={600}
+                        height={400}
+                        className="w-full h-[250px] sm:h-[300px] lg:h-[350px] object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30">
+                          Preview Dokumen
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Content */}
+              <div className="order-1 lg:order-2">
+                <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-xl">
+                  <CardContent className="p-6 sm:p-8">
+                    <div className="text-center lg:text-left">
+                      <div className="bg-gradient-to-br from-blue-500 to-green-500 text-white p-4 sm:p-6 rounded-2xl mb-6">
+                        <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 mx-auto lg:mx-0 mb-3" />
+                        <h3 className="text-lg sm:text-xl font-bold mb-2">
+                          Selayang Pandang Resor Selo
+                        </h3>
+                        <p className="text-blue-100 text-sm sm:text-base opacity-90">
+                          Informasi lengkap tentang Taman Nasional Gunung
+                          Merbabu dan Kawasan Resor Selo
+                        </p>
+                      </div>
+
+                      <div className="space-y-4 sm:space-y-6 mb-6">
+                        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                          Dokumen selayang pandang ini berisi informasi
+                          komprehensif tentang Taman Nasional Gunung Merbabu,
+                          khususnya Kawasan Resor Selo, termasuk profil kawasan,
+                          struktur organisasi, potensi alam, kegiatan rutin,
+                          event tahunan, serta desa penyangga di sekitar kawasan
+                          konservasi.
+                        </p>
+
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4 text-xs sm:text-sm">
+                          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg flex items-center space-x-3">
+                            <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+                            <div className="text-left">
+                              <p className="font-medium">
+                                Profil Taman Nasional
+                              </p>
+                              <p className="text-muted-foreground">
+                                Informasi lengkap kawasan konservasi
+                              </p>
+                            </div>
+                          </div>
+                          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg flex items-center space-x-3">
+                            <Mountain className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                            <div className="text-left">
+                              <p className="font-medium">Potensi Kawasan</p>
+                              <p className="text-muted-foreground">
+                                Kekayaan alam dan biodiversitas
+                              </p>
+                            </div>
+                          </div>
+                          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg flex items-center space-x-3">
+                            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
+                            <div className="text-left">
+                              <p className="font-medium">Kegiatan & Event</p>
+                              <p className="text-muted-foreground">
+                                Program rutin dan event tahunan
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Button
+                        asChild
+                        size="lg"
+                        className="w-full lg:w-auto bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      >
+                        <Link
+                          href="https://drive.google.com/file/d/1guWAGDBfz1D4rSMpxHVFMgceRH86Tg1-/view?usp=sharing"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center space-x-2 w-full"
+                        >
+                          <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+                          <span>Unduh Selayang Pandang</span>
+                        </Link>
+                      </Button>
+
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4">
+                        Dokomen akan terbuka di tab baru • Format: PDF • Resor
+                        Selo
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Struktur Organisasi */}
       <section className="py-12 sm:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">

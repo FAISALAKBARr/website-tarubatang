@@ -219,7 +219,7 @@ export default function UMKMPage() {
   }, [isModalOpen, selectedUMKM]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-white shadow-sm border-b"></header>
 
@@ -264,12 +264,12 @@ export default function UMKMPage() {
       </section>
 
       {/* Search and Filter */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-background">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Cari UMKM, produk, atau pemilik..."
                   value={searchTerm}
@@ -283,11 +283,11 @@ export default function UMKMPage() {
               </Button>
             </form>
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-600" />
+              <Filter className="h-4 w-4 text-muted-foreground" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-muted rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -301,21 +301,21 @@ export default function UMKMPage() {
       </section>
 
       {/* UMKM Grid */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               {selectedCategory === "Semua"
                 ? "Daftar UMKM"
                 : `UMKM ${selectedCategory}`}
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               {searchTerm
                 ? `Hasil pencarian untuk "${searchTerm}"`
                 : "Temukan berbagai produk lokal berkualitas dan penginapan nyaman di Desa Tarubatang"}
             </p>
             {!loading && !error && (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 Menampilkan {filteredUMKM.length} dari {umkmData.length} UMKM
               </p>
             )}
@@ -324,7 +324,7 @@ export default function UMKMPage() {
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Memuat UMKM...</p>
+              <p className="text-muted-foreground mt-4">Memuat UMKM...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -333,7 +333,7 @@ export default function UMKMPage() {
             </div>
           ) : filteredUMKM.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {searchTerm || selectedCategory !== "Semua"
                   ? "Tidak ada UMKM yang ditemukan."
                   : "Belum ada UMKM yang tersedia."}
@@ -369,13 +369,13 @@ export default function UMKMPage() {
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                      <Eye className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <Eye className="h-8 w-8 text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                     <Badge className="absolute top-4 left-4 bg-blue-500">
                       {umkm.category}
                     </Badge>
                     {umkm.images?.length > 1 && (
-                      <Badge className="absolute top-4 right-4 bg-black/50 text-white">
+                      <Badge className="absolute top-4 right-4 bg-black/50 text-foreground">
                         +{umkm.images.length - 1}
                       </Badge>
                     )}
@@ -393,24 +393,24 @@ export default function UMKMPage() {
                         <Heart className="h-4 w-4" />
                       </Button>
                     </div>
-                    <p className="text-gray-600 mb-4 text-sm line-clamp-2">
+                    <p className="text-muted-foreground mb-4 text-sm line-clamp-2">
                       {umkm.description}
                     </p>
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-sm text-gray-500">
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <User className="h-4 w-4 mr-2" />
                         {umkm.user.name}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-2" />
                         {umkm.location || "Desa Tarubatang"}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <Phone className="h-4 w-4 mr-2" />
                         {umkm.contact}
                       </div>
                       {umkm.stock !== undefined && (
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-muted-foreground">
                           <Package className="h-4 w-4 mr-2" />
                           Stok: {umkm.stock}
                         </div>
@@ -450,13 +450,13 @@ export default function UMKMPage() {
       {/* Detail Modal */}
       {isModalOpen && selectedUMKM && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background p-4"
           onClick={handleModalClick}
         >
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-800">
+            <div className="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">
                 {selectedUMKM.name}
               </h2>
               <Button
@@ -474,7 +474,7 @@ export default function UMKMPage() {
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Image Gallery */}
                 <div className="space-y-4">
-                  <div className="relative h-80 bg-gray-100 rounded-lg overflow-hidden">
+                  <div className="relative h-80 bg-background rounded-lg overflow-hidden">
                     {selectedUMKM.images?.length > 0 ? (
                       <>
                         <Image
@@ -496,13 +496,13 @@ export default function UMKMPage() {
                           <>
                             <button
                               onClick={prevImage}
-                              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-background text-foreground p-2 rounded-full hover:bg-black/70 transition-colors"
                             >
                               &#8249;
                             </button>
                             <button
                               onClick={nextImage}
-                              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-background text-foreground p-2 rounded-full hover:bg-black/70 transition-colors"
                             >
                               &#8250;
                             </button>
@@ -510,7 +510,7 @@ export default function UMKMPage() {
                         )}
                       </>
                     ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">
+                      <div className="flex items-center justify-center h-full text-muted-foreground">
                         <Package className="h-16 w-16" />
                       </div>
                     )}
@@ -526,7 +526,7 @@ export default function UMKMPage() {
                           className={`relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-colors ${
                             index === currentImageIndex
                               ? "border-blue-500"
-                              : "border-gray-300"
+                              : "border-muted-foreground"
                           }`}
                         >
                           <Image
@@ -547,7 +547,7 @@ export default function UMKMPage() {
                     <Badge className="bg-blue-500 mb-3">
                       {selectedUMKM.category}
                     </Badge>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    <h3 className="text-2xl font-bold text-foreground mb-2">
                       {selectedUMKM.name}
                     </h3>
                     <p className="text-3xl font-bold text-green-600 mb-4">
@@ -556,17 +556,17 @@ export default function UMKMPage() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-2">
+                    <h4 className="font-semibold text-foreground mb-2">
                       Deskripsi
                     </h4>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed">
                       {selectedUMKM.description}
                     </p>
                   </div>
 
                   {selectedUMKM.stock !== undefined && (
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-2">
+                      <h4 className="font-semibold text-foreground mb-2">
                         Ketersediaan Stok
                       </h4>
                       <p
@@ -584,27 +584,27 @@ export default function UMKMPage() {
                   )}
 
                   <div className="space-y-3">
-                    <h4 className="font-semibold text-gray-800">
+                    <h4 className="font-semibold text-foreground">
                       Informasi Kontak
                     </h4>
                     <div className="space-y-2">
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-muted-foreground">
                         <User className="h-4 w-4 mr-3" />
                         <span className="font-medium">
                           {selectedUMKM.pemilik} {/* Change this line */}
                         </span>
                       </div>
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-muted-foreground">
                         <Phone className="h-4 w-4 mr-3" />
                         <span>{selectedUMKM.contact}</span>
                       </div>
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-muted-foreground">
                         <MapPin className="h-4 w-4 mr-3" />
                         <span>
                           {selectedUMKM.location || "Desa Tarubatang"}
                         </span>
                       </div>
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-muted-foreground">
                         <Calendar className="h-4 w-4 mr-3" />
                         <span>
                           Dibuat: {formatDate(selectedUMKM.createdAt)}

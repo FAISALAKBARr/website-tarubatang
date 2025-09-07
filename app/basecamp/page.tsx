@@ -308,7 +308,7 @@ export default function BasecampPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative h-[400px] bg-gradient-to-r from-green-800 to-green-600">
         <div className="absolute inset-0 bg-black/40"></div>
@@ -320,7 +320,7 @@ export default function BasecampPage() {
           priority
         />
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-          <div className="text-white max-w-4xl">
+          <div className="text-foreground max-w-4xl">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">
               Basecamp Tarubatang
             </h1>
@@ -346,7 +346,7 @@ export default function BasecampPage() {
       {/* Important Notice */}
       <section className="py-6 bg-amber-50 border-b border-amber-200">
         <div className="container mx-auto px-4">
-          <Alert className="bg-white border-amber-300">
+          <Alert className="bg-bg-muted/30 border-amber-300">
             <Info className="h-5 w-5 text-amber-600" />
             <AlertDescription className="text-amber-800">
               <div className="space-y-2">
@@ -393,12 +393,12 @@ export default function BasecampPage() {
       </section>
 
       {/* Search and Filter */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-background border-b border-foreground/10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Cari basecamp, lokasi, atau pemilik..."
                   value={searchTerm}
@@ -412,11 +412,11 @@ export default function BasecampPage() {
               </Button>
             </form>
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-600" />
+              <Filter className="h-4 w-4 text-muted-foreground" />
               <select
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="px-3 py-2 border border-foreground rounded-md text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
               >
                 {filterOptions.map((option) => (
                   <option key={option} value={option}>
@@ -430,21 +430,21 @@ export default function BasecampPage() {
       </section>
 
       {/* Basecamp Grid */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               {selectedFilter === "Semua"
                 ? "Daftar Basecamp"
                 : `Basecamp ${selectedFilter}`}
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               {searchTerm
                 ? `Hasil pencarian untuk "${searchTerm}"`
                 : "Pilih basecamp yang sesuai dengan kebutuhan dan keinginan Anda. Semua basecamp telah terverifikasi dan siap memberikan pengalaman menginap terbaik."}
             </p>
             {!loading && !error && (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 Menampilkan {filteredBasecamp.length} dari {basecampData.length}{" "}
                 basecamp
               </p>
@@ -454,10 +454,10 @@ export default function BasecampPage() {
           {loading ? (
             <div className="text-center py-16">
               <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mx-auto"></div>
-              <p className="text-gray-600 mt-6 text-lg">
+              <p className="text-muted-foreground mt-6 text-lg">
                 Memuat daftar basecamp...
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-muted-foreground text-sm mt-2">
                 Mohon tunggu sebentar
               </p>
             </div>
@@ -494,7 +494,7 @@ export default function BasecampPage() {
           ) : filteredBasecamp.length === 0 ? (
             <div className="text-center py-16">
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
-                <div className="text-gray-400 mb-4">
+                <div className="text-muted-foreground mb-4">
                   <svg
                     className="h-16 w-16 mx-auto"
                     fill="none"
@@ -509,10 +509,10 @@ export default function BasecampPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                <h3 className="text-lg font-semibold text-muted-foreground mb-2">
                   Tidak Ada Basecamp Ditemukan
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   {searchTerm || selectedFilter !== "Semua"
                     ? "Coba ubah kata kunci pencarian atau filter yang digunakan."
                     : "Belum ada basecamp yang tersedia saat ini."}
@@ -562,14 +562,14 @@ export default function BasecampPage() {
                       <Bed className="h-3 w-3 mr-1" />
                       Basecamp
                     </Badge>
-                    <div className="absolute bottom-4 left-4 text-white">
+                    <div className="absolute bottom-4 left-4 text-foreground">
                       <div className="flex items-center gap-1 text-sm">
                         <Clock className="h-3 w-3" />
                         <span>Tersedia 24/7</span>
                       </div>
                     </div>
                     {basecamp.images.length > 1 && (
-                      <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 rounded-full text-xs">
+                      <div className="absolute bottom-4 right-4 bg-black/60 text-foreground px-2 py-1 rounded-full text-xs">
                         +{basecamp.images.length - 1} foto
                       </div>
                     )}
@@ -577,25 +577,25 @@ export default function BasecampPage() {
 
                   <CardContent className="p-6">
                     <div className="mb-4">
-                      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-green-600 transition-colors">
+                      <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-green-600 transition-colors">
                         {basecamp.namaBasecamp}
                       </h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-1">
+                      <div className="flex items-center text-sm text-muted-foreground mb-1">
                         <MapPin className="h-4 w-4 mr-2 text-red-500" />
                         {basecamp.lokasi}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <Users className="h-4 w-4 mr-2 text-blue-500" />
                         Dikelola oleh {basecamp.pemilik}
                       </div>
                     </div>
 
                     {/* Capacity Info */}
-                    <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-muted-background rounded-lg">
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-1">
                           <Users className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-sm font-medium text-gray-700">
+                          <span className="text-sm font-medium text-foreground">
                             Kapasitas
                           </span>
                         </div>
@@ -606,7 +606,7 @@ export default function BasecampPage() {
                       <div className="text-center">
                         <div className="flex items-center justify-center mb-1">
                           <Car className="h-4 w-4 text-blue-600 mr-1" />
-                          <span className="text-sm font-medium text-gray-700">
+                          <span className="text-sm font-medium text-foreground">
                             Parkir
                           </span>
                         </div>
@@ -618,7 +618,7 @@ export default function BasecampPage() {
 
                     {/* Facilities */}
                     <div className="mb-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-2">
+                      <p className="text-sm font-semibold text-foreground mb-2">
                         Fasilitas Unggulan:
                       </p>
                       <div className="flex flex-wrap gap-2">
@@ -627,7 +627,7 @@ export default function BasecampPage() {
                           .map((facility, index) => (
                             <div
                               key={index}
-                              className="flex items-center bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs"
+                              className="flex items-center bg-green-60 text-green-700 px-2 py-1 rounded-full text-xs"
                             >
                               {getFacilityIcon(facility)}
                               <span className="ml-1 font-medium">
@@ -636,7 +636,7 @@ export default function BasecampPage() {
                             </div>
                           ))}
                         {basecamp.fasilitas.length > 4 && (
-                          <div className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                          <div className="bg-gray-100 text-muted-foreground px-2 py-1 rounded-full text-xs font-medium">
                             +{basecamp.fasilitas.length - 4} lainnya
                           </div>
                         )}
@@ -646,8 +646,8 @@ export default function BasecampPage() {
                     {/* Food & Beverage Menu */}
                     {(basecamp.menuMakanan.length > 0 ||
                       basecamp.menuMinuman.length > 0) && (
-                      <div className="mb-4 p-3 bg-orange-50 rounded-lg">
-                        <p className="text-sm font-semibold text-orange-800 mb-2">
+                      <div className="mb-4 p-3 bg-orange-60 rounded-lg">
+                        <p className="text-sm font-semibold text-orange-700 mb-2">
                           Menu Tersedia:
                         </p>
                         <div className="flex items-center gap-3">
@@ -672,7 +672,7 @@ export default function BasecampPage() {
                     )}
 
                     {/* Contact Info */}
-                    <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                    <div className="mb-4 p-3 bg-blue-45 rounded-lg">
                       <div className="flex items-center text-sm text-blue-700">
                         <Phone className="h-4 w-4 mr-2" />
                         <span className="font-medium">{basecamp.nomorWa}</span>
@@ -683,7 +683,7 @@ export default function BasecampPage() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                        className="flex-1 bg-green-600 hover:bg-green-700"
                         onClick={() =>
                           window.open(
                             `https://wa.me/${formatPhoneNumber(
@@ -701,7 +701,7 @@ export default function BasecampPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-green-300 text-green-700 hover:bg-green-50 bg-transparent"
+                        className="border-green-300 text-green-700 hover:bg-background-50 bg-transparent"
                         onClick={() => openModal(basecamp)}
                       >
                         Lihat Detail
@@ -718,15 +718,15 @@ export default function BasecampPage() {
       {/* Detail Modal */}
       {isModalOpen && selectedBasecamp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-background rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-2xl z-10">
+            <div className="sticky top-0 bg-background border-b border-background-200 p-6 rounded-t-2xl z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800">
+                  <h2 className="text-2xl font-bold text-foreground">
                     {selectedBasecamp.namaBasecamp}
                   </h2>
-                  <div className="flex items-center text-gray-600 mt-1">
+                  <div className="flex items-center text-muted-foreground mt-1">
                     <MapPin className="h-4 w-4 mr-2" />
                     <span>{selectedBasecamp.lokasi}</span>
                   </div>
@@ -764,8 +764,8 @@ export default function BasecampPage() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/modal-image:opacity-100 transition-opacity duration-300 bg-black/20">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-3">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/modal-image:opacity-100 transition-opacity duration-300 bg-background/20">
+                    <div className="bg-background/90 backdrop-blur-sm rounded-full p-3">
                       <Eye className="h-6 w-6 text-green-600" />
                     </div>
                   </div>
@@ -774,17 +774,17 @@ export default function BasecampPage() {
                   <>
                     <button
                       onClick={previousImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 shadow-lg"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
                     <button
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 shadow-lg"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </button>
-                    <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                    <div className="absolute bottom-4 right-4 bg-background/60 text-foreground px-3 py-1 rounded-full text-sm">
                       {currentImageIndex + 1} / {selectedBasecamp.images.length}
                     </div>
                   </>
@@ -801,14 +801,14 @@ export default function BasecampPage() {
                       Informasi Kapasitas
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-center bg-background p-4 rounded-lg shadow-sm">
                         <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
                         <p className="text-2xl font-bold text-green-600">
                           {selectedBasecamp.dayaTampungOrang}
                         </p>
                         <p className="text-sm text-gray-600">Orang</p>
                       </div>
-                      <div className="text-center bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-center bg-background p-4 rounded-lg shadow-sm">
                         <Car className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                         <p className="text-2xl font-bold text-blue-600">
                           {selectedBasecamp.dayaTampungKendaraan}
@@ -824,12 +824,12 @@ export default function BasecampPage() {
                       Kontak Pemilik
                     </h3>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between bg-white p-3 rounded-lg">
+                      <div className="flex items-center justify-between bg-background p-3 rounded-lg">
                         <div>
                           <p className="font-medium text-gray-800">
                             {selectedBasecamp.pemilik}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             {selectedBasecamp.nomorWa}
                           </p>
                         </div>
@@ -864,7 +864,7 @@ export default function BasecampPage() {
                       Lokasi & Navigasi
                     </h3>
                     <div className="space-y-3">
-                      <p className="text-gray-700 bg-white p-3 rounded-lg">
+                      <p className="text-gray-700 bg-background p-3 rounded-lg">
                         {selectedBasecamp.lokasi}
                       </p>
                       <Button
@@ -891,7 +891,7 @@ export default function BasecampPage() {
                       {selectedBasecamp.fasilitas.map((facility, index) => (
                         <div
                           key={index}
-                          className="flex items-center bg-white p-3 rounded-lg shadow-sm"
+                          className="flex items-center bg-background p-3 rounded-lg shadow-sm"
                         >
                           {getFacilityIcon(facility)}
                           <span className="ml-3 text-gray-700 font-medium">
@@ -921,7 +921,7 @@ export default function BasecampPage() {
                             {selectedBasecamp.menuMakanan.map((menu, index) => (
                               <div
                                 key={index}
-                                className="bg-white p-3 rounded-lg shadow-sm"
+                                className="bg-background p-3 rounded-lg shadow-sm"
                               >
                                 <span className="text-gray-700">{menu}</span>
                               </div>
@@ -940,7 +940,7 @@ export default function BasecampPage() {
                             {selectedBasecamp.menuMinuman.map((menu, index) => (
                               <div
                                 key={index}
-                                className="bg-white p-3 rounded-lg shadow-sm"
+                                className="bg-background p-3 rounded-lg shadow-sm"
                               >
                                 <span className="text-gray-700">{menu}</span>
                               </div>
@@ -1020,7 +1020,7 @@ export default function BasecampPage() {
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                 <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-background h-12"
                   onClick={() =>
                     window.open(
                       `https://wa.me/${formatPhoneNumber(
@@ -1041,7 +1041,7 @@ export default function BasecampPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="sm:w-auto border-red-300 text-red-700 hover:bg-red-50 h-12 bg-transparent"
+                  className="sm:w-auto border-red-300 text-red-500 hover:bg-muted-50 h-12 bg-transparent"
                   onClick={() => openGoogleMaps(selectedBasecamp)}
                 >
                   <Navigation className="h-5 w-5 mr-2" />
@@ -1114,8 +1114,8 @@ export default function BasecampPage() {
                     onClick={() => setViewerImageIndex(index)}
                     className={`w-3 h-3 rounded-full transition-colors ${
                       index === viewerImageIndex
-                        ? "bg-white"
-                        : "bg-white/50 hover:bg-white/70"
+                        ? "bg-background"
+                        : "bg-background/50 hover:bg-background/70"
                     }`}
                   />
                 ))}
@@ -1139,55 +1139,55 @@ export default function BasecampPage() {
       )}
 
       {/* Tips & Important Information */}
-      <section className="py-12 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <section className="py-12 bg-muted-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Tips Menginap di Basecamp
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Pastikan pengalaman menginap Anda nyaman dan menyenangkan dengan
               mengikuti tips berikut
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-blue-100">
+            <div className="bg-background p-6 rounded-xl shadow-lg border border-blue-100">
               <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                 <Phone className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
+              <h3 className="font-bold text-lg text-foreground mb-2">
                 Hubungi Pemilik Terlebih Dahulu Lebih Baik
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Untuk konfirmasi ketersediaan dan detail menginap dengan pemilik
                 basecamp sebelum datang. Tanyakan tentang aturan khusus dan
                 fasilitas yang tersedia.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
+            <div className="bg-background p-6 rounded-xl shadow-lg border border-green-100">
               <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
+              <h3 className="font-bold text-lg text-foreground mb-2">
                 Perhatikan Kapasitas
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Pastikan jumlah tamu dan kendaraan sesuai dengan kapasitas
                 basecamp. Jangan melebihi batas yang telah ditetapkan untuk
                 kenyamanan bersama.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-purple-100">
+            <div className="bg-background p-6 rounded-xl shadow-lg border border-purple-100">
               <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
+              <h3 className="font-bold text-lg text-foreground mb-2">
                 Hormati Aturan Setempat
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Ikuti aturan dan tata tertib yang berlaku di basecamp. Jaga
                 kebersihan, keamanan, dan kenyamanan untuk pengalaman yang
                 menyenangkan.

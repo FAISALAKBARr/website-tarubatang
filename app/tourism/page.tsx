@@ -688,7 +688,7 @@ export default function TourismPage() {
       </section>
 
       {/* Search and Filter Section */}
-      <section className="py-8 bg-white border-b">
+      <section className="py-8 bg-background border-b">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
@@ -730,13 +730,13 @@ export default function TourismPage() {
       </section>
 
       {/* Interactive Map Section */}
-      <section className="py-16 bg-green-50">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Peta Lokasi Desa Tarubatang
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Temukan lokasi semua destinasi wisata di Desa Tarubatang dengan
               peta interaktif di bawah ini
             </p>
@@ -746,21 +746,21 @@ export default function TourismPage() {
       </section>
 
       {/* Destinations Grid */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               {selectedCategory === "all"
                 ? "Semua Destinasi Wisata"
                 : `Destinasi ${selectedCategory}`}
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               {searchTerm
                 ? `Hasil pencarian untuk "${searchTerm}"`
                 : "Pilih destinasi yang sesuai dengan minat dan kemampuan Anda"}
             </p>
             {!loading && (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 Menampilkan {destinations.length} dari {pagination.total}{" "}
                 destinasi
               </p>
@@ -770,7 +770,7 @@ export default function TourismPage() {
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Memuat destinasi...</p>
+              <p className="text-muted-foreground mt-4">Memuat destinasi...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -779,7 +779,7 @@ export default function TourismPage() {
             </div>
           ) : destinations.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Tidak ada destinasi yang ditemukan.
               </p>
               <Button
@@ -863,17 +863,17 @@ export default function TourismPage() {
                             </div>
                           </div>
 
-                          <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+                          <p className="text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-3">
                             {destination.description}
                           </p>
 
                           <div className="space-y-3 mb-4">
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-muted-foreground">
                               <MapPin className="h-4 w-4 mr-2" />
                               {destination.location}
                             </div>
                             {destination.contact && (
-                              <div className="flex items-center text-sm text-gray-500">
+                              <div className="flex items-center text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4 mr-2" />
                                 <Button
                                   variant="link"
@@ -1008,13 +1008,13 @@ export default function TourismPage() {
       </section>
 
       {/* Tips Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Tips Berwisata
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Panduan penting untuk pengalaman wisata yang aman dan menyenangkan
             </p>
           </div>
@@ -1028,7 +1028,7 @@ export default function TourismPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Pagi hari (06:00-10:00) untuk sunrise</li>
                   <li>• Sore hari (15:00-18:00) untuk sunset</li>
                   <li>• Hindari musim hujan (Nov-Mar)</li>
@@ -1045,7 +1045,7 @@ export default function TourismPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Bawa jaket (suhu dingin di malam hari)</li>
                   <li>• Sepatu trekking yang nyaman</li>
                   <li>• Air minum dan snack secukupnya</li>
@@ -1062,7 +1062,7 @@ export default function TourismPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Jaga kebersihan lingkungan</li>
                   <li>• Tidak merusak tanaman/fasilitas</li>
                   <li>• Hormati budaya lokal</li>

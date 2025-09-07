@@ -116,27 +116,27 @@ export default function GoogleMapsComponent() {
       </div>
 
       {/* Additional Info */}
-      <div className="bg-blue-50 rounded-lg p-6">
+      <div className="bg-muted/30 rounded-lg p-6">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             Informasi Lokasi
           </h3>
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <div>
               <strong className="text-blue-700">Alamat:</strong>
-              <p className="text-gray-700">
+              <p className="text-muted-foreground">
                 Tarubatang, Kec. Selo, Kabupaten Boyolali, Jawa Tengah
               </p>
             </div>
             <div>
               <strong className="text-blue-700">Akses:</strong>
-              <p className="text-gray-700">
+              <p className="text-muted-foreground">
                 Dapat diakses dengan kendaraan pribadi atau transportasi umum
               </p>
             </div>
             <div>
               <strong className="text-blue-700">Koordinat:</strong>
-              <p className="text-gray-700">-7.492°S, 110.482°E</p>
+              <p className="text-muted-foreground">-7.492°S, 110.482°E</p>
             </div>
           </div>
         </div>

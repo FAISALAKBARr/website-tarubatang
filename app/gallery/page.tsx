@@ -314,10 +314,10 @@ export default function GalleryPage() {
       </section>
 
       {/* Filter & Search */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-background">
         <div className="container mx-auto px-4 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Cari foto..."
               value={searchTerm}
@@ -327,7 +327,7 @@ export default function GalleryPage() {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-600" />
+              <Filter className="h-4 w-4 text-muted-foreground" />
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
@@ -375,16 +375,16 @@ export default function GalleryPage() {
       </section>
 
       {/* Gallery Grid */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            <h2 className="text-3xl font-bold text-foreground mb-2">
               {selectedCategory === "all"
                 ? "Semua Foto"
                 : `Galeri ${selectedCategory}`}
             </h2>
             {!loading && !error && (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 Menampilkan {galleryItems.length} dari{" "}
                 {pagination.totalItems || 0} foto
               </p>
@@ -394,7 +394,7 @@ export default function GalleryPage() {
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Memuat galeri...</p>
+              <p className="text-muted-foreground mt-4">Memuat galeri...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -770,9 +770,11 @@ export default function GalleryPage() {
 
                   <div className="space-y-3">
                     <div className="flex items-start space-x-3">
-                      <Tag className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <Tag className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-600">Kategori</p>
+                        <p className="text-sm text-muted-foreground">
+                          Kategori
+                        </p>
                         <Badge
                           className={getCategoryColor(
                             detailItem.category || "Other"
@@ -784,9 +786,11 @@ export default function GalleryPage() {
                     </div>
 
                     <div className="flex items-start space-x-3">
-                      <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-600">Tanggal Dibuat</p>
+                        <p className="text-sm text-muted-foreground">
+                          Tanggal Dibuat
+                        </p>
                         <p className="font-medium">
                           {formatDate(detailItem.createdAt)}
                         </p>
@@ -796,9 +800,9 @@ export default function GalleryPage() {
                     {detailItem.updatedAt &&
                       detailItem.updatedAt !== detailItem.createdAt && (
                         <div className="flex items-start space-x-3">
-                          <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+                          <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-foreground">
                               Terakhir Diperbarui
                             </p>
                             <p className="font-medium">
@@ -817,7 +821,7 @@ export default function GalleryPage() {
                         />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Status</p>
+                        <p className="text-sm text-muted-foreground">Status</p>
                         <Badge
                           variant={detailItem.active ? "default" : "secondary"}
                         >
@@ -832,14 +836,14 @@ export default function GalleryPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Deskripsi</h3>
                   {detailItem.description ? (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    <div className="bg-background rounded-lg p-4">
+                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                         {detailItem.description}
                       </p>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 rounded-lg p-4 text-center">
-                      <p className="text-gray-500 italic">
+                    <div className="bg-background rounded-lg p-4 text-center">
+                      <p className="text-muted-foreground italic">
                         Tidak ada deskripsi tersedia
                       </p>
                     </div>
@@ -848,36 +852,38 @@ export default function GalleryPage() {
               </div>
 
               {/* Statistics */}
-              <div className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg p-6">
+              <div className="bg-muted-background rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-4">Statistik</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div className="bg-white rounded-lg p-3">
+                  <div className="bg-background rounded-lg p-3">
                     <div className="text-2xl font-bold text-teal-600">
                       {Array.isArray(detailItem.images)
                         ? detailItem.images.length
                         : 0}
                     </div>
-                    <div className="text-sm text-gray-600">Total Gambar</div>
+                    <div className="text-sm text-foreground">Total Gambar</div>
                   </div>
-                  <div className="bg-white rounded-lg p-3">
+                  <div className="bg-background rounded-lg p-3">
                     <div className="text-2xl font-bold text-blue-600">
                       {detailItem.title?.length || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Karakter Judul</div>
+                    <div className="text-sm text-foreground">
+                      Karakter Judul
+                    </div>
                   </div>
-                  <div className="bg-white rounded-lg p-3">
+                  <div className="bg-background rounded-lg p-3">
                     <div className="text-2xl font-bold text-purple-600">
                       {detailItem.description?.length || 0}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-foreground">
                       Karakter Deskripsi
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg p-3">
+                  <div className="bg-background rounded-lg p-3">
                     <div className="text-2xl font-bold text-green-600">
                       {detailItem.id?.length || 0}
                     </div>
-                    <div className="text-sm text-gray-600">ID Length</div>
+                    <div className="text-sm text-foreground">ID Length</div>
                   </div>
                 </div>
               </div>
